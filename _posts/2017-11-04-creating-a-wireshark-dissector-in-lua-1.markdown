@@ -5,9 +5,9 @@ date:   2017-11-04 16:40:34 +0100
 categories: wireshark lua dissector
 ---
 
-This post will explain how you can easily create protocol dissectors in Wireshark, using the Lua programming language.
-This is can be useful when you're working with a custom protocol that Wireshark doesn't already have a
-dissector for. If Wireshark looks like this for example
+This post will explain how you can easily create [protocol dissectors][wireshark-lua-dissectors] in Wireshark, using the
+Lua programming language. This is can be useful when you're working with a custom protocol that Wireshark doesn't
+already have a dissector for. If Wireshark looks like this for example
 
 ![Wireshark without dissector]({{ "/assets/creating-wireshark-dissectors-1/before.png" | absolute_url }})
 
@@ -314,8 +314,9 @@ The packet details pane finally looks like this:
 
 ![Final result for packet details pane]({{ "/assets/creating-wireshark-dissectors-1/final.png" | absolute_url }})
 
-and we are happy for now. In the next part I'll take a look at debugging and more advanced parsing methods. Right now
-we only see the number value for the opcodes, but the opcode name would be more interesting.
+and we are happy for now. In the next [part]({% post_url 2017-11-06-creating-a-wireshark-dissector-in-lua-2 %}) I'll
+take a look at debugging and more advanced parsing methods. Right now we only see the number value for the opcodes, but
+the opcode name would be more interesting.
 
 [lua-5.2-reference-manual]: https://www.lua.org/manual/5.2/
 [mongodb-wire-protocol]: https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/
@@ -328,6 +329,3 @@ we only see the number value for the opcodes, but the opcode name would be more 
 [pinfo-object]: https://wiki.wireshark.org/LuaAPI/Pinfo#Pinfo
 [treeitem-object]: https://wiki.wireshark.org/LuaAPI/TreeItem
 [wireshark-lua-dissectors]: https://wiki.wireshark.org/Lua/Dissectors
-[wireshark-lua-api]: https://wiki.wireshark.org/LuaAPI/
-[delog-wireshark-dissector-in-lua]: https://delog.wordpress.com/2010/09/27/create-a-wireshark-dissector-in-lua/
-[emmanueladenola-wireshark-dissector-with-lua]: https://emmanueladenola.wordpress.com/2013/11/23/wireshark-dissector-with-lua/
