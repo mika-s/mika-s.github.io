@@ -19,8 +19,8 @@ function mongodb_protocol.dissector(buffer, pinfo, tree)
     subtree:add_le(request_id,     buffer(4,4))
     subtree:add_le(response_to,    buffer(8,4))
 
-    local opcode = buffer(12,4):le_uint()
-    local opcode_name = get_opcode_name(opcode)
+    local opcode_number = buffer(12,4):le_uint()
+    local opcode_name = get_opcode_name(opcode_number)
     subtree:add_le(opcode,         buffer(12,4)):append_text(" (" .. opcode_name .. ")")
 end
 

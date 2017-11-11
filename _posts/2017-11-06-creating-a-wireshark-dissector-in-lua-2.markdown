@@ -5,7 +5,7 @@ date:   2017-11-06 16:00:00 +0100
 categories: wireshark lua dissector
 ---
 
-This is post continues where [the first post]({% post_url 2017-11-04-creating-a-wireshark-dissector-in-lua-1 %}) left off.
+This post continues where [the first post]({% post_url 2017-11-04-creating-a-wireshark-dissector-in-lua-1 %}) left off.
 
 In this post we will first look at basic debugging of Lua dissectors. After that we will extend the dissector to display
 the names of the opcodes, rather than just the numbers.
