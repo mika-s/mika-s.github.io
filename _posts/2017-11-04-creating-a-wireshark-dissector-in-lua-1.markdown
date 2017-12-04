@@ -314,7 +314,7 @@ The packet details pane finally looks like this:
 
 ![Final result for packet details pane]({{ "/assets/creating-wireshark-dissectors-1/final.png" | absolute_url }})
 
-and we are happy for now. In the next [part]({% post_url 2017-11-06-creating-a-wireshark-dissector-in-lua-2 %}) I'll
+and we are happy for now. In the [next part]({% post_url 2017-11-06-creating-a-wireshark-dissector-in-lua-2 %}) I'll
 take a look at debugging and more advanced parsing methods. Right now we only see the number value for the opcodes, but
 the opcode name would be more interesting.
 

@@ -161,8 +161,8 @@ local tcp_port = DissectorTable.get("tcp.port")
 tcp_port:add(59274, mongodb_protocol)
 ```
 
-The entire header of the message is now being parsed. The next part will go into how the specific messages can be
-decoded.
+The entire header of the message is now being parsed. The [next part]({% post_url 2017-11-08-creating-a-wireshark-dissector-in-lua-3 %})
+will go into how the specific messages can be decoded.
 
 [lua-5.2-debug-library]: http://www.lua.org/manual/5.2/manual.html#pdf-debug.debug
 [mongodb-wire-protocol]: https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/
