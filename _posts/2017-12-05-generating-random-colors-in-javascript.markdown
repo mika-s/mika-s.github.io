@@ -140,7 +140,7 @@ increases the further right you go in the table. The lightness is 50% for all th
     <td style="width: 40px">100%</td>
   </tr>
   <tr>
-    <td>0</td>
+    <td>0°</td>
     <td style="background-color: hsla(0,   0%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(0,  10%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(0,  20%, 50%, 1)">&nbsp;</td>
@@ -154,7 +154,7 @@ increases the further right you go in the table. The lightness is 50% for all th
     <td style="background-color: hsla(0, 100%, 50%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>60</td>
+    <td>60°</td>
     <td style="background-color: hsla(60,   0%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(60,  10%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(60,  20%, 50%, 1)">&nbsp;</td>
@@ -168,7 +168,7 @@ increases the further right you go in the table. The lightness is 50% for all th
     <td style="background-color: hsla(60, 100%, 50%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>120</td>
+    <td>120°</td>
     <td style="background-color: hsla(120,   0%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(120,  10%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(120,  20%, 50%, 1)">&nbsp;</td>
@@ -182,7 +182,7 @@ increases the further right you go in the table. The lightness is 50% for all th
     <td style="background-color: hsla(120, 100%, 50%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>180</td>
+    <td>180°</td>
     <td style="background-color: hsla(180,   0%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(180,  10%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(180,  20%, 50%, 1)">&nbsp;</td>
@@ -196,7 +196,7 @@ increases the further right you go in the table. The lightness is 50% for all th
     <td style="background-color: hsla(180, 100%, 50%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>240</td>
+    <td>240°</td>
     <td style="background-color: hsla(240,   0%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(240,  10%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(240,  20%, 50%, 1)">&nbsp;</td>
@@ -210,7 +210,7 @@ increases the further right you go in the table. The lightness is 50% for all th
     <td style="background-color: hsla(240, 100%, 50%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>300</td>
+    <td>300°</td>
     <td style="background-color: hsla(300,   0%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(300,  10%, 50%, 1)">&nbsp;</td>
     <td style="background-color: hsla(300,  20%, 50%, 1)">&nbsp;</td>
@@ -250,7 +250,7 @@ further right you go in the table. The saturation is 100% for all the colors.
     <td style="width: 40px">100%</td>
   </tr>
   <tr>
-    <td>0</td>
+    <td>0°</td>
     <td style="background-color: hsla(0, 100%,   0%, 1)">&nbsp;</td>
     <td style="background-color: hsla(0, 100%,  10%, 1)">&nbsp;</td>
     <td style="background-color: hsla(0, 100%,  20%, 1)">&nbsp;</td>
@@ -264,7 +264,7 @@ further right you go in the table. The saturation is 100% for all the colors.
     <td style="background-color: hsla(0, 100%, 100%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>60</td>
+    <td>60°</td>
     <td style="background-color: hsla(60, 100%,   0%, 1)">&nbsp;</td>
     <td style="background-color: hsla(60, 100%,  10%, 1)">&nbsp;</td>
     <td style="background-color: hsla(60, 100%,  20%, 1)">&nbsp;</td>
@@ -278,7 +278,7 @@ further right you go in the table. The saturation is 100% for all the colors.
     <td style="background-color: hsla(60, 100%, 100%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>120</td>
+    <td>120°</td>
     <td style="background-color: hsla(120, 100%,   0%, 1)">&nbsp;</td>
     <td style="background-color: hsla(120, 100%,  10%, 1)">&nbsp;</td>
     <td style="background-color: hsla(120, 100%,  20%, 1)">&nbsp;</td>
@@ -292,7 +292,7 @@ further right you go in the table. The saturation is 100% for all the colors.
     <td style="background-color: hsla(120, 100%, 100%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>180</td>
+    <td>180°</td>
     <td style="background-color: hsla(180, 100%,   0%, 1)">&nbsp;</td>
     <td style="background-color: hsla(180, 100%,  10%, 1)">&nbsp;</td>
     <td style="background-color: hsla(180, 100%,  20%, 1)">&nbsp;</td>
@@ -306,7 +306,7 @@ further right you go in the table. The saturation is 100% for all the colors.
     <td style="background-color: hsla(180, 100%, 100%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>240</td>
+    <td>240°</td>
     <td style="background-color: hsla(240, 100%,   0%, 1)">&nbsp;</td>
     <td style="background-color: hsla(240, 100%,  10%, 1)">&nbsp;</td>
     <td style="background-color: hsla(240, 100%,  20%, 1)">&nbsp;</td>
@@ -320,7 +320,7 @@ further right you go in the table. The saturation is 100% for all the colors.
     <td style="background-color: hsla(240, 100%, 100%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>300</td>
+    <td>300°</td>
     <td style="background-color: hsla(300, 100%,   0%, 1)">&nbsp;</td>
     <td style="background-color: hsla(300, 100%,  10%, 1)">&nbsp;</td>
     <td style="background-color: hsla(300, 100%,  20%, 1)">&nbsp;</td>
