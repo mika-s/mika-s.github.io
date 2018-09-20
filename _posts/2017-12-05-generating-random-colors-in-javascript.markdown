@@ -67,8 +67,9 @@ A problem quickly arises when we, for example, generate 10 random colors:
 </table>
 <br />
 
-Several of the colors look similar, making it hard to distinguish them apart. So we don't really want the
-colors completely random, we want them spread apart from each other. This is easily done with HSL colors.
+Several of the colors look similar, making it hard to distinguish them from each other. So we don't really
+want the colors completely random, we want them spread apart from each other. This is easily done with HSL
+colors.
 
 ### HSL
 

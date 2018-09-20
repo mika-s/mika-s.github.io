@@ -7,8 +7,8 @@ categories: python control-theory kinematics
 
 One thing that can be hard to get right is the mapping from -∞ to ∞ radians to
 -π to π radians. Or -∞ to ∞ to -180° to 180°. I've been unable to find information
-about it with Google, so I decided to share a function I've made that does the
-transformation.
+about it with Google (except for the functions that comes with Matlab), so I decided
+to share a function I've made that does the transformation.
 
 In C#:
 

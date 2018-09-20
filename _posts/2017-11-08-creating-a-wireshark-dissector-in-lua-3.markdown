@@ -198,7 +198,7 @@ function mongodb_protocol.dissector(buffer, pinfo, tree)
   -- Header
   subtree:add_le(message_length, buffer(0,4))
   subtree:add_le(request_id,     buffer(4,4))
-  subtree:add_le(response_to,    buffer(8,4)) 
+  subtree:add_le(response_to,    buffer(8,4))
   local opcode_number = buffer(12,4):le_uint()
   local opcode_name = get_opcode_name(opcode_number)
   subtree:add_le(opcode,         buffer(12,4)):append_text(" (" .. opcode_name .. ")")
@@ -207,7 +207,7 @@ function mongodb_protocol.dissector(buffer, pinfo, tree)
   if opcode_name == "OP_QUERY" then
     local flags_number = buffer(16,4):le_uint()
     local flags_description = get_flag_description(flags_number)
-    subtree:add_le(flags,      buffer(16,4)):append_text(" (" .. flags_description .. ")")  
+    subtree:add_le(flags,      buffer(16,4)):append_text(" (" .. flags_description .. ")")
 
     -- Loop over string
     local string_length
@@ -216,7 +216,7 @@ function mongodb_protocol.dissector(buffer, pinfo, tree)
         string_length = i - 20
         break
       end
-    end 
+    end
 
     subtree:add_le(full_coll_name,   buffer(20,string_length))
     subtree:add_le(number_to_skip,   buffer(20+string_length,4))
@@ -315,7 +315,7 @@ like this:
 
 ```lua
 function get_response_flag_description(flags)
-  local flags_description = "Unknown" 
+  local flags_description = "Unknown"
 
       if flags == 0 then flags_description = "CursorNotFound"
   elseif flags == 1 then flags_description = "QueryFailure"
@@ -400,7 +400,7 @@ function mongodb_protocol.dissector(buffer, pinfo, tree)
   elseif opcode_name == "OP_REPLY" then
     local response_flags_number = buffer(16,4):le_uint()
     local response_flags_description = get_response_flag_description(response_flags_number)
-    
+
     subtree:add_le(response_flags,   buffer(16,4)):append_text(" (" .. response_flags_description .. ")")
     subtree:add_le(cursor_id,        buffer(20,8))
     subtree:add_le(starting_from,    buffer(28,4))
@@ -471,5 +471,5 @@ Two other blogs that describe Wireshark dissectors in Lua can be found [here][de
 [wikipedia-null-terminated-string]: https://en.wikipedia.org/wiki/Null-terminated_string
 [mongodb-wire-protocol]: https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/
 [mikas-github-mongodb]: https://github.com/mika-s/mika-s.github.io/blob/master/assets/creating-wireshark-dissectors-3/mongodb.lua
-[delog-wireshark-dissector-in-lua]: https://delog.wordpress.com/2010/09/27/create-a-wireshark-dissector-in-lua/
+[delog-wireshark-dissector-in-lua]: https://tewarid.github.io/2010/09/27/create-a-wireshark-dissector-in-lua.html
 [emmanueladenola-wireshark-dissector-with-lua]: https://emmanueladenola.wordpress.com/2013/11/23/wireshark-dissector-with-lua/

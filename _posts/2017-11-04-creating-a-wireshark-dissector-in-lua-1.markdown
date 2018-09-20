@@ -18,7 +18,7 @@ Lua implementation that makes it easy for people who are unfamiliar with C to wr
 unfamiliar with Lua, it's a very light-weight programming language that is designed to be implemented as a scripting
 language in applications to extend their functionality.
 
-The downside with using Lua is that the dissector will be slower than making a proper dissector in C.
+The downside of using Lua is that the dissector will be slower than a dissector written in C.
 
 Before we start writing the dissector, let's go through a crash course on Lua. It's not important to know the
 language in detail, but we have to know the basics.
@@ -173,7 +173,7 @@ is a [Pinfo object][pinfo-object]. Finally, `tree` is the tree root and is a [Tr
 
 Inside the dissector function, we start by checking the length of the buffer and then returning if it's empty.
 
-As mentioned, the `pinfo` object contains the columns in the packet list. We can use it to set the protocol name when we
+As mentioned before, the `pinfo` object contains the columns in the packet list. We can use it to set the protocol name when we
 receive a packet of MongoDB type. On the script's first line we set the name of the protocol to be "MongoDB" (by passing
 the name to the constructor). We set the protocol column name here
 
