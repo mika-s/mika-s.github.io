@@ -5,9 +5,9 @@ date:   2018-01-10 12:00:00 +0100
 categories: javascript jpeg compression algorithm
 ---
 
-[jpeg-recompress][github-jpeg-recompress] is used to re-encode JPEG images to
-the lowest possible JPEG quality that still keeps the perceived visual quality
-to a certain standard. JPEG uses lossy compression, so there will always be
+[jpeg-recompress][github-jpeg-recompress] is an application that is used to re-encode
+JPEG images to the lowest possible JPEG quality that still keeps the perceived visual
+quality to a certain standard. JPEG uses lossy compression, so there will always be
 losses when re-encoding the image. The goal is to do the compression while making the
 image look practically the same after the compression.
 
@@ -109,10 +109,46 @@ Final optimized ssim at q=71: 0.998779
 New size is 30% of original (saved 973 kb)
 ```
 
-Like before the initial search conditions are between 40 and 95. The target that the search
+Like before, the initial search conditions are between 40 and 95. The target that the search
 looks for is lower than before, so the optimal JPEG quality is now chosen to be 71.
 
-If we want to lower the quality even further we can change the `min` and/or `max` values.
+If we want to lower the quality even further than low, we can either set target value manually,
+(rather than using a preset) or change the `min` and/or `max` values. As mentioned before, we can
+set the target manually with the `--target` parameter. Lets try with the following settings:
+target = 0.90000, min = 45 and max = 95.
+
+```
+Metadata size is 3kb
+ssim at q=70 (45 - 95): 0.998998
+ssim at q=57 (45 - 69): 0.998138
+ssim at q=50 (45 - 56): 0.997676
+ssim at q=47 (45 - 49): 0.997296
+ssim at q=45 (45 - 46): 0.996997
+Final optimized ssim at q=45: 0.995933
+New size is 17% of original (saved 1154 kb)
+```
+
+Because `min` was set to 45 it refused to go below that, and the target was never reached. Let's set
+`min` to 0 and try again:
+
+```
+Metadata size is 3kb
+ssim at q=45 (0 - 90): 0.996997
+ssim at q=22 (0 - 44): 0.989810
+ssim at q=10 (0 - 21): 0.959405
+ssim at q=4 (0 - 9): 0.877762
+ssim at q=7 (5 - 9): 0.932563
+Final optimized ssim at q=5: 0.891700
+New size is 2% of original (saved 1366 kb)
+```
+
+So we can see that `target` is the value jpeg-recompress searches for, while `min` and `max` are
+saturations that it refuses to go below or above.
+
+---
+
+Let's look at how `min` and `max` works more in depth. We will use the low quality preset again.
+
 Changing `min` to 60 and `max` to 80, for example, will give this result:
 
 ```
@@ -143,9 +179,9 @@ New size is 19% of original (saved 1127 kb)
 ```
 
 This will force jpeg-recompress to look for an optimal solution within the range 40-50. The
-found optimal quality is 51. It looks like 51 is chosen rather than 50 because the final
-attempt in the algorithm either increases or decreases the number. The image looks like
-this now and is 267 kB large.
+found optimal quality is 51 (should have been 50, but there is a small bug in jpeg-recompress).
+The target quality was never found, because it reached the max limit before it was found.
+The image looks like this now and is 267 kB large.
 
 ![Quality: low, min: 40, max: 50]({{ "/assets/quality-min-and-max-with-jpeg-recompress/low-40-50.jpg" | absolute_url }}){: style="display: block; margin: auto;" }
 
@@ -180,12 +216,16 @@ as before, but will atleast be compressed by a large amount.
 
 ### Tl;dr
 
-- Quality sets the target presets for how good the perceived quality has to be when
+- quality sets the target presets for how good the perceived quality has to be when
   compressing. It will directly influence the quality of the compressed image.
+- target sets the target to a specific value if you need something else than the
+  presets. For example if low quality is not low enough.
 - min sets the lower limit of the binary search. The quality of the compressed image will
   never go below this value.
 - max sets the upper limit of the binary search. The quality of the compressed image will
-  never go above this value + 1.  
+  never go above this value + 1.
+- to get heavy compression, below what the default values provide, you can either set
+  the target manually (below what low quality provides), or set `max` to a small number.
 
 [github-jpeg-recompress]: https://github.com/danielgtaylor/jpeg-archive
 [wikipedia-ssim]: https://en.wikipedia.org/wiki/Structural_similarity

@@ -1,8 +1,8 @@
 # Site settings
 title: Mika's coding blog
-email: mika@sund.land
+email: mail@sund.land
 description: >-
-  
+
 baseurl: ""
 url: "https://mika-s.github.io"
 twitter_username:

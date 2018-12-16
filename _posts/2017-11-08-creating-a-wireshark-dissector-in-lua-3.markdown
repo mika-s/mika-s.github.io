@@ -458,14 +458,16 @@ local tcp_port = DissectorTable.get("tcp.port")
 tcp_port:add(59274, mongodb_protocol)
 ```
 
-The code could be further refactored into more managable modules. The remaining opcodes are also
-missing from the script. I will leave it for here though, as I think the concept of writing
-dissectors in Lua has been described well enough.
+The remaining opcodes are missing from the script. I will not go further into details about those,
+as it will just be repetition of what I've written about above.
 
-You can also find the final code [here][mikas-github-mongodb].
+You can find the final code [here][mikas-github-mongodb].
 
 Two other blogs that describe Wireshark dissectors in Lua can be found [here][delog-wireshark-dissector-in-lua] and
 [here][emmanueladenola-wireshark-dissector-with-lua].
+
+If you want to find out how you can separate the fields into separate subtrees, you can take a look of
+[part four]({% post_url 2018-12-16-creating-a-wireshark-dissector-in-lua-4 %}) of this series.
 
 [wikipedia-nul]: https://en.wikipedia.org/wiki/Null_character
 [wikipedia-null-terminated-string]: https://en.wikipedia.org/wiki/Null-terminated_string
