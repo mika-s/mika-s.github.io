@@ -11,9 +11,9 @@ function mongodb_protocol.dissector(buffer, pinfo, tree)
     length = buffer:len()
     if length == 0 then return end
 
-	pinfo.cols.protocol = mongodb_protocol.name
+    pinfo.cols.protocol = mongodb_protocol.name
 
-	local subtree = tree:add(mongodb_protocol, buffer(), "MongoDB Protocol Data")
+    local subtree = tree:add(mongodb_protocol, buffer(), "MongoDB Protocol Data")
 
     subtree:add_le(message_length, buffer(0,4))
     subtree:add_le(request_id,     buffer(4,4))

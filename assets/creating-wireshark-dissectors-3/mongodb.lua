@@ -29,9 +29,9 @@ function mongodb_protocol.dissector(buffer, pinfo, tree)
     length = buffer:len()
     if length == 0 then return end
 
-	pinfo.cols.protocol = mongodb_protocol.name
+    pinfo.cols.protocol = mongodb_protocol.name
 
-	local subtree = tree:add(mongodb_protocol, buffer(), "MongoDB Protocol Data")
+    local subtree = tree:add(mongodb_protocol, buffer(), "MongoDB Protocol Data")
 
     -- Header
     subtree:add_le(message_length, buffer(0,4))
@@ -64,7 +64,7 @@ function mongodb_protocol.dissector(buffer, pinfo, tree)
     elseif opcode_name == "OP_REPLY" then
         local response_flags_number = buffer(16,4):le_uint()
         local response_flags_description = get_response_flag_description(response_flags_number)
-        
+
         subtree:add_le(response_flags,   buffer(16,4)):append_text(" (" .. response_flags_description .. ")")
         subtree:add_le(cursor_id,        buffer(20,8))
         subtree:add_le(starting_from,    buffer(28,4))

@@ -41,31 +41,18 @@ A problem quickly arises when we, for example, generate 10 random colors:
 
 <table style="text-align: center">
   <tr>
-    <td style="width: 40px">&nbsp;</td>
-    <td style="width: 40px">&nbsp;</td>
-    <td style="width: 40px">&nbsp;</td>
-    <td style="width: 40px">&nbsp;</td>
-    <td style="width: 40px">&nbsp;</td>
-    <td style="width: 40px">&nbsp;</td>
-    <td style="width: 40px">&nbsp;</td>
-    <td style="width: 40px">&nbsp;</td>
-    <td style="width: 40px">&nbsp;</td>
-    <td style="width: 40px">&nbsp;</td>
-  </tr>
-  <tr>
-    <td style="background-color: rgba(210, 191, 156, 1)">&nbsp;</td>
-    <td style="background-color: rgba( 89, 187,  20, 1)">&nbsp;</td>
-    <td style="background-color: rgba(151,  76,  57, 1)">&nbsp;</td>
-    <td style="background-color: rgba(132, 157, 204, 1)">&nbsp;</td>
-    <td style="background-color: rgba(211,  19, 210, 1)">&nbsp;</td>
-    <td style="background-color: rgba(  0, 144, 101, 1)">&nbsp;</td>
-    <td style="background-color: rgba( 95, 195,  63, 1)">&nbsp;</td>
-    <td style="background-color: rgba( 24,  97, 229, 1)">&nbsp;</td>
-    <td style="background-color: rgba( 56, 154,  66, 1)">&nbsp;</td>
-    <td style="background-color: rgba(227, 247, 211, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: rgba(210, 191, 156, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: rgba( 89, 187,  20, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: rgba(151,  76,  57, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: rgba(132, 157, 204, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: rgba(211,  19, 210, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: rgba(  0, 144, 101, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: rgba( 95, 195,  63, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: rgba( 24,  97, 229, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: rgba( 56, 154,  66, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: rgba(227, 247, 211, 1)">&nbsp;</td>
   </tr>
 </table>
-<br />
 
 Several of the colors look similar, making it hard to distinguish them from each other. So we don't really
 want the colors completely random, we want them spread apart from each other. This is easily done with HSL
@@ -91,29 +78,28 @@ blue is 240°.
 
 <table style="text-align: center">
   <tr>
-    <td style="width: 40px">  0°</td>
-    <td style="width: 40px"> 40°</td>
-    <td style="width: 40px"> 80°</td>
-    <td style="width: 40px">120°</td>
-    <td style="width: 40px">160°</td>
-    <td style="width: 40px">200°</td>
-    <td style="width: 40px">240°</td>
-    <td style="width: 40px">280°</td>
-    <td style="width: 40px">320°</td>
+    <td style="padding: 0">  0°</td>
+    <td style="padding: 0"> 40°</td>
+    <td style="padding: 0"> 80°</td>
+    <td style="padding: 0">120°</td>
+    <td style="padding: 0">160°</td>
+    <td style="padding: 0">200°</td>
+    <td style="padding: 0">240°</td>
+    <td style="padding: 0">280°</td>
+    <td style="padding: 0">320°</td>
   </tr>
   <tr>
-    <td style="background-color: hsla(  0, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla( 40, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla( 80, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(160, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(200, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(280, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(320, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(  0, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla( 40, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla( 80, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(160, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(200, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(280, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(320, 100%, 50%, 1)">&nbsp;</td>
   </tr>
 </table>
-<br />
 
 The colors above all have constant saturation and lightness.
 
@@ -127,105 +113,104 @@ increases the further right you go in the table. The lightness is 50% for all th
 
 <table style="text-align: center">
   <tr>
-    <td style="width: 100px">Hue / Sat</td>
-    <td style="width: 40px">0%</td>
-    <td style="width: 40px">10%</td>
-    <td style="width: 40px">20%</td>
-    <td style="width: 40px">30%</td>
-    <td style="width: 40px">40%</td>
-    <td style="width: 40px">50%</td>
-    <td style="width: 40px">60%</td>
-    <td style="width: 40px">70%</td>
-    <td style="width: 40px">80%</td>
-    <td style="width: 40px">90%</td>
-    <td style="width: 40px">100%</td>
+    <td style="padding: 0">Hue / Sat</td>
+    <td style="padding: 0">0%</td>
+    <td style="padding: 0">10%</td>
+    <td style="padding: 0">20%</td>
+    <td style="padding: 0">30%</td>
+    <td style="padding: 0">40%</td>
+    <td style="padding: 0">50%</td>
+    <td style="padding: 0">60%</td>
+    <td style="padding: 0">70%</td>
+    <td style="padding: 0">80%</td>
+    <td style="padding: 0">90%</td>
+    <td style="padding: 0">100%</td>
   </tr>
   <tr>
-    <td>0°</td>
-    <td style="background-color: hsla(0,   0%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0,  10%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0,  20%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0,  30%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0,  40%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0,  50%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0,  60%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0,  70%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0,  80%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0,  90%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">0°</td>
+    <td style="padding-top: 0; background-color: hsla(0,   0%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0,  10%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0,  20%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0,  30%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0,  40%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0,  50%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0,  60%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0,  70%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0,  80%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0,  90%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%, 50%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>60°</td>
-    <td style="background-color: hsla(60,   0%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60,  10%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60,  20%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60,  30%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60,  40%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60,  50%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60,  60%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60,  70%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60,  80%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60,  90%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">60°</td>
+    <td style="padding-top: 0; background-color: hsla(60,   0%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60,  10%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60,  20%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60,  30%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60,  40%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60,  50%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60,  60%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60,  70%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60,  80%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60,  90%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%, 50%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>120°</td>
-    <td style="background-color: hsla(120,   0%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120,  10%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120,  20%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120,  30%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120,  40%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120,  50%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120,  60%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120,  70%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120,  80%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120,  90%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">120°</td>
+    <td style="padding-top: 0; background-color: hsla(120,   0%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120,  10%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120,  20%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120,  30%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120,  40%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120,  50%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120,  60%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120,  70%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120,  80%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120,  90%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%, 50%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>180°</td>
-    <td style="background-color: hsla(180,   0%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180,  10%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180,  20%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180,  30%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180,  40%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180,  50%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180,  60%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180,  70%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180,  80%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180,  90%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">180°</td>
+    <td style="padding-top: 0; background-color: hsla(180,   0%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180,  10%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180,  20%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180,  30%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180,  40%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180,  50%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180,  60%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180,  70%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180,  80%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180,  90%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%, 50%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>240°</td>
-    <td style="background-color: hsla(240,   0%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240,  10%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240,  20%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240,  30%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240,  40%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240,  50%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240,  60%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240,  70%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240,  80%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240,  90%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">240°</td>
+    <td style="padding-top: 0; background-color: hsla(240,   0%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240,  10%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240,  20%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240,  30%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240,  40%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240,  50%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240,  60%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240,  70%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240,  80%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240,  90%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%, 50%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>300°</td>
-    <td style="background-color: hsla(300,   0%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300,  10%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300,  20%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300,  30%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300,  40%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300,  50%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300,  60%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300,  70%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300,  80%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300,  90%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">300°</td>
+    <td style="padding-top: 0; background-color: hsla(300,   0%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300,  10%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300,  20%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300,  30%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300,  40%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300,  50%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300,  60%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300,  70%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300,  80%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300,  90%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%, 50%, 1)">&nbsp;</td>
   </tr>
 </table>
-<br />
 
 **Lightness:**
 
@@ -237,105 +222,104 @@ further right you go in the table. The saturation is 100% for all the colors.
 
 <table style="text-align: center">
   <tr>
-    <td style="width: 100px">Hue / Lig</td>
-    <td style="width: 40px">0%</td>
-    <td style="width: 40px">10%</td>
-    <td style="width: 40px">20%</td>
-    <td style="width: 40px">30%</td>
-    <td style="width: 40px">40%</td>
-    <td style="width: 40px">50%</td>
-    <td style="width: 40px">60%</td>
-    <td style="width: 40px">70%</td>
-    <td style="width: 40px">80%</td>
-    <td style="width: 40px">90%</td>
-    <td style="width: 40px">100%</td>
+    <td style="padding: 0">Hue / Lig</td>
+    <td style="padding: 0">0%</td>
+    <td style="padding: 0">10%</td>
+    <td style="padding: 0">20%</td>
+    <td style="padding: 0">30%</td>
+    <td style="padding: 0">40%</td>
+    <td style="padding: 0">50%</td>
+    <td style="padding: 0">60%</td>
+    <td style="padding: 0">70%</td>
+    <td style="padding: 0">80%</td>
+    <td style="padding: 0">90%</td>
+    <td style="padding: 0">100%</td>
   </tr>
   <tr>
-    <td>0°</td>
-    <td style="background-color: hsla(0, 100%,   0%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0, 100%,  10%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0, 100%,  20%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0, 100%,  30%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0, 100%,  40%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0, 100%,  50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0, 100%,  60%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0, 100%,  70%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0, 100%,  80%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0, 100%,  90%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(0, 100%, 100%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">0°</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%,   0%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%,  10%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%,  20%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%,  30%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%,  40%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%,  50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%,  60%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%,  70%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%,  80%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%,  90%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(0, 100%, 100%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>60°</td>
-    <td style="background-color: hsla(60, 100%,   0%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60, 100%,  10%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60, 100%,  20%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60, 100%,  30%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60, 100%,  40%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60, 100%,  50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60, 100%,  60%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60, 100%,  70%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60, 100%,  80%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60, 100%,  90%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(60, 100%, 100%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">60°</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%,   0%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%,  10%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%,  20%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%,  30%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%,  40%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%,  50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%,  60%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%,  70%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%,  80%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%,  90%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(60, 100%, 100%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>120°</td>
-    <td style="background-color: hsla(120, 100%,   0%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%,  10%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%,  20%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%,  30%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%,  40%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%,  50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%,  60%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%,  70%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%,  80%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%,  90%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%, 100%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">120°</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%,   0%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%,  10%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%,  20%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%,  30%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%,  40%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%,  50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%,  60%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%,  70%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%,  80%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%,  90%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%, 100%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>180°</td>
-    <td style="background-color: hsla(180, 100%,   0%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180, 100%,  10%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180, 100%,  20%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180, 100%,  30%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180, 100%,  40%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180, 100%,  50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180, 100%,  60%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180, 100%,  70%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180, 100%,  80%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180, 100%,  90%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(180, 100%, 100%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">180°</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%,   0%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%,  10%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%,  20%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%,  30%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%,  40%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%,  50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%,  60%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%,  70%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%,  80%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%,  90%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(180, 100%, 100%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>240°</td>
-    <td style="background-color: hsla(240, 100%,   0%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%,  10%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%,  20%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%,  30%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%,  40%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%,  50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%,  60%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%,  70%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%,  80%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%,  90%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%, 100%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">240°</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%,   0%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%,  10%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%,  20%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%,  30%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%,  40%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%,  50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%,  60%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%,  70%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%,  80%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%,  90%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%, 100%, 1)">&nbsp;</td>
   </tr>
   <tr>
-    <td>300°</td>
-    <td style="background-color: hsla(300, 100%,   0%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300, 100%,  10%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300, 100%,  20%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300, 100%,  30%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300, 100%,  40%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300, 100%,  50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300, 100%,  60%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300, 100%,  70%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300, 100%,  80%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300, 100%,  90%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(300, 100%, 100%, 1)">&nbsp;</td>
+    <td style="padding-top: 0;">300°</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%,   0%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%,  10%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%,  20%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%,  30%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%,  40%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%,  50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%,  60%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%,  70%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%,  80%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%,  90%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(300, 100%, 100%, 1)">&nbsp;</td>
   </tr>
 </table>
-<br />
 
 ### Code
 
@@ -373,14 +357,14 @@ let c = generateHslaColors(50, 100, 1.0, 3)
 
 <table style="text-align: center">
   <tr>
-    <td style="width: 40px">c[0]</td>
-    <td style="width: 40px">c[1]</td>
-    <td style="width: 40px">c[2]</td>
+    <td style="padding: 0">c[0]</td>
+    <td style="padding: 0">c[1]</td>
+    <td style="padding: 0">c[2]</td>
   </tr>
   <tr>
-    <td style="background-color: hsla(  0, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(  0, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%, 50%, 1)">&nbsp;</td>
   </tr>
 </table>
 <br>
@@ -391,18 +375,18 @@ let c = generateHslaColors(50, 100, 1.0, 5)
 
 <table style="text-align: center">
   <tr>
-    <td style="width: 40px">c[0]</td>
-    <td style="width: 40px">c[1]</td>
-    <td style="width: 40px">c[2]</td>
-    <td style="width: 40px">c[3]</td>
-    <td style="width: 40px">c[4]</td>
+    <td style="padding: 0">c[0]</td>
+    <td style="padding: 0">c[1]</td>
+    <td style="padding: 0">c[2]</td>
+    <td style="padding: 0">c[3]</td>
+    <td style="padding: 0">c[4]</td>
   </tr>
   <tr>
-    <td style="background-color: hsla(  0, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla( 72, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(144, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(216, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(288, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(  0, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla( 72, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(144, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(216, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(288, 100%, 50%, 1)">&nbsp;</td>
   </tr>
 </table>
 <br>
@@ -414,22 +398,22 @@ let c = generateHslaColors(50, 100, 1.0, 7)
 
 <table style="text-align: center">
   <tr>
-    <td style="width: 40px">c[0]</td>
-    <td style="width: 40px">c[1]</td>
-    <td style="width: 40px">c[2]</td>
-    <td style="width: 40px">c[3]</td>
-    <td style="width: 40px">c[4]</td>
-    <td style="width: 40px">c[5]</td>
-    <td style="width: 40px">c[6]</td>
+    <td style="padding: 0">c[0]</td>
+    <td style="padding: 0">c[1]</td>
+    <td style="padding: 0">c[2]</td>
+    <td style="padding: 0">c[3]</td>
+    <td style="padding: 0">c[4]</td>
+    <td style="padding: 0">c[5]</td>
+    <td style="padding: 0">c[6]</td>
   </tr>
   <tr>
-    <td style="background-color: hsla(  0, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla( 51, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(102, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(154, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(205, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(257, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(308, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(  0, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla( 51, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(102, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(154, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(205, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(257, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(308, 100%, 50%, 1)">&nbsp;</td>
   </tr>
 </table>
 <br>
@@ -441,26 +425,26 @@ let c = generateHslaColors(50, 100, 1.0, 9)
 
 <table style="text-align: center">
   <tr>
-    <td style="width: 40px">c[0]</td>
-    <td style="width: 40px">c[1]</td>
-    <td style="width: 40px">c[2]</td>
-    <td style="width: 40px">c[3]</td>
-    <td style="width: 40px">c[4]</td>
-    <td style="width: 40px">c[5]</td>
-    <td style="width: 40px">c[6]</td>
-    <td style="width: 40px">c[7]</td>
-    <td style="width: 40px">c[8]</td>
+    <td style="padding: 0">c[0]</td>
+    <td style="padding: 0">c[1]</td>
+    <td style="padding: 0">c[2]</td>
+    <td style="padding: 0">c[3]</td>
+    <td style="padding: 0">c[4]</td>
+    <td style="padding: 0">c[5]</td>
+    <td style="padding: 0">c[6]</td>
+    <td style="padding: 0">c[7]</td>
+    <td style="padding: 0">c[8]</td>
   </tr>
   <tr>
-    <td style="background-color: hsla(  0, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla( 40, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla( 80, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(120, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(160, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(200, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(240, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(280, 100%, 50%, 1)">&nbsp;</td>
-    <td style="background-color: hsla(320, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(  0, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla( 40, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla( 80, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(120, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(160, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(200, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(240, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(280, 100%, 50%, 1)">&nbsp;</td>
+    <td style="padding-top: 0; background-color: hsla(320, 100%, 50%, 1)">&nbsp;</td>
   </tr>
 </table>
 <br>

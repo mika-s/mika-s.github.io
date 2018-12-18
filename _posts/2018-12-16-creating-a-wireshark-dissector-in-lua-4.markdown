@@ -84,4 +84,6 @@ It has to be done for all the fields. It will look like this in the end:
 
 You can also find the final code [here][mikas-github-mongodb].
 
+If you want to find out how you can split the dissector into several files you can take a look at [the fifth post]({% post_url 2018-12-18-creating-a-wireshark-dissector-in-lua-5 %}) in this series.
+
 [mikas-github-mongodb]: https://github.com/mika-s/mika-s.github.io/blob/master/assets/creating-wireshark-dissectors-4/mongodb.lua
