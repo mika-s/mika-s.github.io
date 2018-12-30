@@ -33,6 +33,7 @@ language in detail, but we have to know the basics.
 - Semicolons are not needed. Whitespace is not important like in Python.
 - Lines that start with `--` are comments.
 - Don't use `++` or `+=`. Use `i = i + 1` instead.
+- Not equal in conditionals is `~=` rather than `!=`.
 - Its types are: string, number, boolean, nil, function, userdata, thread and table. Number represents all numbers,
   both floating points and integers. Booleans are either true or false. Strings are either single-quote or double-quote.
   You can forget about thread and userdata.
