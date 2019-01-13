@@ -245,9 +245,11 @@ but I won't go into that here.
 
 `scp_protocol.dissector()` could also be passed in as an argument to `register_heuristic()`, rather
 than having a separate function for this. There is more written about that in the [official manual][protofield-functions]
-(search for register_heuristic). That makes it possible to reuse the parsing logic.
+(search for register_heuristic) and in [this][example-heuristic-dissector] dissector. That makes
+it possible to reuse the parsing logic.
 
 For more information on heuristic dissectors, please also read the official [readme][readme-heuristic].
 
 [readme-heuristic]: https://github.com/wireshark/wireshark/blob/master/doc/README.heuristic
 [protofield-functions]: https://www.wireshark.org/docs/wsdg_html_chunked/lua_module_Proto.html
+[example-heuristic-dissector]: https://github.com/zonque/wireshark/blob/master/test/lua/dissector.lua
