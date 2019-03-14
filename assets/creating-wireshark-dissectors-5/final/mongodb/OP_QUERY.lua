@@ -15,7 +15,7 @@ local m = {
     full_coll_name   = ProtoField.string("mongodb.full_coll_name"  , "fullCollectionName", base.ASCII),
     number_to_skip   = ProtoField.int32 ("mongodb.number_to_skip"  , "numberToSkip"      , base.DEC),
     number_to_return = ProtoField.int32 ("mongodb.number_to_return", "numberToReturn"    , base.DEC),
-    query            = ProtoField.string("mongodb.query"           , "query"             , base.ASCII)
+    query            = ProtoField.none  ("mongodb.query"           , "query"             , base.HEX)
 }
 
 function m.get_fields()

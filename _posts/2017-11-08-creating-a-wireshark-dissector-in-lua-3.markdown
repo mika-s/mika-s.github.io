@@ -116,10 +116,10 @@ The MongoDB subtree will then look like this for messages with the `OP_QUERY` op
 
 The flag field will not be there for other messages, as they never enter the `OP_QUERY` *if* block.
 
-Next up is a bit different than before: we now have to dissect something else than an int32. In this particular
-case it's a string. A string is different from the other types in that it doesn't have a fixed length. So we
-have to loop over the bytes in the buffer until we hit the end of the string. How we determine the end of the
-string is depends on what type of string it is. In this case, it's a *[cstring][wikipedia-null-terminated-string]*,
+The next field is a bit different than the previous ones: we now have to dissect something else than an int32.
+In this particular case it's a string. A string is different from the other types in that it doesn't have a
+fixed length. So we have to loop over the bytes in the buffer until we hit the end of the string. How we determine
+the end of the string is depends on what type of string it is. In this case, it's a *[cstring][wikipedia-null-terminated-string]*,
 which means the string is terminated by *[NUL][wikipedia-nul]* (the byte 00).
 
 ```lua
@@ -163,8 +163,9 @@ We now have the collection name in the packet details pane:
 ![Packet details with Collection name]({{ "/assets/creating-wireshark-dissectors-3/collectionname.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
 The rest of the fields are fairly simple. I will not explain them in detail, but show the final code instead.
-The field called `query` is technically BSON documents, but as mentioned before, decoding them are outside
-the scope of this post. The script with `OP_QUERY` added is then:
+The field called `query` contains BSON documents, but as mentioned before, decoding them are outside the
+scope of this post. I'll use `ProtoField.none` for that field, which is a type that can be used for unstructured
+data. The script with `OP_QUERY` added is then:
 
 ```lua
 mongodb_protocol = Proto("MongoDB",  "MongoDB Protocol")
@@ -180,7 +181,7 @@ flags           = ProtoField.int32 ("mongodb.flags"           , "flags"         
 full_coll_name  = ProtoField.string("mongodb.full_coll_name"  , "fullCollectionName", base.ASCII)
 number_to_skip  = ProtoField.int32 ("mongodb.number_to_skip"  , "numberToSkip"      , base.DEC)
 number_to_return= ProtoField.int32 ("mongodb.number_to_return", "numberToReturn"    , base.DEC)
-query           = ProtoField.string("mongodb.query"           , "query"             , base.ASCII)
+query           = ProtoField.none  ("mongodb.query"           , "query"             , base.HEX)
 
 mongodb_protocol.fields = {
     message_length, request_id, response_to, opcode,                  -- Header
@@ -279,7 +280,7 @@ response_flags =ProtoField.int32 ("mongodb.response_flags" ,"responseFlags" ,bas
 cursor_id      =ProtoField.int64 ("mongodb.cursor_id"      ,"cursorId"      ,base.DEC)
 starting_from  =ProtoField.int32 ("mongodb.starting_from"  ,"startingFrom"  ,base.DEC)
 number_returned=ProtoField.int32 ("mongodb.number_returned","numberReturned",base.DEC)
-documents      =ProtoField.string("mongodb.documents"      ,"documents"     ,base.ASCII)
+documents      =ProtoField.none  ("mongodb.documents"      ,"documents"     ,base.HEX)
 ```
 
 We also have to add the fields to the `fields` table:
@@ -347,13 +348,13 @@ flags           = ProtoField.int32 ("mongodb.flags"           , "flags"         
 full_coll_name  = ProtoField.string("mongodb.full_coll_name"  , "fullCollectionName", base.ASCII)
 number_to_skip  = ProtoField.int32 ("mongodb.number_to_skip"  , "numberToSkip"      , base.DEC)
 number_to_return= ProtoField.int32 ("mongodb.number_to_return", "numberToReturn"    , base.DEC)
-query           = ProtoField.string("mongodb.query"           , "query"             , base.ASCII)
+query           = ProtoField.none  ("mongodb.query"           , "query"             , base.HEX)
 
 response_flags  = ProtoField.int32 ("mongodb.response_flags"  , "responseFlags"     , base.DEC)
 cursor_id       = ProtoField.int64 ("mongodb.cursor_id"       , "cursorId"          , base.DEC)
 starting_from   = ProtoField.int32 ("mongodb.starting_from"   , "startingFrom"      , base.DEC)
 number_returned = ProtoField.int32 ("mongodb.number_returned" , "numberReturned"    , base.DEC)
-documents       = ProtoField.string("mongodb.documents"       , "documents"         , base.ASCII)
+documents       = ProtoField.none  ("mongodb.documents"       , "documents"         , base.HEX)
 
 mongodb_protocol.fields = {
   message_length, request_id, response_to, opcode,                     -- Header

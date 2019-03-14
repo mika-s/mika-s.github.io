@@ -27,8 +27,23 @@ name is wrong then the error message will look like this.
 
 ![Error in the tree]({{ "/assets/creating-wireshark-dissectors-2/error-in-tree.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
-Finally, Wireshark has a Lua console built in that can be used to print error messages. It's found in the Tools --> Lua
-menu. Wireshark also has some built in [utility functions][wireshark-lua-util-functions] for logging. They are:
+Finally, Wireshark has a Lua console built in that you can print error messages to. It's found in the Tools → Lua
+menu. Wireshark has a function called `print()` that can be used for logging. So the following code:
+
+```lua
+print("buffer length: " .. length)
+```
+
+will end up looking like this when printed to the console:
+
+![Wireshark console with messages for Wireshark 3.0]({{ "/assets/creating-wireshark-dissectors-2/wireshark-console-3.0.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 20px;" }
+
+where ``..`` is used for string concatenation.
+
+---
+
+
+In Wireshark versions older than 3.0 there are different functions used for logging. These are:
 `critical("message")`, `warn("message")`, `message("message")`, `info("message")` and `debug("message")`. They all print
 to the console, and the difference is the perceived severity level. The following code:
 
@@ -44,21 +59,23 @@ will end up looking like this when printed to the console:
 
 ![Wireshark console with messages]({{ "/assets/creating-wireshark-dissectors-2/wireshark-console.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
-where ``..`` is used for string concatenation. You can access the [debug library][lua-5.2-debug-library] by requiring it
-at the start of the file
+---
+
+You can access the [debug library][lua-5.2-debug-library] by requiring it at the start of the file
 
 ```lua
-local d = require 'debug'
+local d = require('debug')
 ```
 
 and then start using it by calling it's functions. For example:
 
 ```lua
-info(d.traceback())
+print(d.traceback())
 ```
 
 And that's pretty much what we have available for debugging. Don't expect any fancy IDE with a built in debugger when
-dealing with Lua.
+dealing with Lua dissectors. If you want to you could try to get [ZeroBrane Studio][github-ZeroBraneStudio] working,
+but I haven't figured out how to do that easily, so I'm going with printf debugging myself.
 
 ### Extending the MongoDB protocol dissector
 
@@ -169,3 +186,4 @@ will go into how the specific messages can be decoded.
 [wireshark-lua-util-functions]: https://wiki.wireshark.org/LuaAPI/Utils
 [delog-wireshark-dissector-in-lua]: https://delog.wordpress.com/2010/09/27/create-a-wireshark-dissector-in-lua/
 [emmanueladenola-wireshark-dissector-with-lua]: https://emmanueladenola.wordpress.com/2013/11/23/wireshark-dissector-with-lua/
+[github-ZeroBraneStudio]: https://github.com/pkulchenko/ZeroBraneStudio

@@ -11,13 +11,13 @@ flags           = ProtoField.int32 ("mongodb.flags"           , "flags"         
 full_coll_name  = ProtoField.string("mongodb.full_coll_name"  , "fullCollectionName", base.ASCII)
 number_to_skip  = ProtoField.int32 ("mongodb.number_to_skip"  , "numberToSkip"      , base.DEC)
 number_to_return= ProtoField.int32 ("mongodb.number_to_return", "numberToReturn"    , base.DEC)
-query           = ProtoField.string("mongodb.query"           , "query"             , base.ASCII)
+query           = ProtoField.none  ("mongodb.query"           , "query"             , base.HEX)
 
 response_flags  = ProtoField.int32 ("mongodb.response_flags"  , "responseFlags"     , base.DEC)
 cursor_id       = ProtoField.int64 ("mongodb.cursor_id"       , "cursorId"          , base.DEC)
 starting_from   = ProtoField.int32 ("mongodb.starting_from"   , "startingFrom"      , base.DEC)
 number_returned = ProtoField.int32 ("mongodb.number_returned" , "numberReturned"    , base.DEC)
-documents       = ProtoField.string("mongodb.documents"       , "documents"         , base.ASCII)
+documents       = ProtoField.none  ("mongodb.documents"       , "documents"         , base.HEX)
 
 mongodb_protocol.fields = {
   message_length, request_id, response_to, opcode,                     -- Header

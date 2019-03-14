@@ -19,7 +19,7 @@ local m = {
     cursor_id       = ProtoField.int64 ("mongodb.cursor_id"       , "cursorId"          , base.DEC),
     starting_from   = ProtoField.int32 ("mongodb.starting_from"   , "startingFrom"      , base.DEC),
     number_returned = ProtoField.int32 ("mongodb.number_returned" , "numberReturned"    , base.DEC),
-    documents       = ProtoField.string("mongodb.documents"       , "documents"         , base.ASCII)
+    documents       = ProtoField.none  ("mongodb.documents"       , "documents"         , base.HEX)
 }
 
 function m.get_fields()
