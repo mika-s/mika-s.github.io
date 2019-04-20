@@ -1,11 +1,11 @@
 ---
 layout: post
 title:  "SoapUI snippets"
-date:   2020-04-01 15:00:00 +0100
+date:   2019-04-08 15:00:00 +0100
 categories: soapui snippets
 ---
 
-# SoapUI snippets
+This is various SoapUI snippets I'm using that other might be interested in.
 
 ## Snippets
 

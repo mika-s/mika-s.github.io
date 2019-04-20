@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Fiddler">
+      <HintPath>C:\Program Files (x86)\Fiddler\Fiddler.exe</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Windows.Forms" Version="4.0.0.0" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" AfterTargets="PreBuildEvent">
+    <Exec Command="taskkill /im fiddler.exe /t /f 2&gt;&amp;1 | exit /B 0" />
+  </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="XCOPY &quot;$(TargetPath)&quot; &quot;C:\Users\mika\Documents\Fiddler2\Scripts\&quot; /S /Y" />
+  </Target>
+
+</Project>

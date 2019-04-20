@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.271
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiddlerExtensionTest", "FiddlerExtensionTest\FiddlerExtensionTest.csproj", "{D49C7A69-8ABA-44B9-9A0D-AA9644F5A685}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D49C7A69-8ABA-44B9-9A0D-AA9644F5A685}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D49C7A69-8ABA-44B9-9A0D-AA9644F5A685}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D49C7A69-8ABA-44B9-9A0D-AA9644F5A685}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D49C7A69-8ABA-44B9-9A0D-AA9644F5A685}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {610A97E8-9F62-43F0-8A07-FDABCA49DAAE}
+	EndGlobalSection
+EndGlobal
