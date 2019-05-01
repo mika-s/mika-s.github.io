@@ -48,12 +48,13 @@ taskkill /im fiddler.exe /t /f 2>&1 | exit /B 0
 and the following post-build event
 
 ```
-XCOPY "$(TargetPath)" "C:\Users\username\Documents\Fiddler2\Scripts\" /S /Y
+XCOPY "$(TargetPath)" "%25userprofile%25\Documents\Fiddler2\Scripts\" /S /Y
 ```
 
 This will stop Fiddler before the build starts, and then copy the built dll to the local Scripts
 folder. When Fiddler is started again it will have the updated extension loaded. The build events
-are optional.
+are optional. `Scripts` can be replaced with `Inspectors` if you are making a custom inspector.
+The `Inspector` folder might have to be created.
 
 You can see an example project [here][mikas-github-visual-studio-project].
 
@@ -120,15 +121,15 @@ Add the following to project file (FiddlerExtensionTest.csproj):
   </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="XCOPY &quot;$(TargetPath)&quot; &quot;C:\Users\yourusername\Documents\Fiddler2\Scripts\&quot; /S /Y" />
+    <Exec Command="XCOPY &quot;$(TargetPath)&quot; &quot;%25userprofile%25\Documents\Fiddler2\Scripts\&quot; /S /Y" />
   </Target>
 ```
 
 This adds a reference to *Fiddler.exe* and *System.Windows.Forms*. The post-build event is
 optional. It will move the extension (which is a dll file) to the local Scripts folder every time
 you build the project. Fiddler looks for extensions in that folder, which will make the newly
-built dll available to Fiddler. Inspectors go in another folder, so if you are making inspectors you
-have to change the path.
+built dll available to Fiddler. `Scripts` can be replaced with `Inspectors` if you are making a
+custom inspector. The `Inspector` folder might have to be created.
 
 Use this command to build:
 
@@ -223,15 +224,24 @@ prefs set fiddler.debug.extensions.showerrors True
 prefs set fiddler.debug.extensions.verbose True
 ```
 
-You can also attach the debugger in Visual Studio to the Fiddler process. This makes it possible to
-set breakpoints etc. in Visual Studio. This is done in Visual Studio by going to the Debug menu and
+You can start Fiddler when you click Start in Visual Studio by making Fiddler.exe the startup
+executable. It should look like this in the project's properties:
+
+![Fiddler.exe as startup executable]({{ "/assets/creating-a-fiddler-extension-1/project-properties-debug.png" | absolute_url }})
+
+This makes it possible to set breakpoints in the extension or catch exceptions that Fiddler usually
+swallows. If you use this method you probably want to add the pre-build and post-build events mentioned
+above.
+
+You can also attach the debugger in Visual Studio to the Fiddler process. This also makes it possible
+to set breakpoints etc. in Visual Studio. This is done in Visual Studio by going to the Debug menu and
 choosing *Attach to Process...*.  Find Fiddler.exe and click on the Attach button. You can now debug
 like you would any other application.
 
 ## Next
 
-In the next post I'll show an example of a custom response inspector that pretty prints XML received
-in the response body.
+In [the next post]({% post_url 2019-04-28-creating-a-fiddler-extension-2 %}) I'll show an example of a
+custom response inspector that pretty prints XML received in the response body.
 
 [netcore-home]: https://dotnet.microsoft.com/download
 [vscode-home]: https://code.visualstudio.com/

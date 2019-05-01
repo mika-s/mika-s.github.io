@@ -16,9 +16,7 @@ permalink: /topics/
 ## Fiddler
 
 * [Creating a Fiddler extension - part 1 (initial setup)]({% post_url 2019-04-09-creating-a-fiddler-extension-1 %})
-{% comment %}
-* [Creating a Fiddler extension - part 2 (custom inspector)]({% post_url 2019-04-17-creating-a-fiddler-extension-2 %})
-{% endcomment %}
+* [Creating a Fiddler extension - part 2 (custom response inspector)]({% post_url 2019-04-28-creating-a-fiddler-extension-2 %})
 
 ## Various debugging
 
@@ -29,6 +27,14 @@ permalink: /topics/
 
 * [Trajectory generation with a minimum jerk trajectory]({% post_url 2017-12-06-trajectory-generation-with-a-minimum-jerk-trajectory %})
 * [Angle transformation to [-π, π]]({% post_url 2017-12-18-transformation-to-pipi %})
+
+{% comment %}
+
+## Certifications
+
+* [Notes on 70-761 - Querying Data with Transact SQL]({% post_url 2019-01-31-notes-on-70-761-Querying-Data-with-Transact-SQL %})
+
+{% endcomment %}
 
 ## Miscellaneous
 

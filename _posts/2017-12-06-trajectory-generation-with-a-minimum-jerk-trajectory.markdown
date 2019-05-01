@@ -5,7 +5,7 @@ date:   2017-12-06 12:00:00 +0100
 categories: python control-theory trajectory-generation
 ---
 
-[Trajectory generators][stanford-handout-trajectory] are necessary in control systems when we 
+[Trajectory generators][stanford-handout-trajectory] are necessary in control systems when we
 want to move something smoothly from some intial position to another position. They are often
 very advanced and derived from first principles for a particular system. So I was searching
 the Internet for something that was fast and easy to implement and luckily enough I found the
@@ -127,4 +127,4 @@ Result:
 And we see that the maximum velocity is 50°/sec like wanted.
 
 [stanford-handout-trajectory]: https://see.stanford.edu/materials/aiircs223a/handout6_Trajectory.pdf
-[shadmehrlab-mjt]: http://www.shadmehrlab.org/book/minimumjerk.pdf
+[shadmehrlab-mjt]: http://courses.shadmehrlab.org/Shortcourse/minimumjerk.pdf

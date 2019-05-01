@@ -19,7 +19,7 @@
   </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="XCOPY &quot;$(TargetPath)&quot; &quot;C:\Users\mika\Documents\Fiddler2\Scripts\&quot; /S /Y" />
+    <Exec Command="XCOPY &quot;$(TargetPath)&quot; &quot;%25userprofile%25\Documents\Fiddler2\Scripts\&quot; /S /Y" />
   </Target>
 
 </Project>
