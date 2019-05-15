@@ -6,7 +6,7 @@ categories: python control-theory trajectory-generation
 ---
 
 [Trajectory generators][stanford-handout-trajectory] are necessary in control systems when we
-want to move something smoothly from some intial position to another position. They are often
+want to move something smoothly from some initial position to another position. They are often
 very advanced and derived from first principles for a particular system. So I was searching
 the Internet for something that was fast and easy to implement and luckily enough I found the
 [minimum jerk trajectory][shadmehrlab-mjt].
@@ -34,10 +34,10 @@ we have two explicit equations that are very easy to implement that will give a 
 ### Code
 
 The equations can be translated into the code shown below. I chose to use Python here because it's
-borderline pseudocode and also allows me to use *matplotlib* for plotting.
+borderline pseudo code and also allows me to use *matplotlib* for plotting.
 
 `mjtg` accepts the current position (start position), the setpoint (desired position), the
-frequency of the control system and a time parameter that indictes how long it should
+frequency of the control system and a time parameter that indicates how long it should
 take to get from the current position to the setpoint.
 
 We can also use average velocity rather than movement time, considering that we know the

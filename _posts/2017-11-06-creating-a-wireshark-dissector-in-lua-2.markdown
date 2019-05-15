@@ -22,7 +22,7 @@ Here is what an error message looks like when an `end` statement is missing:
 
 ![Error during startup]({{ "/assets/creating-wireshark-dissectors-2/error-dialog.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
-Runtime errors are often shown in the subtree for the dissector. For example, if a function is called with the wrong
+Runtime errors are often shown in the sub tree for the dissector. For example, if a function is called with the wrong
 name is wrong then the error message will look like this.
 
 ![Error in the tree]({{ "/assets/creating-wireshark-dissectors-2/error-in-tree.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
@@ -116,7 +116,7 @@ function get_opcode_name(opcode)
 end
 ```
 
-Finally we have to replace the old addition to the subtree with the following code:
+Finally we have to replace the old addition to the sub tree with the following code:
 
 ```lua
 local opcode_name = get_opcode_name(opcode)

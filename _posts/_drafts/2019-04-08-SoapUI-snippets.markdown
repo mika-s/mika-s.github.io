@@ -14,6 +14,7 @@ This is various SoapUI snippets I'm using that other might be interested in.
 | Random integer with two digits    | `${=org.apache.commons.lang.RandomStringUtils.randomNumeric(2)}`    |
 | Random string with two characters | `${=org.apache.commons.lang.RandomStringUtils.randomAlphabetic(2)}` |
 | Today's date in ISO format        | `${=def now = new Date();now.format("yyyy-MM-dd")}`                 |
+| Own IP address                    | `${=java.net.InetAddress.getLocalHost().getHostAddress()}`          |
 
 ## Important links
 

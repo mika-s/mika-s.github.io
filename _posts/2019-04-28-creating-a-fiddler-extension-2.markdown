@@ -151,7 +151,7 @@ public partial class XmlPrettyfierView : UserControl
 ```
 
 This is in XmlPrettyfierView.cs, the code behind of the view. The reason the ViewModel is available
-as a property is because we need access to the viewmodel from the insepctor class (XmlPrettifier).
+as a property is because we need access to the viewmodel from the inspector class (XmlPrettifier).
 
 Lets also add the pre-build and post-build events that are described in the first post:
 
@@ -320,7 +320,7 @@ container for the WPF view so it can be used in a Windows Forms application. In 
 `ElementHost` we have to add a reference to *WindowsFormsIntegration*.
 
 `GetOrder()` and `AddToTab()` were inherited from the class `Inspector2`. Fiddler will call our
-overrided `AddToTab()` to get information on what view to put in the new tab it has created for
+overridden `AddToTab()` to get information on what view to put in the new tab it has created for
 our new inspector. In `AddToTab()` we put the WPF view inside the `host` container and then add it
 to the `Controls` collection. We also change the title of the tab to *"XML pretty"*.
 

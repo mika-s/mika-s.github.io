@@ -69,7 +69,7 @@ There are three types of remainder calculations according to [Wikipedia][wikiped
 
 - using truncated division
 - using floored division
-- using Euclidian division
+- using Euclidean division
 
 Python uses floored division when finding the remainder with %. In short, that means -5 % 2 = 1, not -1.
 The algorithm above has to use truncated division when calculating the remainder, so we have to define

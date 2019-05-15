@@ -154,7 +154,7 @@ project (I renamed the only class file to MyExtension.cs):
 
 The version number is the version of Fiddler the extension requires. I picked 5.0.0.0 because
 5.0.20182.28034 is the latest version at the current date. You could also target older versions
-than 5.0. For backwards compability with Fiddler 2 you can take a look at [this][fiddler-backwards-compability]
+than 5.0. For backwards compatibility with Fiddler 2 you can take a look at [this][fiddler-backwards-compatibility]
 link.
 
 We then have to implement the interface `IFiddlerExtension` or a interface that inherits from
@@ -247,6 +247,6 @@ custom response inspector that pretty prints XML received in the response body.
 [vscode-home]: https://code.visualstudio.com/
 [fiddler-home]: https://www.telerik.com/fiddler
 [fiddler-extend]: https://docs.telerik.com/fiddler/Extend-Fiddler/ExtendWithDotNet
-[fiddler-backwards-compability]: https://docs.telerik.com/fiddler/Extend-Fiddler/ExtensionsForv2Andv4
+[fiddler-backwards-compatibility]: https://docs.telerik.com/fiddler/Extend-Fiddler/ExtensionsForv2Andv4
 [mikas-github-visual-studio-project]: https://github.com/mika-s/mika-s.github.io/blob/master/assets/creating-a-fiddler-extension-1/FiddlerExtensionTest-Visual-Studio/
 [mikas-github-vs-code-project]: https://github.com/mika-s/mika-s.github.io/blob/master/assets/creating-a-fiddler-extension-1/FiddlerExtensionTest-VS-Code/

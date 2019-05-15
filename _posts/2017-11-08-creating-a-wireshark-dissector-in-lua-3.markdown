@@ -69,7 +69,7 @@ local tcp_port = DissectorTable.get("tcp.port")
 tcp_port:add(59274, mongodb_protocol)
 ```
 
-To make the distiction clearer between the header and the actual payload of the message we will use comments
+To make the distinction clearer between the header and the actual payload of the message we will use comments
 to show where the different sections start. Because the different opcodes have different structure we have
 to check what type of message we are dissecting with an `if` statement. We are only dissecting the `OP_QUERY`
 message in the code above.
@@ -77,7 +77,7 @@ message in the code above.
 The script is starting to get pretty big for a blog post now, so I will start shortening the content that
 we have already looked at before with ...
 
-So the `flags` field is now shown in the subtree for `OP_QUERY` messages. Similar to the `opcode`, it would
+So the `flags` field is now shown in the sub tree for `OP_QUERY` messages. Similar to the `opcode`, it would
 be nice we if could have a description of the flag value in parentheses beside the value. The description
 of the values are found in the spec. As with the opcode description we make a lookup function to get the
 flag description:
@@ -100,7 +100,7 @@ function get_flag_description(flags)
 end
 ```
 
-and then change how we add the field to the subtree:
+and then change how we add the field to the sub tree:
 
 ```lua
 if opcode_name == "OP_QUERY" then
@@ -110,7 +110,7 @@ if opcode_name == "OP_QUERY" then
 end
 ```
 
-The MongoDB subtree will then look like this for messages with the `OP_QUERY` opcode:
+The MongoDB sub tree will then look like this for messages with the `OP_QUERY` opcode:
 
 ![Flag with description]({{ "/assets/creating-wireshark-dissectors-3/flag-with-description.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
@@ -140,7 +140,7 @@ We loop over the bytes from the start of the string (byte 20) to the end of the 
 byte at a time with `buffer(i,1):le_uint()` and check whether it's the *NUL* byte, which indicates the end of
 the string. If it is we store the length of the string in `string_length` and break the loop.
 
-We can then add the field to the subtree. We also have to make the field by adding this line to the top of the
+We can then add the field to the sub tree. We also have to make the field by adding this line to the top of the
 script:
 
 ```lua
@@ -467,7 +467,7 @@ You can find the final code [here][mikas-github-mongodb].
 Two other blogs that describe Wireshark dissectors in Lua can be found [here][delog-wireshark-dissector-in-lua] and
 [here][emmanueladenola-wireshark-dissector-with-lua].
 
-If you want to find out how you can separate the fields into separate subtrees, you can take a look of
+If you want to find out how you can separate the fields into separate sub trees, you can take a look of
 [part four]({% post_url 2018-12-16-creating-a-wireshark-dissector-in-lua-4 %}) of this series.
 
 [wikipedia-nul]: https://en.wikipedia.org/wiki/Null_character

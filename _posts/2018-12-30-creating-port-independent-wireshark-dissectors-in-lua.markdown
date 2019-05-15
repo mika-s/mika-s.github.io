@@ -20,9 +20,9 @@ match, we can assume the dissector is correct to use for the packet that is bein
 You might want to make a dissector heuristic if you don't know what port a protocol will operate
 on, if it uses random ports, if the port it uses is also used by another protocol, and so on.
 However, be aware that many protocols share structure and metadata such as message IDs and flags.
-It's important that a protocol is unique enough before using the heurisitic dissector functionality.
+It's important that a protocol is unique enough before using the heuristic dissector functionality.
 
-Registering a dissector as a heurisitic dissector is done with `register_heuristic()`. Before we start,
+Registering a dissector as a heuristic dissector is done with `register_heuristic()`. Before we start,
 let's take a look at the protocol we'll use first.
 
 ### Protocol example
@@ -121,7 +121,7 @@ udp_port:add(4000, scp_protocol)
 udp_port:add(4001, scp_protocol)
 ```
 
-It puts the protocol flag and message ID on the subtree and is registered to UDP ports 4000 and 4001.
+It puts the protocol flag and message ID on the sub tree and is registered to UDP ports 4000 and 4001.
 
 Let's convert this into a heuristic dissector.
 
@@ -165,7 +165,7 @@ that the length of the packet is long enough to actually be a SCP packet. This i
 don't end up trying to read values outside the buffer.
 
 The first real check I do is to look for the protocol flag: `0xD3`. If this doesn't exist as the first
-byte it can't be a SCP packet and we can return false immidiatly.
+byte it can't be a SCP packet and we can return false immediately.
 
 The second check I do is for the two next bytes, which represents the message ID. This is checked with
 the `get_message_name()` function which looks for valid message IDs in a bunch of if-elseifs. If it doesn't

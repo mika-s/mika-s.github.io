@@ -40,3 +40,4 @@ permalink: /topics/
 
 * [Quality, min and max with jpeg-recompress]({% post_url 2018-01-10-quality-min-and-max-with-jpeg-recompress %})
 * [Generating random HSL colors in Javascript]({% post_url 2017-12-05-generating-random-colors-in-javascript %})
+* [Generating normally distributed random numbers in Javascript]({% post_url 2019-05-15-generating-normally-distributed-random-numbers-in-javascript %})

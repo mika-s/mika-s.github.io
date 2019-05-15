@@ -199,7 +199,7 @@ tcp_port:add(59274, mongodb_protocol)
 ```
 
 Notice the call to `header.parse()`. As mentioned, I return `opcode_name` because I need it further down in the code. The
-subtree `headerSubtree` will also be modified (fields added to it), because it's a reference type and thus mutable inside
+sub tree `headerSubtree` will also be modified (fields added to it), because it's a reference type and thus mutable inside
 `parse()`.
 
 ### Creating OP_QUERY.lua and OP_REPLY.lua
@@ -467,7 +467,7 @@ return m
 
 As you can see I found the code on Stack Overflow.
 
-Fianlly you can see that the call to `parse()` has been shortened down to:
+Finally, you can see that the call to `parse()` has been shortened down to:
 
 ```lua
 local opcode_name = header.parse(headerSubtree, buffer)

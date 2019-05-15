@@ -25,7 +25,7 @@ you like. You are not required to give them a valid email, you'll get to downloa
 
 Fiddler generally works out-of-the-box, but if it doesn't you can try to look up in the [documentation][fiddler-configuration]
 on how to set it up. Fiddler works by setting up a proxy on port 8888. It will therefore sit between the
-client and the server and listen to requests and reponses, which it shows in a list. If you're using a
+client and the server and listen to requests and responses, which it shows in a list. If you're using a
 tool such as SoapUI you might have to restart it after starting Fiddler. Otherwise it will not use the
 Fiddler proxy. You might also have to restart the tool or any consoles after shutting down Fiddler, in
 order to stop using the proxy.
@@ -37,7 +37,7 @@ request. Here is a request I sent with SoapUI being listed in Fiddler:
 
 ![Screenshot of Fiddler]({{ "/assets/debugging-http-requests/screenshot-of-fiddler.png" | absolute_url }})
 
-We can see the request body under the Inspectors tab. To see the raw request use the Raw subtab.
+We can see the request body under the Inspectors tab. To see the raw request use the Raw sub tab.
 
 Fiddler is a fairly advanced tool, but easy to get into. You can write your own extensions in .NET (C#).
 There are more info about that [here][fiddler-extend].
@@ -46,7 +46,7 @@ There are more info about that [here][fiddler-extend].
 
 [netcat][wikipedia-netcat] is a well-known network tool used for creating TCP and UDP connections. netcat
 was originally written for Unix, but is now also available for Windows and OS X. Here I'll use
-[ncat][ncat-home], which is a fork of netcat. You might have problems using netcat in coorporate environments.
+[ncat][ncat-home], which is a fork of netcat. You might have problems using netcat in corporate environments.
 It's often blocked for security reasons, as it can be used as a port scanner and for creating backdoors.
 
 netcat can be used for many things, one one of them is to make it act as a server that listens to a given port.
@@ -74,7 +74,7 @@ unless you write something in the netcat window.
 Wireshark is a tool I've written several [posts]({% post_url 2017-11-04-creating-a-wireshark-dissector-in-lua-1 %})
 about before. Wireshark is easy to use and supported on all major operating systems. It's a full blown
 packet capturing and protocol analyzing application that can do way more than just log HTTP requests. It
-can be downloaded from the [Wireshark homepage][wireshark-home]. You might have problems using Wireshark in coorporate
+can be downloaded from the [Wireshark homepage][wireshark-home]. You might have problems using Wireshark in corporate
 environments, as it can be used to sniff passwords etc. You probably also need admin rights to install and use it.
 
 To see HTTP requests in Wireshark you just have to start capturing on the correct network adapter. The HTTP
@@ -194,10 +194,10 @@ This doesn't work very well for .NET Core, as of now, but I believe it will impr
   development environment where you are able to install applications.
 * netcat is very light weight and is often installed in *nix environments. It's a multipurpose networking
   utility that's used for much more than viewing raw requests. Often not possible to use netcat in
-  coorporate environments.
+  corporate environments.
 * Wireshark is a full-blown packet analyzer and is better suited when you are developing applications
   that use protocols at a lower abstraction level than HTTP. Is also impossible to install and use in some
-  coorporate environments.
+  corporate environments.
 * Tracing and logging requests with the used framework (e.g. .NET, Spring, etc.) is typically needed
   in production environments as you can't really install Fiddler, Wireshark, etc. there.
 
