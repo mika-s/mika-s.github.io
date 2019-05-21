@@ -10,7 +10,7 @@ distribution. The code below uses the [Box-Muller transform][box–muller-transf
 the numbers are normally distributed.
 
 ```js
-function BoxMullerTransform() {
+function boxMullerTransform() {
     const u1 = Math.random();
     const u2 = Math.random();
     
@@ -20,15 +20,15 @@ function BoxMullerTransform() {
     return { z0, z1 };
 }
 
-function GetNormallyDistributedRandomNumber(mean, stddev) {
-    const { z0, _ } = BoxMullerTransform();
+function getNormallyDistributedRandomNumber(mean, stddev) {
+    const { z0, _ } = boxMullerTransform();
     
     return z0 * stddev + mean;
 }
 ```
 
-`z1` isn't used in this case, but I'll leave it in in case `BoxMullerTransform()` is used another
-place. This is how you can use `GetNormallyDistributedRandomNumber()`:
+`z1` isn't used in this case, but I'll leave it in in case `boxMullerTransform()` is used another
+place. This is how you can use `getNormallyDistributedRandomNumber()`:
 
 ```js
 const generatedNumbers = []
@@ -37,7 +37,7 @@ const mean   = 30.0;
 const stddev = 2.0;
 
 for (let i = 0; i < 100000; i += 1) {
-    generatedNumbers.push(GetNormallyDistributedRandomNumber(mean, stddev))
+    generatedNumbers.push(getNormallyDistributedRandomNumber(mean, stddev))
 }
 
 const sum = generatedNumbers.reduce((acc, i) => acc += i);

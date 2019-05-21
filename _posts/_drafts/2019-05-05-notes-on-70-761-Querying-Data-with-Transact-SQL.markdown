@@ -42,6 +42,69 @@ This is for the syllabus as it was in May 2019. The syllabus might change in the
     - [Arithmetic functions](#arithmetic_functions)
     - [Date-related functions](#date_related_functions)
     - [System functions](#system_functions)
+  - [Modify data](#modify_data)
+    - [INSERT](#insert)
+    - [UPDATE](#update)
+    - [DELETE](#delete)
+    - [MERGE](#merge)
+    - [OUTPUT](#output)
+- [Query data with advanced Transact-SQL components](#query_data_with_advanced_tsql_components)
+  - [Query data by using subqueries and APPLY](#query_data_by_using_subqueries_and_apply)
+    - [Subqueries](#subqueries)
+    - [Subqueries vs joins](#subqueries_vs_joins)
+    - [CROSS APPLY](#cross_apply)
+    - [OUTER APPLY](#outer_apply)
+  - [Query data by using table expressions](#query_data_by_using_table_expressions)
+    - [Table expressions](#table_expressions)
+    - [Common table expressions (CTEs) ](#common_table_expressions)
+    - [Recursive CTEs](#recursive_common_table_expressions)
+    - [Table expressions vs temporary tables](#table_expressions_vs_temporary_tables)
+  - [Group and pivot data by using queries](#group_and_pivot_data_by_using_queries)
+    - [GROUP BY](#group_by)
+    - [GROUP BY vs windowing functions](#group_by_vs_windowing_functions)
+    - [GROUPING SETS](#grouping_sets)
+    - [CUBE](#cube)
+    - [PIVOT and UNPIVOT statements](#pivot_and_unpivot_statements)
+    - [NULL values in PIVOT and UNPIVOT](#null_values_in_pivot_and_unpivot)
+    - [Windowing functions](#windowing_functions)
+  - [Query temporal data and non-relational data](#query_temporal_data_and_nonrelational_data)
+    - [Temporal tables](#temporal_tables)
+    - [XML output](#xml_output)
+    - [XML parsing](#xml_parsing)
+    - [XML querying](#xml_querying)
+    - [JSON output ](#json_output)
+    - [JSON parsing](#json_parsing)
+    - [JSON querying](#json_querying)
+- [Program databases by using Transact-SQL](#program_databases_by_using_tsql)
+  - [Create database programmability objects by using Transact-SQL](#create_database_programmability_objects_by_using_tsql)
+    - [Stored procedures](#stored_procedures)
+    - [Table-valued user-defined function](#table_valued_function)
+    - [Scalar-valued user-defined function](#scalar_valued_function)
+    - [Functions in general](#function_in_general)
+    - [Triggers](#triggers)
+    - [Views](#views)
+    - [Indexed views](#indexed_views)
+  - [Implement error handling and transactions](#implement_error_handling_and_transactions)
+    - [Transaction control](#transaction_control)
+    - [TRY-CATCH](#try_catch)
+    - [Error functions](#error_functions)
+    - [THROW](#throw)
+    - [RAISERROR](#raiserror)
+    - [THROW vs RAISERROR](#throw_vs_raiserror)
+  - [Implement data types and NULLs](#implement_data_types_and_nulls)
+    - [Data type conversions](#data_type_conversions)
+    - [Proper data types for elements and columns](#proper_data_types_for_elements_and_columns)
+    - [Locations of implicit data type conversions in queries](#locations_of_implicit_data_type_conversions_in_queries)
+    - [Correct results when joins and NULL values](#correct_results_when_joins_and_null_values)
+    - [ISNULL()](#isnull)
+    - [COALESCE()](#coalesce)
+    - [ISNULL() vs COALESCE()](#isnull_vs_coalesce)
+- [Not part of the official syllabus](#not_part_of_the_official_syllabus)
+  - [Spatial data](#spatial_data)
+    - [Geography](#geography)
+    - [Geometry](#geometry)
+    - [Geography vs geometry](#geography_vs_geometry)
+  - [Cursors](#cursors)
 
 ---
 
@@ -587,6 +650,145 @@ It rounds down.
 
 #### Date-related functions
 
+[Official documentation][microsoft-date-and-time-functions]
+
+SQL Server has several types for storing and representing date and time:
+
+- `DATE`
+- `TIME`
+- `SMALLDATETIME`
+- `DATETIME`
+- `DATETIME2`
+- `DATETIMEOFFSET`
+
+`DATETIME2` has higher accuracy than `DATETIME`, which has higher accuracy than `SMALLDATETIME`.
+`DATE` is only for date and `TIME` is only for time. `DATETIMEOFFSET` is time-zone aware.
+
+SQL Server has the following date and time functions:
+
+- `GETDATE()` returns the current date as a `DATETIME`.
+- `CURRENT_TIMESTAMP` returns the same as `GETDATE()`, but is a part of the SQL Standard.
+- `SYSDATETIME()` and `SYSDATETIMEOFFSET()` returns the current date in `DATETIME2` and `DATETIMEOFFSET`
+format.
+- `GETUTCDATE()` returns the current date and time in UTC as a `DATETIME`.
+- `SYSUTCDATETIME()` returns the current date and time in UTC as a `DATETIME2`.
+
+To get the current date, use `CAST(SYSDATETIME() AS DATE)`.
+
+`DATEPART()` can be used to extract year, month or day from a date.
+
+Example:
+
+```sql
+DECLARE @date VARCHAR(8) = '20190518'
+SELECT DATEPART(year, @date), DATEPART(month, @date), DATEPART(day, @date)
+-- outputs 2019, 5, 18
+```
+
+`DATENAME()` can be used to extract the names of the date parts from a date.
+
+Example:
+
+```sql
+DECLARE @date VARCHAR(8) = '20190518'
+SELECT DATENAME(month, @date), DATENAME(weekday, @date)
+-- outputs May, Saturday
+```
+
+The following functions can be used to create datetime values from numeric parts:
+
+- `DATEFROMPARTS()`
+- `DATETIMEFROMPARTS()`
+- `DATETIME2FROMPARTS()`
+- `DATETIMEOFFSETFROMPARTS()`
+- `SMALLDATETIMEFROMPARTS()`
+- `TIMEFROMPARTS()`
+
+Example:
+
+```sql
+SELECT DATETIMEFROMPARTS(2019, 05, 18, 0, 0, 0, 0)
+-- output is 2019-05-18 00:00:00
+```
+
+`EOMONTH()` can be used to find the date that is the end of the month for a given date.
+
+Example:
+
+```sql
+SELECT EOMONTH(DATEFROMPARTS(2019, 05, 18))
+-- output is 2019-05-31
+```
+
+`DATEADD()` is used to add a year, month or day to a given date.
+
+Example:
+
+```sql
+SELECT DATEADD(month, 2, '2019-05-18')
+-- output is 2019-07-18 00:00:00
+```
+
+`DATEDIFF()` is used to find the difference between two dates.
+
+Example:
+
+```sql
+SELECT DATEDIFF(day, '2019-05-01', '2019-05-18')
+-- output is 17
+```
+
+`DATEDIFF()` only looks at the part in the first argument. The rest are ignored.
+
+`SWITCHOFFSET()` is used to adjust the timezone of a value that has type `DATETIMEOFFSET`.
+
+Example:
+
+```sql
+DECLARE @dt DATETIMEOFFSET = '2019-05-18 06:00:00 -07:00'
+SET @dt = SWITCHOFFSET(@dt, '-01:00')
+
+PRINT @dt   -- output is 2019-05-18 12:00:00.0000000 -01:00
+```
+
+To convert a datetime that doesn't have timezone to one that does, we can use the function
+`TODATETIMEOFFSET()`.
+
+Example:
+
+```sql
+DECLARE @dt  DATETIME = '2019-05-18 06:00:00'
+DECLARE @dto DATETIMEOFFSET
+
+SET @dto = TODATETIMEOFFSET(@dt, '+02:00')
+
+PRINT @dto  -- output is 2019-05-18 06:00:00.0000000 +02:00
+```
+
+`AT TIME ZONE` can be used to make datetimes aware of daylight savings.
+
+[Official documentation for `AT TIME ZONE`][microsoft-at-time-zone]
+
+When `AT TIME ZONE` is used on a value without timezone, it does not adjust the date and time.
+
+Example:
+
+```sql
+DECLARE @dt DATETIME2 = '2019-05-18 06:00:00'
+SELECT @dt AT TIME ZONE 'Central European Standard Time'
+-- output is 2019-05-18 06:00:00 +02:00
+```
+
+When `AT TIME ZONE` is used on a value with timezone, it will also adjust the time and date.
+
+Example:
+
+```sql
+DECLARE @dt DATETIMEOFFSET = '2019-05-18 06:00:00 +00:00'
+SELECT @dt AT TIME ZONE 'Central European Standard Time'
+-- output is 2019-05-18 08:00:00 +02:00
+```
+
 <a name="system_functions"></a>
 
 #### System functions
@@ -681,6 +883,8 @@ load data to a table based on its structure and constraints; construct Data Mani
 Language (DML) statements using the OUTPUT statement; determine the results of Data
 Definition Language (DDL) statements on supplied tables and data*
 
+<a name="insert"></a>
+
 #### INSERT
 
 There are four different ways to insert rows in tables:
@@ -729,6 +933,8 @@ FROM customers c
 - Definition is taken from the result of the query.
 - Indexes, constraints, triggers and permissions are not copied to the new table.
 
+<a name="update"></a>
+
 #### UPDATE
 
 Examples:
@@ -771,6 +977,8 @@ SET @age = age += 1
 WHERE id = 1
 ```
 
+<a name="delete"></a>
+
 #### DELETE
 
 Example:
@@ -806,6 +1014,8 @@ TRUNCATE TABLE customers
 
 - The identity columns will be reset, e.g. `id` will start at 1 again.
 - Truncating uses optimized logging and therefore faster than deleting.
+
+<a name="merge"></a>
 
 #### MERGE
 
@@ -881,6 +1091,8 @@ OUTPUT $action, INSERTED.firstName, INSERTED.lastName, INSERTED.age;
 
 ![Example of MERGE with OUTPUT]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/merge-2.png" | absolute_url }})
 
+<a name="output"></a>
+
 #### OUTPUT
 
 [Official documentation][microsoft-output]
@@ -921,7 +1133,11 @@ OUTPUT DELETED.*, INSERTED.*
 
 <br/><br/><br/>
 
+<a name="query_data_with_advanced_tsql_components"></a>
+
 ## Query data with advanced Transact-SQL components (30–35%)
+
+<a name="query_data_by_using_subqueries_and_apply"></a>
 
 # Query data by using subqueries and APPLY
 
@@ -931,6 +1147,175 @@ OUTPUT DELETED.*, INSERTED.*
 differences between table joins and correlated subqueries based on provided data and query
 plans, distinguish between the use of CROSS APPLY and OUTER APPLY, write APPLY statements
 that return a given data set based on supplied data*
+
+<a name="subqueries"></a>
+
+#### Subqueries
+
+Subqueries are inner queries in an outer query.
+
+A self-contained subquery does not have any dependency on the outer query. A subquery can return
+either a single value or a table of values. When a subquery returns a table of values it's called
+a table expression. A subquery that returns a single value can be used in comparisons.
+
+Example:
+
+```sql
+CREATE TABLE customers (
+    Id          INT           IDENTITY(1,1)  NOT NULL
+  , firstName   VARCHAR(200)
+  , lastName    VARCHAR(200)
+  , age         INT
+)
+
+INSERT INTO dbo.customers (firstName, lastName, age) VALUES
+    ('John'  , 'Smith'     , 77)
+  , ('Anette', 'DeLorean'  , 43)
+  , ('Julian', 'Washington', 52)
+  , ('Ariana', 'Brown'     , 55)
+
+SELECT *
+FROM customers
+WHERE age > 10 + (SELECT min(age) FROM customers)
+
+/* Outputs:
+1   John     Smith   77
+4   Ariana   Brown   55
+*/
+```
+
+- The query fails if the inner query returns multiple rows, and a scalar is expected.
+- `IN` can be used if the inner query returns multiple rows.
+
+The following predicates can be used with the subquery: `ALL`, `ANY` and `SOME`.
+
+Example:
+
+```sql
+SELECT *
+FROM customers
+WHERE age > ALL (SELECT age FROM customers WHERE age BETWEEN 43 AND 56)
+
+/* Outputs:
+1   John   Smith   77
+*/
+
+SELECT *
+FROM customers
+WHERE age = ANY (SELECT age FROM customers WHERE age BETWEEN 43 AND 56)
+
+/* Outputs:
+2   Anette   DeLorean    43
+3   Julian   Washington  52
+4   Ariana   Brown       55
+*/
+
+SELECT *
+FROM customers
+WHERE age = SOME (SELECT age FROM customers WHERE age BETWEEN 43 AND 56)
+
+/* Outputs:
+2   Anette   DeLorean    43
+3   Julian   Washington  52
+4   Ariana   Brown       55
+*/
+```
+
+- `ALL` returns true if all values returned from the subquery are equal to the left side of the
+  expression.
+- `ANY` or `SOME` will return true if at least one of the values returned from the subquery are
+  equal to the left side of the expression.
+
+A correlated subquery has a dependency on the outer query.
+
+Example:
+
+```sql
+CREATE TABLE customers (
+    Id          INT           IDENTITY(1,1)  NOT NULL
+  , firstName   VARCHAR(200)
+  , lastName    VARCHAR(200)
+  , age         INT
+)
+
+CREATE TABLE accounts (
+    Id         INT            IDENTITY(1,1)  NOT NULL
+  , customerId INT
+  , balance    MONEY
+)
+
+INSERT INTO dbo.customers (firstName, lastName, age) VALUES
+    ('John'  , 'Smith'     , 77)
+  , ('Anette', 'DeLorean'  , 43)
+
+INSERT INTO dbo.accounts (customerId, balance) VALUES
+    (1, 100)
+  , (2, 50)
+
+SELECT *
+FROM customers c
+WHERE EXISTS(
+  SELECT 1
+  FROM accounts a
+  WHERE c.Id = a.customerId
+)
+
+/* Outputs:
+1   John     Smith      77
+2   Anette   DeLorean   43
+*/
+```
+
+<a name="subqueries_vs_joins"></a>
+
+#### Subqueries vs joins
+
+Subqueries are more efficient than joins in some cases, and less efficient in other cases.
+
+Example (`dbo.customers` and `dbo.accounts` taken from above):
+
+```sql
+INSERT INTO dbo.customers (firstName, lastName, age) VALUES
+    ('Samuel', 'Williams'  , 32)
+  , ('Daniel', 'Davis'     , 25)
+  , ('Sophia', 'Miller'    , 85)
+
+INSERT INTO dbo.accounts (customerId, balance) VALUES
+    (1, 100)
+  , (2, 50)
+
+-- Find customers that don't have an account, with two different solutions.
+
+-- Subquery
+SELECT *
+FROM customers c
+WHERE NOT EXISTS(
+  SELECT *
+  FROM accounts a
+  WHERE c.Id = a.customerId
+)
+-- outputs: 3   Sophia    Miller    85			
+
+-- vs
+
+-- LEFT JOIN with check for NULL
+SELECT *
+FROM customers c
+LEFT JOIN accounts a ON a.customerId = c.Id
+WHERE a.Id IS NULL
+-- outputs: 3   Sophia    Miller    85		
+```
+
+In this case, the subquery method will be faster. The inner query will return immediately when it
+finds a match in `accounts`. The join solution, however, will go through all the rows in `accounts`,
+and then later filter out unwanted rows with the `WHERE` clause.
+
+The short-circuiting done in the subquery solution is called *anti semi join optimization*. This makes
+the subquery solution cost less than half of what the join solution costs.
+
+![Anti semi join query plan]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/anti-semi-join-query-plan.png" | absolute_url }})
+
+<a name="cross_apply"></a>
 
 #### CROSS APPLY
 
@@ -948,11 +1333,15 @@ once per row and then joined to the results.*
 - For INNER JOIN the left and right tables have to be independent from each other.
   If they are not, we have to use CROSS APPLY.
 
+<a name="outer_apply"></a>
+
 #### OUTER APPLY
 
 ---
 
 <br/><br/><br/>
+
+<a name="query_data_by_using_table_expressions"></a>
 
 # Query data by using table expressions
 
@@ -962,10 +1351,13 @@ once per row and then joined to the results.*
 expressions and temporary tables, construct recursive table expressions to meet business
 requirements*
 
+<a name="table_expressions"></a>
+
 ### Table expressions
 
 Table expressions are named queries, according to the [official exam book][amazon-querying-data-with-transact-sql].
-It also mentions that there are four types of table expressions:
+They can also be described as table-valued subqueries. The book also mentions that there are four
+types of table expressions:
 
 - Common table expressions (CTEs)
 - Views
@@ -973,11 +1365,13 @@ It also mentions that there are four types of table expressions:
 - Inline table-valued functions
 
 Views are explained [here](#views). Table-valued functions are explained [here](#table_valued_function).
-Derived tables are sub queries.
+Derived tables are subqueries.
+
+<a name="common_table_expressions"></a>
 
 #### Common table expressions (CTEs)
 
-[Official documentation][microsoft-cte]
+[Official documentation][microsoft-cte] <br/>
 [Introduction to CTEs on Essential SQL][essentialsql-intro-to-ctes]
 
 Example of simple CTE:
@@ -992,7 +1386,7 @@ SELECT
   , o.Id        AS OrderId
   , o.Date      AS Date
 FROM customer c
-  INNER JOIN ca_order o ON c.Id = o.CustomerId
+  INNER JOIN order o ON c.Id = o.CustomerId
 )
 SELECT *
 FROM customer_order_cte
@@ -1010,7 +1404,7 @@ SELECT
   , o.Id        AS OrderId
   , o.Date      AS Date
 FROM customer c
-  INNER JOIN ca_order o ON c.Id = o.CustomerId
+  INNER JOIN order o ON c.Id = o.CustomerId
 ),
 order_order_line_cte (OrderId, Date, OrderLineId, ItemId, Amount) AS
 (
@@ -1021,7 +1415,7 @@ SELECT
   , ol.ItemId   AS ItemId
   , ol.Amount   AS Amount
 FROM ca_order o
-  INNER JOIN ca_order_line ol ON o.Id = ol.OrderId
+  INNER JOIN order_line ol ON o.Id = ol.OrderId
 )
 SELECT
     CustomerId
@@ -1034,6 +1428,11 @@ SELECT
 FROM customer_order_cte co
   INNER JOIN order_order_line_cte ool ON co.OrderId = ool.OrderId
 ```
+
+`INSERT`, `UPDATE`, `DELETE` and `MERGE` can also be used in the outer statement of a table
+expression.
+
+<a name="recursive_common_table_expressions"></a>
 
 #### Recursive CTEs
 
@@ -1098,6 +1497,8 @@ ORDER BY Sort
 
 ![Recursive CTE results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/recursive-cte.png" | absolute_url }})
 
+<a name="table_expressions_vs_temporary_tables"></a>
+
 #### Table expressions vs temporary tables
 
 Temporary tables or table variables should be used when the data is used several times. This is
@@ -1118,6 +1519,8 @@ temporary table.
 
 <br/><br/><br/>
 
+<a name="group_and_pivot_data_by_using_queries"></a>
+
 # Group and pivot data by using queries
 
 ### Syllabus
@@ -1126,6 +1529,8 @@ temporary table.
 windowing functions and GROUP BY; construct complex GROUP BY clauses using GROUPING SETS,
 and CUBE; construct PIVOT and UNPIVOT statements to return desired results based on supplied
 data; determine the impact of NULL values in PIVOT and UNPIVOT queries*
+
+<a name="group_by"></a>
 
 #### GROUP BY
 
@@ -1153,19 +1558,74 @@ FROM people
 GROUP BY lastName
 ```
 
+<a name="group_by_vs_windowing_functions"></a>
+
 #### GROUP BY vs windowing functions
+
+<a name="grouping_sets"></a>
 
 #### GROUPING SETS
 
+<a name="cube"></a>
+
 #### CUBE
+
+<a name="pivot_and_unpivot_statements"></a>
 
 #### PIVOT and UNPIVOT statements
 
+<a name="null_values_in_pivot_and_unpivot"></a>
+
 #### NULL values in PIVOT and UNPIVOT
+
+<a name="windowing_functions"></a>
+
+#### Windowing functions
+
+- Windows functions are only allowed in `SELECT` or `ORDER BY`.
+
+**Window aggregate functions**
+
+**Window ranking functions**
+
+**Window offset functions**
+
+[Official documentation on `LAG()`][microsoft-lag]<br/>
+[Official documentation on `LEAD()`][microsoft-lead]<br/>
+[Official documentation on `FIRST_VALUE()`][microsoft-first-value]<br/>
+[Official documentation on `LAST_VALUE()`][microsoft-last-value]
+
+Window offset functions return values from other rows that are an offset away from the current
+row in a window partition. `LAG()`, `LEAD()`, `FIRST_VALUE()` and `LAST_VALUE()` are window offset
+functions.
+
+- `LAG()` retrieves a value from a previous row in the partition.
+- `LEAD()` retrieves a value from a subsequent row in the partition.
+- `FIRST_VALUE()` retrieves a value from the first row in the window frame.
+- `LAST_VALUE()` retrieves a value from the last row in the window frame. The last row in the
+  window frame is the current row when using a default frame.
+
+`LAG()` and `LEAD()` takes an optional offset parameter. Offset is 1 by default.
+
+Example:
+
+```sql
+SELECT
+    Id
+  , LAG(Id)         OVER (ORDER BY Id) AS Previous
+  , LEAD(Id)        OVER (ORDER BY Id) AS Next
+  , FIRST_VALUE(Id) OVER (ORDER BY Id) AS First
+  , LAST_VALUE(Id)  OVER (ORDER BY Id) AS Last
+FROM customer 
+```
+
+![LAG, LEAD, FIRST_VALUE and LAST_VALUE results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/lead-lag-first-value-last-value.png" | absolute_url }})
 
 ---
 
 <br/><br/><br/>
+
+<a name="query_temporal_data_and_nonrelational_data"></a>
 
 # Query temporal data and non-relational data
 
@@ -1174,9 +1634,118 @@ GROUP BY lastName
 *Query historic data by using temporal tables, query and output JSON data, query and output
 XML data*
 
+<a name="temporal_tables"></a>
+
 #### Temporal tables
 
+[Official documentation][microsoft-temporal-tables]
+
+SQL Server 2016 or later is needed to use temporal tables.
+
+Temporal tables are tables that keep a full history of data changes, rather than just the data at the
+current time. This makes it possible to retrieve data from any point in the past.
+
+Temporal tables basically consists of a pair of tables: a current table and a history table. Both tables
+have two columns, in addition to the ordinary data columns, that contain period start and period end.
+The two period columns are both of `DATETIME2` type.
+
+Example:
+
+```sql
+CREATE TABLE dbo.customers   
+(    
+    Id          INT           IDENTITY(1,1)   NOT NULL   PRIMARY KEY
+  , firstName   VARCHAR(200)
+  , lastName    VARCHAR(200)
+  , validFrom   DATETIME2 (2) GENERATED ALWAYS AS ROW START  
+  , validTo     DATETIME2 (2) GENERATED ALWAYS AS ROW END  
+  , PERIOD FOR SYSTEM_TIME (validFrom, validTo)  
+ )    
+WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.customersHistory));  
+```
+
+![System versioned table in SSMS]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/system-versioned-table-in-ssms.png" | absolute_url }})
+
+- Temporal tables need a primary key.
+
+**Inserting:**
+
+When a row is inserted it gets start time set to the current time in UTC and the end time set to 9999-12-31.
+
+```sql
+INSERT INTO customers (firstName, lastName) VALUES
+    ('Scott'  , 'Jones'   )
+  , ('Tiffany', 'Williams')
+
+SELECT * FROM customers
+SELECT * FROM customersHistory
+```
+
+![System versioned table after first INSERT]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/system-versioned-table-after-first-insert.png" | absolute_url }})
+
+**Updating:**
+
+When a row is updated, the old value is moved to the history table. The end time in the history table is set
+to the current time in UTC. The from time in the system-versioned table is set to the current time in UTC.
+
+```sql
+UPDATE customers SET lastName = 'White' WHERE Id = 2
+
+SELECT * FROM customers
+SELECT * FROM customersHistory
+```
+
+![System versioned table after first UPDATE]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/system-versioned-table-after-first-update.png" | absolute_url }})
+
+**Deleting:**
+
+When a row is deleted, it gets moved to the history table. The end time in the history table is set to the
+current time in UTC. The row is removed from the system-versioned table.
+
+```sql
+DELETE FROM customers WHERE Id = 2
+
+SELECT * FROM customers
+SELECT * FROM customersHistory
+```
+
+![System versioned table after first DELETE]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/system-versioned-table-after-first-delete.png" | absolute_url }})
+
+**Query:**
+
+All values between two datetimes:
+
+```sql
+SELECT *
+FROM customers   
+FOR SYSTEM_TIME    
+  BETWEEN '2019-05-20 06:00:00.0000000' AND '2019-05-20 08:00:00.0000000'
+ORDER BY ValidFrom
+```
+
+Table at a current date and time:
+
+```sql
+SELECT *
+FROM customers   
+FOR SYSTEM_TIME    
+  AS OF '2019-05-20 07:00:00.0000000'
+```
+
+To drop a system-versioned table, you have to turn off system versioning and drop both the system
+versioned table and history table.
+
+Example:
+  
+```sql
+ALTER TABLE dbo.customers SET (SYSTEM_VERSIONING = OFF)
+DROP TABLE IF EXISTS dbo.customers
+DROP TABLE IF EXISTS dbo.customersHistory
+```
+
 ### XML
+
+<a name="xml_output"></a>
 
 #### XML output
 
@@ -1303,12 +1872,15 @@ FOR XML PATH ('Person')
 </Person>
 ```
 
+<a name="xml_parsing"></a>
+
 #### XML parsing
 
 [Official documentation][microsoft-openxml]
 
 `OPENXML` can be used to parse XML and return the values as rows and columns. `sp_xml_preparedocument`
-is used to prepare the XML for parsing.
+is used to prepare the XML for parsing. `sp_xml_removedocument` has to be used after parsing the XML.
+Preparing is not needed when the XML is typed.
 
 Example with single element containing sub elements:
 
@@ -1321,17 +1893,19 @@ DECLARE @xml VARCHAR(MAX) =
   <BirthDate>2001-04-25</BirthDate>
 </Person>'
 
-DECLARE @prepped_xml INT
+DECLARE @preppedXmlHandle INT
 
-EXEC sp_xml_preparedocument @prepped_xml OUTPUT, @xml; 
+EXEC sp_xml_preparedocument @preppedXmlHandle OUTPUT, @xml; 
 
 SELECT *
-FROM OPENXML(@prepped_xml, '/Person', 2)
+FROM OPENXML(@preppedXmlHandle, '/Person', 2)
   WITH (
         FirstName  VARCHAR(200)
       , LastName   VARCHAR(200)
       , BirthDate  DATE
     )
+
+EXEC sp_xml_removedocument @preppedXmlHandle
 ```
 
 ![OPENXML results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/OPENXML-results.png" | absolute_url }})
@@ -1366,7 +1940,108 @@ FROM OPENXML(@prepped_xml, '/People/Person', 1)
     * 1: attribute-centric
     * 2: element-centric
 
+<a name="xml_querying"></a>
+
 #### XML querying
+
+[Official documentation][microsoft-xml-data-type-methods]
+
+`value()` can be used to get values in the XML.
+
+Example:
+
+```sql
+DECLARE @xml XML =
+'<People>
+  <Person FirstName="John"   LastName="Wilson"   Age="43"/>
+  <Person FirstName="Lauren" LastName="Adeleres" Age="52"/>
+</People>'
+
+SELECT
+    @xml.value('(/People/Person/@FirstName)[1]', 'VARCHAR(200)') AS FirstName
+  , @xml.value('(/People/Person/@LastName)[1]' , 'VARCHAR(200)') AS LastName
+  , @xml.value('(/People/Person/@Age)[1]'      , 'INT'         ) AS Age
+```
+
+![Results from value]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/XML-VALUE-results.png" | absolute_url }})
+
+`exist()` can be used to determine whether an element or attribute exists.
+
+Example:
+
+```sql
+DECLARE @xml XML =
+'<People>
+  <Person FirstName="John"   LastName="Wilson"   Age="43"/>
+  <Person FirstName="Lauren" LastName="Adeleres" Age="52"/>
+</People>'
+
+SELECT
+    @xml.exist('(/People/Person/@FirstName)[1]') AS 'FirstName exists'
+  , @xml.exist('(/People/Person/@BirthDate)[1]') AS 'BirthDate exists'
+```
+
+![Results from exist]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/XML-EXIST-results.png" | absolute_url }})
+
+`modify()` is used to modify the XML.
+
+Example:
+
+```sql
+DECLARE @xml XML =
+'<People>
+  <Person FirstName="John"   LastName="Wilson"   Age="43"/>
+  <Person FirstName="Lauren" LastName="Adeleres" Age="52"/>
+</People>'
+
+SELECT @xml
+
+/* Output:
+<People>
+  <Person FirstName="John"   LastName="Wilson"   Age="43" />
+  <Person FirstName="Lauren" LastName="Adeleres" Age="52" />
+</People>
+*/
+
+SET @xml.modify(
+  'replace value of (/People/Person/@FirstName)[1]
+   with "Jonathan"')
+
+SET @xml.modify(
+  'insert <Person FirstName="Ashley" LastName="Saxon" Age="15"/>
+   as last into (/People)[1]')
+
+SET @xml.modify('delete (/People/Person)[2]')
+
+SELECT @xml
+
+/* Output:
+<People>
+  <Person FirstName="Jonathan" LastName="Wilson" Age="43" />
+  <Person FirstName="Ashley"   LastName="Saxon"  Age="15" />
+</People>
+*/
+```
+
+`query()` is used to query the content in the XML.
+
+Example:
+
+```sql
+DECLARE @xml XML =
+'<People>
+  <Person FirstName="John"   LastName="Wilson"   Age="43"/>
+  <Person FirstName="Lauren" LastName="Adeleres" Age="52"/>
+</People>'
+
+SELECT @xml.query('/People/Person[@FirstName="John"]')
+
+-- Output: <Person FirstName="John" LastName="Wilson" Age="43" />
+
+SELECT @xml.query('/People/Person[@Age>50]')
+
+-- Output: <Person FirstName="Lauren" LastName="Adeleres" Age="52" />
+```
 
 ### JSON
 
@@ -1382,6 +2057,8 @@ DECLARE @json VARCHAR(MAX) =
   "age": 56
 }'
 ```
+
+<a name="json_output"></a>
 
 #### JSON output
 
@@ -1419,6 +2096,8 @@ Prints:
 ]
 ```
 
+<a name="json_parsing"></a>
+
 #### JSON parsing
 
 [Official documentation][microsoft-openjson]
@@ -1437,7 +2116,9 @@ WITH (
 )
 ```
 
-![OPENXML output]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/OPENJSON-output.png" | absolute_url }})
+![OPENJSON output]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/OPENJSON-output.png" | absolute_url }})
+
+<a name="json_querying"></a>
 
 #### JSON querying
 
@@ -1497,7 +2178,11 @@ This would output:
 
 <br/><br/><br/>
 
+<a name="program_databases_by_using_tsql"></a>
+
 ## Program databases by using Transact-SQL (25–30%)
+
+<a name="create_database_programmability_objects_by_using_tsql"></a>
 
 # Create database programmability objects by using Transact-SQL
 
@@ -1507,6 +2192,8 @@ This would output:
 and views; implement input and output parameters in stored procedures; identify whether to use
 scalar-valued or table-valued functions; distinguish between deterministic and non-deterministic
 functions; create indexed views*
+
+<a name="stored_procedures"></a>
 
 #### Stored procedures
 
@@ -1568,6 +2255,8 @@ SELECT *
 FROM GetCustomersWithLastName('Smith')
 ```
 
+<a name="scalar_valued_function"></a>
+
 #### Scalar-valued user-defined function
 
 Scalar-valued user-defined functions return one value.
@@ -1599,12 +2288,16 @@ EXEC @BirthMonth = dbo.GetBirthMonthFromSSN '24119812345'
 PRINT @BirthMonth   -- prints 11
 ```
 
+<a name="function_in_general"></a>
+
 #### Functions in general
 
 - User-defined functions can be used in queries.
 - Have to return a value.
 - Cannot use `PRINT` or `SELECT` inside them.
 - Can have schema bindings.
+
+<a name="triggers"></a>
 
 #### Triggers
 
@@ -1697,6 +2390,8 @@ These options can be added to the view:
 - `WITH ENCRYPTION`: Encrypts the view.
 - `WITH CHECK`: Cannot do updates that removes the updated rows from the view.
 
+<a name="indexed_views"></a>
+
 #### Indexed views
 
 ```sql
@@ -1730,6 +2425,8 @@ FROM UnderagePeople
 
 <br/><br/><br/>
 
+<a name="implement_error_handling_and_transactions"></a>
+
 # Implement error handling and transactions
 
 ### Syllabus
@@ -1739,9 +2436,76 @@ statements, implement TRY…CATCH error handling with Transact-SQL, generate err
 THROW and RAISERROR, implement transaction control in conjunction with error handling in stored
 procedures*
 
+<a name="transaction_control"></a>
+
 #### Transaction control
 
+<a name="try_catch"></a>
+
 #### TRY-CATCH
+
+[Official documentation][microsoft-try-catch] <br/>
+[Erland Sommerskog on error handling][erland-sommerskog-error-handling]
+
+`TRY-CATCH` is used to handle errors in SQL Server. Place ordinary code within the `TRY` block and
+error handling in the `CATCH` block. If no errors are thrown, the `CATCH` block is never activated.
+
+Example:
+
+```sql
+CREATE TABLE customers (
+    Id        INT           IDENTITY(1,1)  NOT NULL
+  , firstName VARCHAR(200)
+  , lastName  VARCHAR(200)
+  , age       INT
+  , CONSTRAINT CK_age CHECK (age BETWEEN 18 and 80)
+)
+
+BEGIN TRY
+  INSERT INTO dbo.customers (firstName, lastName, age) VALUES
+      ('John'  , 'Smith'   , 120)
+    , ('Anette', 'DeLorean', 43 )
+END TRY
+BEGIN CATCH
+  PRINT 'In CATCH'
+  PRINT 'Error message: ' + ERROR_MESSAGE()
+END CATCH
+
+/* Output:
+In CATCH
+Error message: The INSERT statement conflicted with the CHECK constraint
+"CK_age". The conflict occurred in database "test", table "dbo.customers",
+column 'age'.
+*/
+```
+
+- `TRY-CATCH` can be nested. For example, a new nested `TRY-CATCH` inside the first `CATCH`.
+- If `TRY-CATCH` isn't used the error will bubble up the call stack. If there are no `TRY-CATCH`
+  statements the caller will receive an error.
+- If a new error happens inside the `CATCH` block, and it isn't wrapped in a new `TRY-CATCH`, it
+  will bubble up.
+- Compilation errors are not transferred to the `CATCH` block in the same scope they occur in.
+- `TRY-CATCH` is not allowed in user-defined functions.
+
+<a name="error_functions"></a>
+
+#### Error functions
+
+SQL Server has the following functions that provide information about an error that has been thrown:
+
+- [`ERROR_NUMBER()`][microsoft-error-number]: returns the error number of the error.
+- [`ERROR_MESSAGE()`][microsoft-error-message]: returns the message text of the error.
+- [`ERROR_SEVERITY()`][microsoft-error-severity]: returns the severity value of the error.
+- [`ERROR_STATE()`][microsoft-error-state]: returns the state number of the error.
+- [`ERROR_LINE()`][microsoft-error-line]: returns the line number of occurrence of an error.
+- [`ERROR_PROCEDURE()`][microsoft-error-procedure]: returns the name of the stored procedure or
+  trigger where an error occurs.
+
+Note:
+
+- They all have to be used within a `CATCH` block.
+
+<a name="throw"></a>
 
 #### THROW
 
@@ -1767,6 +2531,8 @@ This rethrows the original error.
 
 If the throw happens outside a `TRY` block it will abort the batch. If it's inside it will activate
 the `CATCH` block.
+
+<a name="raiserror"></a>
 
 #### RAISERROR
 
@@ -1805,11 +2571,15 @@ RAISERROR('Error message', 16, 1) WITH NOWAIT
 RAISERROR('Error message', 22, 1) WITH LOG
 ```
 
+<a name="throw_vs_raiserror"></a>
+
 #### THROW vs RAISERROR
 
 ---
 
 <br/><br/><br/>
+
+<a name="implement_data_types_and_nulls"></a>
 
 # Implement data types and NULLs
 
@@ -1820,13 +2590,73 @@ or table columns, identify locations of implicit data type conversions in querie
 the correct results of joins and functions in the presence of NULL values, identify proper
 usage of ISNULL and COALESCE functions*
 
+<a name="proper_data_types_for_elements_and_columns"></a>
+
+#### Proper data types for elements and columns
+
+SQL Server supports several data types in various categories:
+
+- Exact numeric: `INT`, `NUMERIC`.
+- Character string: `CHAR`, `VARCHAR`.
+- Unicode character string: `NCHAR`, `NVARCHAR`.
+- Approximate numeric: `FLOAT`, `REAL`.
+- Binary strings: `BINARY`, `VARBINARY`.
+- Date and time: `DATE`, `TIME`, `SMALLDATETIME`, `DATETIME`, `DATETIME2`, `DATETIMEOFFSET`.
+
+Important things to take into account when choosing a data type:
+
+- The data type should represent the model.
+- Data types acts as constraints. A proper date type should be chosen to enforce integrity in the
+  database. E.g. an integer can not be stored in a `VARCHAR`, and a character string can not be
+  stored in an `INT`.
+- The size of the data type is important. If an attribute can vary between 0 and 100, a `TINYINT`
+  should be used over `INT`, as `TINYINT` only needs 1 byte whereas `INT` requires 4 bytes. The
+  smallest data type that suits our needs, in the long run, should be used.
+- `FLOAT` and `REAL` are only approximate. If a value has to be represented with preciseness then
+  a exact numeric type should be used.
+- When `CHAR(X)` is used, it will always use a storage of X characters, even if less characters
+  are specified. While this may take more space than a `VARCHAR(20)`, it makes updates faster.
+- When `VARCHAR(Y)` is used, it will use less storage than `CHAR(Y)`, because `VARCHAR` only stores
+  the characters that are specified. Less storage used means better read performance.
+- `CHAR` and `VARCHAR` uses 1 byte per character and only supports one language besides English.
+  `NCHAR` and `NVARCHAR` uses 2 bytes per character and can use Unicode.
+- `NOT NULL` should be used to disallow `NULL` in variables that should never be `NULL`.
+
+<a name="data_type_conversions"></a>
+
 #### Data type conversions
 
-#### Proper data types
+[Official documentation on data type precedence][microsoft-data-type-precedence]
+
+Literals have to be on the correct form.
+
+| Type       | Literal                  |
+|------------|--------------------------|
+| `VARCHAR`  | `'This is a varchar'`    |
+| `NVARCHAR` | `N'This is an nvarchar'` |
+
+When an expression involves different types, SQL Server will implicitly convert the various types
+when that's possible. Explicit conversions; using `CAST`, `CONVERT`, etc.; can be beneficial.
+
+SQL Server usually converts the types with lower precedence to the ones with higher precedence.
+
+Example:
+
+```sql
+SELECT 2 + '2'
+```
+
+Outputs 4, because `INT` has higher precedence than `VARCHAR`.
+
+<a name="locations_of_implicit_data_type_conversions_in_queries"></a>
 
 #### Locations of implicit data type conversions in queries
 
+<a name="correct_results_when_joins_and_null_values"></a>
+
 #### Correct results when joins and NULL values
+
+<a name="isnull"></a>
 
 #### ISNULL()
 
@@ -1843,6 +2673,8 @@ SELECT ISNULL(@a, @b)   -- outputs 1
 
 - `ISNULL()` is T-SQL and not part of the SQL standard.
 
+<a name="coalesce"></a>
+
 #### COALESCE()
 
 Returns the first value that is not NULL. Supports more than two parameters.
@@ -1858,6 +2690,8 @@ SELECT COALESCE(@a, @b, @c)   -- outputs 2
 ```
 
 - `COALESCE()` is part of the SQL standard.
+
+<a name="isnull_vs_coalesce"></a>
 
 #### ISNULL() vs COALESCE()
 
@@ -1877,13 +2711,19 @@ the differences between `ISNULL()` and `COALESCE()`:
 
 <br/><br/><br/>
 
-# Not part of the official syllabus
+<a name="not_part_of_the_official_syllabus"></a>
+
+## Not part of the official syllabus
 
 The things in this chapter is not part of the official syllabus, but should be known about anyway.
+
+<a name="spatial_data"></a>
 
 ### Spatial data
 
 [redgate on spatial data][red-gate-spatial-data]
+
+<a name="geography"></a>
 
 #### Geography
 
@@ -1906,6 +2746,8 @@ INSERT INTO customers (firstName, lastName, customer_location) VALUES
     ('Jon' , 'Snow' , geography::Parse('POINT(5.0 60.0)'))
   , ('Arya', 'Stark', geography::Parse('POINT(4.0 58.0)'))
 ```
+
+<a name="geometry"></a>
 
 #### Geometry
 
@@ -1936,10 +2778,14 @@ SELECT
 FROM employees
 ```
 
+<a name="geography_vs_geometry"></a>
+
 #### Geography vs geometry
 
 - `geography` uses a round-earth coordinate system.
 - `geometry` uses a flat coordinate system.
+
+<a name="cursors"></a>
 
 #### Cursors
 
@@ -1975,15 +2821,31 @@ DEALLOCATE cursor_test
 [microsoft-deterministic-and-non-deterministic-functions]: https://docs.microsoft.com/en-us/sql/relational-databases/user-defined-functions/deterministic-and-nondeterministic-functions
 [microsoft-conversion-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/conversion-functions-transact-sql
 [microsoft-aggregate-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/aggregate-functions-transact-sql
+[microsoft-date-and-time-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/date-and-time-data-types-and-functions-transact-sql
+[microsoft-at-time-zone]: https://docs.microsoft.com/en-us/sql/t-sql/queries/at-time-zone-transact-sql
 [microsoft-system-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/system-functions-transact-sql
 [microsoft-merge]: https://docs.microsoft.com/en-us/sql/t-sql/statements/merge-transact-sql
 [microsoft-output]: https://docs.microsoft.com/en-us/sql/t-sql/queries/output-clause-transact-sql
 [microsoft-cte]: https://docs.microsoft.com/en-us/sql/t-sql/queries/with-common-table-expression-transact-sql
+[microsoft-lag]: https://docs.microsoft.com/en-us/sql/t-sql/functions/lag-transact-sql
+[microsoft-lead]: https://docs.microsoft.com/en-us/sql/t-sql/functions/lead-transact-sql
+[microsoft-first-value]: https://docs.microsoft.com/en-us/sql/t-sql/functions/first-value-transact-sql
+[microsoft-last-value]: https://docs.microsoft.com/en-us/sql/t-sql/functions/last-value-transact-sql
+[microsoft-temporal-tables]: https://docs.microsoft.com/en-us/sql/relational-databases/tables/temporal-tables
 [microsoft-for-xml]: https://docs.microsoft.com/en-us/sql/relational-databases/xml/for-xml-sql-server
 [microsoft-openxml]: https://docs.microsoft.com/en-us/sql/relational-databases/xml/openxml-sql-server
+[microsoft-xml-data-type-methods]: https://docs.microsoft.com/en-us/sql/t-sql/xml/xml-data-type-methods
 [microsoft-json]: https://docs.microsoft.com/en-us/sql/relational-databases/json/json-data-sql-server
 [microsoft-openjson]: https://docs.microsoft.com/en-us/sql/t-sql/functions/openjson-transact-sql
 [microsoft-create-view]: https://docs.microsoft.com/en-us/sql/t-sql/statements/create-view-transact-sql
+[microsoft-data-type-precedence]: https://docs.microsoft.com/en-us/sql/t-sql/data-types/data-type-precedence-transact-sql
+[microsoft-try-catch]: https://docs.microsoft.com/en-us/sql/t-sql/language-elements/try-catch-transact-sql
+[microsoft-error-number]: https://docs.microsoft.com/en-us/sql/t-sql/functions/error-number-transact-sql
+[microsoft-error-message]: https://docs.microsoft.com/en-us/sql/t-sql/functions/error-message-transact-sql
+[microsoft-error-severity]: https://docs.microsoft.com/en-us/sql/t-sql/functions/error-severity-transact-sql
+[microsoft-error-state]: https://docs.microsoft.com/en-us/sql/t-sql/functions/error-state-transact-sql
+[microsoft-error-line]: https://docs.microsoft.com/en-us/sql/t-sql/functions/error-line-transact-sql
+[microsoft-error-procedure]: https://docs.microsoft.com/en-us/sql/t-sql/functions/error-procedure-transact-sql
 [microsoft-geography]: https://docs.microsoft.com/en-us/sql/t-sql/spatial-geography/spatial-types-geography
 [microsoft-geometry]: https://docs.microsoft.com/en-us/sql/t-sql/spatial-geometry/spatial-types-geometry-transact-sql
 [essentialsql-intro-to-ctes]: https://www.essentialsql.com/introduction-common-table-expressions-ctes/
@@ -1993,3 +2855,4 @@ DEALLOCATE cursor_test
 [stackoverflow-where-clause-sargability]: https://stackoverflow.com/questions/799584/what-makes-a-sql-statement-sargable
 [lobsterpot-sargable-functions]: http://blogs.lobsterpot.com.au/2010/01/22/sargable-functions-in-sql-server/
 [amazon-querying-data-with-transact-sql]: https://www.amazon.com/Exam-70-761-Querying-Data-Transact-SQL/dp/1509304339
+[erland-sommerskog-error-handling]: http://www.sommarskog.se/error_handling/Part1.html
