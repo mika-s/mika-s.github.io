@@ -8,7 +8,11 @@ categories: sql certification 70-761
 These are some notes I took for the Microsoft exam 70-761: Querying Data with Transact-SQL,
 which is a part of [MCSA: SQL 2016 Database Development][microsoft-mcsa-sql-2016-database-development].
 
-This is for the syllabus as it was in May 2019. The syllabus might change in the future.
+This is for the syllabus as it was in May 2019. The syllabus might change in the future. I've mainly
+taken notes from the official documentation and the [official exam book][amazon-querying-data-with-transact-sql].
+I recommend getting the book to make sure you know everything that has to be known at the exam. I
+also recommend reading some of the articles on Erland Sommerskog's web page, especially the articles
+on [error handling][erland-sommerskog-error-handling].
 
 ---
 
@@ -41,6 +45,7 @@ This is for the syllabus as it was in May 2019. The syllabus might change in the
     - [Built-in aggregate functions](#builtin_aggregate_functions)
     - [Arithmetic functions](#arithmetic_functions)
     - [Date-related functions](#date_related_functions)
+    - [Case expressions](#case_expressions)
     - [System functions](#system_functions)
   - [Modify data](#modify_data)
     - [INSERT](#insert)
@@ -64,9 +69,10 @@ This is for the syllabus as it was in May 2019. The syllabus might change in the
     - [GROUP BY vs windowing functions](#group_by_vs_windowing_functions)
     - [GROUPING SETS](#grouping_sets)
     - [CUBE](#cube)
+    - [ROLLUP](#rollup)
     - [PIVOT and UNPIVOT statements](#pivot_and_unpivot_statements)
     - [NULL values in PIVOT and UNPIVOT](#null_values_in_pivot_and_unpivot)
-    - [Windowing functions](#windowing_functions)
+    - [Window functions](#window_functions)
   - [Query temporal data and non-relational data](#query_temporal_data_and_nonrelational_data)
     - [Temporal tables](#temporal_tables)
     - [XML output](#xml_output)
@@ -129,6 +135,8 @@ expected results based on provided table structure and/or data*
 
 #### SELECT in general
 
+[Official documentation][microsoft-select]
+
 Basic examples:
 
 ```sql
@@ -140,6 +148,12 @@ SELECT * FROM accounts WHERE accountId = 12
 
 -- SELECT with WHERE clause containing AND:
 SELECT * FROM customers WHERE city = 'New York City' AND gender = 'Male'
+
+-- SELECT with WHERE clause containing OR:
+SELECT * FROM customers WHERE city = 'New York City' OR city = 'Boston'
+
+-- SELECT with WHERE clause checking for not null:
+SELECT * FROM customers WHERE city IS NOT NULL
 
 -- SELECT that only gets certain columns
 SELECT firstName, lastName FROM customers
@@ -155,6 +169,8 @@ SELECT DISTINCT lastName FROM customers
 ```
 
 <a name="select_with_like"></a>
+
+**`LIKE`:**
 
 Search with `LIKE`:
 
@@ -174,6 +190,10 @@ Wildcards:
 | `[^A-R]` | A single character, not in the range A to R |
 
 <a name="select_with_top"></a>
+
+**`TOP`:**
+
+[Official documentation on `TOP`][microsoft-top]
 
 Get `TOP` elements:
 
@@ -200,7 +220,9 @@ the data is stored on disk.
 
 <a name="select_with_offset_and_fetch"></a>
 
-`OFFSET` and `FETCH`:
+**`OFFSET` and `FETCH`:**
+
+[Official documentation on `OFFSET` and `FETCH`][microsoft-offset-fetch]
 
 ```sql
 SELECT *
@@ -216,6 +238,8 @@ OFFSET 50 ROWS FETCH NEXT 10 ROWS ONLY
 <a name="union_and_union_all"></a>
 
 #### UNION and UNION ALL
+
+[Official documentation][microsoft-union]
 
 `UNION` is all rows in A and all rows in B. Distinct rows only.
 
@@ -255,6 +279,8 @@ Union is the union of two sets, e.g. two tables merged together.
 
 #### INTERSECT
 
+[Official documentation][microsoft-except-intersect]
+
 Finds rows that are common for both table A and B.
 
 ```sql
@@ -271,6 +297,8 @@ SELECT firstName, lastName FROM peopleB
 <a name="except"></a>
 
 #### EXCEPT
+
+[Official documentation][microsoft-except-intersect]
 
 Finds rows that are in A, but not in B.
 
@@ -389,6 +417,8 @@ FROM men m
 
 #### LEFT JOIN
 
+Left join will return everything in the left table, even if there are no matches in the right table.
+
 ```sql
 SELECT
     m.firstName + ' ' + m.lastName AS Name
@@ -422,6 +452,8 @@ FROM men m
 <a name="full_outer_join"></a>
 
 #### FULL OUTER JOIN
+
+Full outer joins will return everything in both the left and right tables.
 
 ```sql
 SELECT
@@ -458,6 +490,78 @@ FROM men m
 
 #### Query with NULL on joins
 
+Rows that have null on one or more of the joined on keys will be filtered out when using inner
+joins. To preserve the row, an outer join has to be used.
+
+When joining on multiple keys, where one or more of the keys can be null, we have to handle the
+nulls in the join. A naive way of handling the null could be like this:
+
+```sql
+CREATE TABLE customers (
+    Id         INT            IDENTITY(1,1)   NOT NULL
+  , firstName  VARCHAR(200)
+  , lastName   VARCHAR(200)
+  , SSN        VARCHAR(20)
+)
+
+INSERT INTO customers (firstName, lastName) VALUES
+    ('Alex' , 'Golding'  )
+  , ('Pablo', 'Fernandez')
+
+INSERT INTO customers (SSN) VALUES
+    ('1234567892')
+  , ('1234567893')
+
+CREATE TABLE accounts (
+    Id         INT            IDENTITY(1,1)   NOT NULL
+  , firstName  VARCHAR(200)
+  , lastName   VARCHAR(200)
+  , SSN        VARCHAR(20)
+)
+
+INSERT INTO accounts (firstName, lastName) VALUES
+    ('Alex' , 'Golding'  )
+  , ('Pablo', 'Fernandez')
+
+INSERT INTO accounts (SSN) VALUES
+    ('1234567892')
+  , ('1234567893')
+
+SELECT *
+FROM customers c
+  INNER JOIN accounts a ON
+          ISNULL(c.firstName, 'N/A') = ISNULL(a.firstName, 'N/A')
+      AND ISNULL(c.lastName,  'N/A') = ISNULL(a.lastName,  'N/A')
+      AND ISNULL(c.SSN,       'N/A') = ISNULL(a.SSN,       'N/A')
+```
+
+The problem with this is that a column is being manipulated, which also means that the order of the
+result no longer is preserved. This will also affect the performance. A better solution for handling
+the null values would be:
+
+```sql
+SELECT *
+FROM customers c
+  INNER JOIN accounts a ON
+      (c.firstName = a.firstName
+        OR (c.firstName IS NULL AND a.firstName IS NULL))
+      AND (c.lastName = a.lastName
+        OR (c.lastName IS NULL AND a.lastName IS NULL))
+      AND (c.SSN = a.SSN
+        OR (c.SSN IS NULL AND a.SSN IS NULL))
+```
+
+According to the exam book, an even better solution could be:
+
+```sql
+SELECT *
+FROM customers c
+    INNER JOIN accounts a ON
+    EXISTS (SELECT c.firstName, c.lastName, c.SSN
+            INTERSECT
+            SELECT a.firstName, a.lastName, a.SSN)
+```
+
 ---
 
 <br/><br/><br/>
@@ -477,20 +581,19 @@ use arithmetic functions, date-related functions, and system functions*
 
 #### Scalar-valued functions
 
-See section: *Create database programmability objects by using Transact-SQL*.
+See section: [*Create database programmability objects by using Transact-SQL*](#table_valued_functions).
 
 <a name="table_valued_functions"></a>
 
 #### Table-valued functions
 
-See section: *Create database programmability objects by using Transact-SQL*.
+See section: [*Create database programmability objects by using Transact-SQL*](#table_valued_functions).
 
 <a name="where_clause_sargability"></a>
 
 #### WHERE clause sargability
 
-Stack Overflow: [What makes a SQL statement sargable?][stackoverflow-where-clause-sargability]
-
+Stack Overflow: [What makes a SQL statement sargable?][stackoverflow-where-clause-sargability]<br/>
 Blog: [SARGable functions in SQL Server][lobsterpot-sargable-functions]
 
 **Search Argument Able**
@@ -517,7 +620,7 @@ Exceptions:
 
 #### Differences between deterministic and non-deterministic functions
 
-[Deterministic and non-deterministic functions on MSDN][microsoft-deterministic-and-non-deterministic-functions]
+[Official documentation][microsoft-deterministic-and-non-deterministic-functions]
 
 * Deterministic functions always return the same given a specific input and state of database.
   E.g. `AVG()`.
@@ -641,10 +744,10 @@ Precedence is like in ordinary mathematics.
 Integer division gives an integer as result:
 
 ```sql
-SELECT 25 / 2		-- outputs 12
+SELECT 25 / 2		-- output is 12
 ```
 
-It rounds down.
+It truncates.
 
 <a name="date_related_functions"></a>
 
@@ -789,6 +892,48 @@ SELECT @dt AT TIME ZONE 'Central European Standard Time'
 -- output is 2019-05-18 08:00:00 +02:00
 ```
 
+<a name="case_expressions"></a>
+
+#### Case expressions
+
+[Official documentation][microsoft-case]
+
+`CASE` can be used to apply conditional logic. `CASE` has two forms: the simple form and the
+searched form.
+
+Example with simple form:
+
+```sql
+SELECT
+      firstName
+    , lastName
+    , age
+    , CASE SIGN(age - 18)
+        WHEN 1 THEN 'Overage'
+        WHEN 0 THEN 'Overage'
+        ELSE 'Underage'
+      END AS ageStatus
+FROM customers
+```
+
+It compares the input to multiple possible scalars.
+
+Example with searched form:
+
+```sql
+SELECT
+      firstName
+    , lastName
+    , age
+    , CASE
+        WHEN age >= 18 THEN 'Overage'
+        ELSE 'Underage'
+      END AS ageStatus
+FROM customers
+```
+
+Searched form uses predicates in the `WHEN` clauses.
+
 <a name="system_functions"></a>
 
 #### System functions
@@ -887,6 +1032,8 @@ Definition Language (DDL) statements on supplied tables and data*
 
 #### INSERT
 
+[Official documentation][microsoft-insert]
+
 There are four different ways to insert rows in tables:
 
 - `INSERT VALUES`
@@ -937,6 +1084,8 @@ FROM customers c
 
 #### UPDATE
 
+[Official documentation][microsoft-update]
+
 Examples:
 
 Ordinary:
@@ -980,6 +1129,8 @@ WHERE id = 1
 <a name="delete"></a>
 
 #### DELETE
+
+[Official documentation][microsoft-delete]
 
 Example:
 
@@ -1319,23 +1470,65 @@ the subquery solution cost less than half of what the join solution costs.
 
 #### CROSS APPLY
 
-Apply a function to every row.
+[Official documentation][microsoft-cross-apply]
 
-CROSS APPLY = lateral join
+The `APPLY` operator makes it possible to apply query logic to each row in a table. The query
+logic is either a derived table (subquery) or a table function. This is also possible to some
+degree with ordinary joins, but in ordinary joins the left and right side cannot correlate, because
+they are in the same set of inputs. Correlation between left and right side is allowed with the
+`APPLY` operator, because the left side is evaluated first.
 
-*"What is the main purpose of using CROSS APPLY?".
+Example:
 
-The main purpose is to enable table functions with parameters to be executed
-once per row and then joined to the results.*
+```sql
+SELECT *
+FROM customers c
+INNER JOIN orders o ON c.Id = o.CustomerId
 
+SELECT *
+FROM customers c
+CROSS APPLY (
+  SELECT TOP 2 *
+  FROM orders o
+  WHERE c.Id = o.CustomerId
+  ORDER BY Date DESC
+) AS o
+```
 
-- CROSS APPLY is instead of INNER JOIN when there are complex join conditions.
-- For INNER JOIN the left and right tables have to be independent from each other.
-  If they are not, we have to use CROSS APPLY.
+![CROSS APPLY results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/CROSS_APPLY.png" | absolute_url }})
+
+The example shows both `INNER JOIN` and `CROSS APPLY`. The `INNER JOIN` shows everything, but if we
+want to only show the two newest orders per customer we have to use `CROSS APPLY`.
+
+A table-valued function could be used instead of a derived table (subquery):
+
+```sql
+CREATE FUNCTION dbo.GetTwoNewestOrders (@CustomerId INT)
+RETURNS TABLE AS
+RETURN 
+(
+  SELECT TOP 2 *
+  FROM orders o
+  WHERE o.CustomerId = @CustomerId
+  ORDER BY Date DESC
+)
+
+---
+
+SELECT *
+FROM customer c
+CROSS APPLY GetTwoNewestOrders(c.Id)
+```
+
+- Cursors can sometimes be replaced with the `APPLY` operator.
+- `CROSS APPLY` is called lateral join in PostgreSQL.
 
 <a name="outer_apply"></a>
 
 #### OUTER APPLY
+
+`OUTER APPLY` preserves the left side of in a similar manner as when using `LEFT JOIN`. Other than
+that it's equal to `CROSS APPLY`.
 
 ---
 
@@ -1534,6 +1727,9 @@ data; determine the impact of NULL values in PIVOT and UNPIVOT queries*
 
 #### GROUP BY
 
+[Official documentation on `GROUP BY`][microsoft-group-by]<br/>
+[Official documentation on `HAVING`][microsoft-having]
+
 ```sql
 CREATE TABLE people (
     Id          INT           IDENTITY(1,1)    NOT NULL
@@ -1558,42 +1754,266 @@ FROM people
 GROUP BY lastName
 ```
 
+![GROUP BY results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/GROUP_BY.png" | absolute_url }})
+
+`HAVING` is used to filter values when using `GROUP BY`:
+
+```sql
+SELECT
+    lastName
+  , AVG(age) AS 'Average age'
+  , MIN(age) AS 'Min age'
+  , MAX(age) AS 'Max age'
+FROM people
+GROUP BY lastName
+HAVING AVG(age) > 40
+```
+
+![GROUP BY with HAVING results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/GROUP_BY_HAVING.png" | absolute_url }})
+
 <a name="group_by_vs_windowing_functions"></a>
 
 #### GROUP BY vs windowing functions
+
+Group functions group together rows and then apply the grouping functions to each group. The result
+is one row per group.
+
+With window functions, a set of underlying rows is defined and the window function operates on each
+row.
 
 <a name="grouping_sets"></a>
 
 #### GROUPING SETS
 
+[redgate on `GROUPING SETS`][red-gate-grouping-sets]
+
+`GROUPING SETS` makes multiple combinations of groups to group the data by.
+
+Example:
+
+```sql
+CREATE TABLE sales (
+    Id       INT    IDENTITY(1,1)    NOT NULL
+  , year     INT                     NOT NULL
+  , month    INT                     NOT NULL
+  , profit   INT
+)
+
+INSERT INTO sales (year, month, profit) VALUES
+    (2015, 03, 2000)
+  , (2015, 03, 3000)
+  , (2015, 04, 1500)
+  , (2015, 04, 1800)
+  , (2016, 03, 1000)
+  , (2016, 03, 1500)
+  , (2016, 03, 3000)
+  , (2016, 04, 2000)
+  , (2016, 04, 3000)
+  , (2017, 02, 7500)
+  , (2017, 03, 3000)
+  , (2017, 03, 3000)
+  , (2017, 03, 3000)
+  , (2017, 02, 4500)
+  , (2018, 07, 1000)
+  , (2018, 08, 2000)
+  , (2018, 03, 3000)
+  , (2019, 03, 3000)
+  , (2019, 03, 2100)
+  , (2019, 04, 8700)
+
+SELECT
+    year
+  , month
+  , SUM(profit) AS 'total profit'
+FROM sales
+GROUP BY GROUPING SETS (
+    year
+  , (year, month)
+  , ()
+)
+```
+
+![GROUPING SETS results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/GROUPING_SETS.png" | absolute_url }})
+
 <a name="cube"></a>
 
 #### CUBE
+
+`CUBE()` is a function that generates all the possible grouping sets for us.
+
+Example:
+
+```sql
+SELECT
+    year
+  , month
+  , SUM(profit) AS 'total profit'
+FROM sales
+GROUP BY CUBE(year, month)
+ORDER BY year, month
+```
+
+![CUBE results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/CUBE.png" | absolute_url }})
+
+<a name="rollup"></a>
+
+#### ROLLUP
+
+`ROLLUP()` is a function that generates grouping sets for us. Unlike `CUBE()`, it doesn't generate
+all grouping sets, but rather grouping sets in a hierarchy.
+
+Example:
+
+```sql
+SELECT
+    year
+  , month
+  , SUM(profit) AS 'total profit'
+FROM sales
+GROUP BY ROLLUP(year, month)
+```
+
+![ROLLUP results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/ROLLUP.png" | absolute_url }})
 
 <a name="pivot_and_unpivot_statements"></a>
 
 #### PIVOT and UNPIVOT statements
 
+[Official documentation][microsoft-pivot-unpivot]
+
+`PIVOT` makes rows into columns, and `UNPIVOT` does the opposite. To make this work, the data has
+to be grouped and aggregated.
+
+Example:
+
+```sql
+CREATE TABLE insurances (
+    Id             INT         IDENTITY(1,1)   NOT NULL
+  , customerId     INT                         NOT NULL
+  , policyNo       INT                         NOT NULL
+  , insuranceType  VARCHAR(20)                 NOT NULL
+)
+
+INSERT INTO insurances (customerId, policyNo, insuranceType) VALUES
+    (1, 1234, 'Life')
+  , (1, 1235, 'Car')
+  , (2, 1236, 'Car')
+  , (2, 1237, 'Life')
+  , (3, 1238, 'Fire')
+  , (4, 1239, 'Liability')
+  , (4, 1230, 'Fire')
+
+WITH insurancesPivotedCTE AS
+(
+  SELECT
+      customerId        -- grouping column
+    , insuranceType     -- spreading column
+    , policyNo          -- aggregation column
+  FROM insurances
+)
+SELECT customerId, [Life], [Car], [Fire], [Liability]
+FROM insurancesPivotedCTE
+  PIVOT (MAX(policyNo) FOR insuranceType  -- aggregate and spreading column
+      IN ([Life], [Car], [Fire], [Liability])) AS P
+```
+
 <a name="null_values_in_pivot_and_unpivot"></a>
 
 #### NULL values in PIVOT and UNPIVOT
 
-<a name="windowing_functions"></a>
+<a name="window_functions"></a>
 
-#### Windowing functions
+#### Window functions
 
 - Windows functions are only allowed in `SELECT` or `ORDER BY`.
 
 **Window aggregate functions**
 
+Many aggregate functions can also be used as window functions, for example `SUM()`, `MAX()`,
+`MIN()`, `AVG()`, `COUNT()`.
+
+Example:
+
+```sql
+SELECT
+  date
+, city + ', ' + country AS location
+, profit
+, SUM(profit)   OVER(ORDER BY date ROWS UNBOUNDED PRECEDING) AS 'running tot'
+, AVG(profit)   OVER(ORDER BY date ROWS UNBOUNDED PRECEDING) AS 'running avg'
+, MIN(profit)   OVER(ORDER BY date ROWS UNBOUNDED PRECEDING) AS 'running min'
+, MAX(profit)   OVER(ORDER BY date ROWS UNBOUNDED PRECEDING) AS 'running max'
+, STDEV(profit) OVER(ORDER BY date ROWS UNBOUNDED PRECEDING) AS 'running stdev'
+FROM sales
+```
+
+![Window aggregate functions result]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/aggregate-window.png" | absolute_url }})
+
 **Window ranking functions**
+
+[Official documentation][microsoft-ranking-functions]
+
+Ranking functions gives a ranking value for each row in a partition. SQL Server has the following ranking
+functions: `RANK()`, `DENSE_RANK()`, `NTILE()` and `ROW_NUMBER()`.
+
+- `RANK()` will return the rank of each row within the result set. The rank of one row is the rank of the previous
+  row plus one. `RANK()` is similar to `ROW_NUMBER()`, but `ROW_NUMBER()` numbers rows sequentially, while `RANK()`
+  provides the same value for ties.
+- `DENSE_RANK` is like rank, but doesn't have any gaps between the ranks.
+- `NTILE()` distributes the rows into a given amount of groups.
+- `ROW_NUMBER()` numbers rows sequentially.
+
+Example using `ROW_NUMBER()`:
+
+```sql
+SELECT
+    ROW_NUMBER() OVER (ORDER BY age DESC) AS 'Row number'
+  , *
+FROM customers
+```
+
+![ROW_NUMBER results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/ROW_NUMBER.png" | absolute_url }})
+
+Example using `RANK()`:
+
+```sql
+SELECT
+    RANK() OVER (ORDER BY age DESC) AS 'Rank (oldest)'
+  , *
+FROM customers
+```
+
+![RANK results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/RANK.png" | absolute_url }})
+
+Example using `DENSE_RANK()`:
+
+```sql
+SELECT
+    DENSE_RANK() OVER (ORDER BY age DESC) AS 'Dense rank (oldest)'
+  , *
+FROM customers
+```
+
+![DENSE_RANK results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/DENSE_RANK.png" | absolute_url }})
+
+Example using `NTILE()`:
+
+```sql
+SELECT
+    NTILE(2) OVER (ORDER BY age DESC) AS 'Tiles'
+  , *
+FROM customers
+```
+
+![NTILE results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/NTILE.png" | absolute_url }})
+
+- `ORDER BY` is mandatory.
+- If the `PARTITION` clause is missing the entire query result is the partition.
+- Window ranking functions are non-deterministic and can therefore not be used in indexed views.
 
 **Window offset functions**
 
-[Official documentation on `LAG()`][microsoft-lag]<br/>
-[Official documentation on `LEAD()`][microsoft-lead]<br/>
-[Official documentation on `FIRST_VALUE()`][microsoft-first-value]<br/>
-[Official documentation on `LAST_VALUE()`][microsoft-last-value]
+[Official documentation][microsoft-analytical-functions]
 
 Window offset functions return values from other rows that are an offset away from the current
 row in a window partition. `LAG()`, `LEAD()`, `FIRST_VALUE()` and `LAST_VALUE()` are window offset
@@ -1723,6 +2143,8 @@ FOR SYSTEM_TIME
 ORDER BY ValidFrom
 ```
 
+![Query results with BETWEEN]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/system-versioned-table-query-history.png" | absolute_url }})
+
 Table at a current date and time:
 
 ```sql
@@ -1731,6 +2153,8 @@ FROM customers
 FOR SYSTEM_TIME    
   AS OF '2019-05-20 07:00:00.0000000'
 ```
+
+![Query results with AS OF]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/system-versioned-table-query-history-AS-OF.png" | absolute_url }})
 
 To drop a system-versioned table, you have to turn off system versioning and drop both the system
 versioned table and history table.
@@ -1744,6 +2168,11 @@ DROP TABLE IF EXISTS dbo.customersHistory
 ```
 
 ### XML
+
+[Official documentation][microsoft-xml]
+
+XML is a data type in SQL Server. XML can be stored with the XML data type in either untyped
+format or in typed format. XML columns can be indexed.
 
 <a name="xml_output"></a>
 
@@ -1761,6 +2190,8 @@ The `FOR XML` clause is used to output XML. It has four modes:
 
 **XML RAW:**
 
+The created XML is close to the relational presentation of data when using `XML RAW`.
+
 ```sql
 SELECT *
 FROM people
@@ -1774,6 +2205,10 @@ FOR XML RAW
 <row Id="4" firstName="Kilroy" lastName="Anderson" age="5" />
 <row Id="5" firstName="Donald" lastName="Sanders" age="18" />
 ```
+
+A root node is not added. The result is an XML fragment. `FOR XML RAW, ROOT('Customers')`
+should be used to create a root element. The result above uses attributes. To use elements,
+`FOR XML RAW, ELEMENTS` should be used instead.
 
 **XML AUTO:**
 
@@ -1790,6 +2225,8 @@ FOR XML AUTO
 <people Id="4" firstName="Kilroy" lastName="Anderson" age="5" />
 <people Id="5" firstName="Donald" lastName="Sanders" age="18" />
 ```
+
+`ELEMENTS` and `ROOT('...')` can be used here too.
 
 **XML EXPLICIT:**
 
@@ -1920,17 +2357,19 @@ DECLARE @xml VARCHAR(MAX) =
   <Person FirstName="Chandler" LastName="Moniquer"     BirthDate="1995-08-02"/>
 </People>'
 
-DECLARE @prepped_xml INT
+DECLARE @preppedXmlHandle INT
 
-EXEC sp_xml_preparedocument @prepped_xml OUTPUT, @xml; 
+EXEC sp_xml_preparedocument @preppedXmlHandle OUTPUT, @xml; 
 
 SELECT *
-FROM OPENXML(@prepped_xml, '/People/Person', 1)
+FROM OPENXML(@preppedXmlHandle, '/People/Person', 1)
   WITH (
         FirstName  VARCHAR(200)
       , LastName   VARCHAR(200)
       , BirthDate  DATE
     )
+
+EXEC sp_xml_removedocument @preppedXmlHandle
 ```
 
 ![OPENXML with attributes results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/OPENXML-attribute-centric-results.png" | absolute_url }})
@@ -1964,6 +2403,25 @@ SELECT
 ```
 
 ![Results from value]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/XML-VALUE-results.png" | absolute_url }})
+
+Instead of getting a value like `value()` does, `nodes()` can will get a reference to the selected
+node. This reference can be used for additional queries.
+
+Example:
+
+```sql
+DECLARE @xml XML =
+'<People>
+  <Person FirstName="John"   LastName="Wilson"   Age="43"/>
+  <Person FirstName="Lauren" LastName="Adeleres" Age="52"/>
+</People>'
+
+SELECT
+  X.root.value('(/People/Person/@FirstName)[1]', 'VARCHAR(200)') AS firstName  
+FROM @xml.nodes('/') AS X(root)
+
+-- output is 'John'
+```
 
 `exist()` can be used to determine whether an element or attribute exists.
 
@@ -2046,6 +2504,8 @@ SELECT @xml.query('/People/Person[@Age>50]')
 ### JSON
 
 [Official documentation][microsoft-json]
+
+SQL Server does not support a native JSON data type. `VARCHAR` is usually used instead.
 
 This variable with JSON in it is used in all examples:
 
@@ -2197,6 +2657,8 @@ functions; create indexed views*
 
 #### Stored procedures
 
+[Official documentation][microsoft-stored-procedure]
+
 Example:
 
 ```sql
@@ -2226,22 +2688,25 @@ EXEC GetMinAndMaxAgeForLastName 'Anderson'
 ![Stored procedure results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/stored-procedure-results.png" | absolute_url }})
 
 - Stored procedures cannot be used in queries.
+- Stored procedures can only return an integer return code. Usually to indicate success or failure.
+  0 usually indicates success, and anything else indicates failure.
 
 <a name="table_valued_function"></a>
 
 #### Table-valued user-defined function
 
-Table-valued user-defined functions return a table.
+Table-valued user-defined functions return a table. There are two different types of table-valued
+functions: inline and multi-statement.
+
+**Inline table-valued functions:**
+
+Are similar to views because it's a single query. Unlike views, it supports parameters.
 
 Example:
 
 ```sql
-CREATE FUNCTION GetCustomersWithLastName
-(
-    @lastName VARCHAR(100)
-)
-RETURNS TABLE
-AS
+CREATE FUNCTION GetCustomersWithLastName (@lastName VARCHAR(100))
+RETURNS TABLE AS
     RETURN
         SELECT *
         FROM customers
@@ -2255,6 +2720,45 @@ SELECT *
 FROM GetCustomersWithLastName('Smith')
 ```
 
+- The return statement is simply `RETURNS TABLE`.
+- The body does not need `BEGIN` or `END`, because it consists of a single query.
+
+**Multi-statement table-valued functions:**
+
+Very similar to inline table-valued functions, but support multiple statements, as the name suggests.
+
+Example:
+
+```sql
+CREATE FUNCTION GetMostProfitableSales (@amount INT)
+RETURNS 
+@sales TABLE 
+(
+    Id     INT    NOT NULL
+  , year   INT    NOT NULL
+  , month  INT    NOT NULL
+  , profit INT
+)
+AS
+BEGIN
+  INSERT INTO @sales
+  SELECT TOP (@amount) *
+  FROM sales
+  ORDER BY Profit DESC
+  
+  RETURN 
+END
+```
+
+Usage:
+
+```sql
+SELECT * FROM GetMostProfitableSales(3)
+```
+
+- The return statements has to contain a definition of the output table.
+- `BEGIN` and `END` are needed, because there are multiple statements in the function body.
+
 <a name="scalar_valued_function"></a>
 
 #### Scalar-valued user-defined function
@@ -2264,12 +2768,8 @@ Scalar-valued user-defined functions return one value.
 Example:
 
 ```sql
-CREATE FUNCTION GetBirthMonthFromSSN
-(
-    @SSN VARCHAR(11)
-)
-RETURNS int
-AS
+CREATE FUNCTION GetBirthMonthFromSSN (@SSN VARCHAR(11))
+RETURNS INT AS
 BEGIN
     DECLARE @BirthMonth INT
     SET @BirthMonth = CAST(SUBSTRING(@SSN, 3, 2) AS INT)
@@ -2301,6 +2801,8 @@ PRINT @BirthMonth   -- prints 11
 
 #### Triggers
 
+[Official documentation][microsoft-triggers]
+
 Triggers are special stored procedures that are connected to tables. Triggers can be set to fire
 when INSERT, UPDATE, DELETE and similar statements are used on a table. Triggers are often used to
 maintain the integrity of the table.
@@ -2319,18 +2821,18 @@ BEGIN
   SET NOCOUNT ON
 
   IF EXISTS(SELECT 1 FROM inserted WHERE firstName = '' OR lastName = '')
-      BEGIN
-        RAISERROR('accounts_trgi: The first name or last name cannot be blank.', 16, 1)
-        ROLLBACK TRAN
-        RETURN
-      END
+  BEGIN
+    RAISERROR('The first name or last name cannot be blank.', 16, 1)
+    ROLLBACK TRAN
+    RETURN
+  END
 
   IF EXISTS(SELECT 1 FROM inserted i INNER JOIN accounts a ON a.SSN = i.SSN)
-      BEGIN
-        RAISERROR('accounts_trgi: Person already exists with that SSN.', 16, 1)
-        ROLLBACK TRAN
-        RETURN
-      END
+  BEGIN
+    RAISERROR('Person already exists with that SSN.', 16, 1)
+    ROLLBACK TRAN
+    RETURN
+  END
 END
 
 GO
@@ -2394,6 +2896,8 @@ These options can be added to the view:
 
 #### Indexed views
 
+[Official documentation][microsoft-indexed-views]
+
 ```sql
 CREATE VIEW UnderagePeople
 WITH SCHEMABINDING
@@ -2439,6 +2943,95 @@ procedures*
 <a name="transaction_control"></a>
 
 #### Transaction control
+
+A transaction is a unit of work. Transactions are used to get the following properties:
+
+- Atomicity: everything happens or nothing happens.
+- Consistency: the database should transition to one consistent state to another.
+- Isolation: intermediate states are only visible to the transaction.
+- Durability: a committed transaction will survive permanently.
+
+A transaction is made explicitly with `BEGIN TRANSACTION` and committed with `COMMIT TRANSACTION`
+or rolled back with `ROLLBACK TRANSACTION`. `TRAN` can be used instead of `TRANSACTION`. Explicitly
+made transactions are called user-defined transactions. There also implicitly made transactions
+called system-made transactions. There are even implicitly user-defined transactions, but these are
+rarely used.
+
+Example:
+
+```sql
+BEGIN TRAN
+
+SELECT * FROM customers -- empty table, so no rows
+
+INSERT INTO customers VALUES ('Trevor', 'Tate')
+
+ROLLBACK TRAN
+
+SELECT * FROM customers -- empty table
+```
+
+![Results when rolled back transaction]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/transaction-rollback.png" | absolute_url }})
+
+The transaction was rolled back, so the customers table is still empty.
+
+Example:
+
+```sql
+BEGIN TRAN
+
+SELECT * FROM customers
+
+INSERT INTO customers VALUES ('Trevor', 'Tate')
+
+COMMIT TRAN
+
+SELECT * FROM customers
+```
+
+![Results when committed transaction]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/transaction-commit.png" | absolute_url }})
+
+Because the transaction was committed it will have the Trevor Tate customer.
+
+`SET XACT_ABORT ON` can be used to get more consistent behavior when an error occurs in the
+transaction. When it's on and an error occurs, the execution of code is aborted and the transaction
+is rolled back automatically.
+
+Example:
+
+```sql
+SET XACT_ABORT OFF
+
+BEGIN TRAN
+
+SELECT * FROM customers
+
+INSERT INTO customers VALUES ('Trevor', 'Tate')
+
+;THROW 50000, 'Error', 1        -- not rolled back here
+
+COMMIT TRAN
+
+GO  -- end of batch, auto commit
+SELECT * FROM customers
+```
+
+```sql
+SET XACT_ABORT ON
+
+BEGIN TRAN
+
+SELECT * FROM customers
+
+INSERT INTO customers VALUES ('Trevor', 'Tate')
+
+;THROW 50000, 'Error', 1    -- error, rolled back
+
+COMMIT TRAN
+
+GO
+SELECT * FROM customers
+```
 
 <a name="try_catch"></a>
 
@@ -2504,6 +3097,9 @@ SQL Server has the following functions that provide information about an error t
 Note:
 
 - They all have to be used within a `CATCH` block.
+- Error functions return NULL outside a CATCH block.
+- Error functions return info about the innermost CATCH block, if there are several nested CATCH
+  blocks.
 
 <a name="throw"></a>
 
@@ -2514,7 +3110,7 @@ Note:
 Example:
 
 ```sql
-THROW 50000, 'Error message', 1;
+;THROW 50000, 'Error message', 1
 ```
 
 The first parameter is the error number, the second is the error message and the third is a state
@@ -2524,13 +3120,15 @@ informational purposes.
 Or without parameters:
 
 ```sql
-THROW;
+;THROW
 ```
 
 This rethrows the original error.
 
 If the throw happens outside a `TRY` block it will abort the batch. If it's inside it will activate
 the `CATCH` block.
+
+- THROW always uses severity level 16.
 
 <a name="raiserror"></a>
 
@@ -2571,9 +3169,28 @@ RAISERROR('Error message', 16, 1) WITH NOWAIT
 RAISERROR('Error message', 22, 1) WITH LOG
 ```
 
+- `RAISERROR` is usually used with severity level 16.
+- `PRINT` is a stripped down version of `RAISERROR`. `PRINT` always uses severity level 0.
+
 <a name="throw_vs_raiserror"></a>
 
 #### THROW vs RAISERROR
+
+The official exam book has this table that compares THROW against RAISERROR:
+
+| Property                                                          | `THROW` | `RAISERROR`                  |
+|-------------------------------------------------------------------|---------|------------------------------|
+| Can re-throw original system error                                | Yes     | No                           |
+| Activates `CATCH` block                                           | Yes     | Yes, when 10 < severity < 20 |
+| Always aborts batch when not using `TRY-CATCH`                    | Yes     | No                           |
+| Aborts/dooms transaction if `XACT_ABORT` is off                   | No      | No                           |
+| Aborts/dooms transaction if `XACT_ABORT` is on                    | Yes     | No                           |
+| If error number is passed, it must be defined in `sys.messages`   | No      | Yes                          |
+| Supports printf parameter markers directly                        | No      | Yes                          |
+| Supports indicating severity                                      | No      | Yes                          |
+| Supports `WITH LOG` to log error to error log and application log | No      | Yes                          |
+| Supports `WITH NOWAIT` to send messages immediately to the client | No      | Yes                          |
+| Preceding statements needs to be terminated                       | Yes     | No                           |
 
 ---
 
@@ -2634,6 +3251,43 @@ Literals have to be on the correct form.
 |------------|--------------------------|
 | `VARCHAR`  | `'This is a varchar'`    |
 | `NVARCHAR` | `N'This is an nvarchar'` |
+| `INT`      | `1`                      |
+| `FLOAT`    | `1.1`                    |
+| `REAL`     | `1.1`                    |
+| `DECIMAL`  | `1.1`                    |
+| `DATE`     | `'2018-05-18'`           |
+
+Casting `NUMERIC` to `INT` truncates the value:
+
+```sql
+SELECT CAST(1.99999 AS INT)     -- output is 1
+```
+
+Converting a `NUMERIC` of higher scale to a `NUMERIC` with lower scale rounds the number:
+
+```sql
+SELECT CAST(1.99999 AS NUMERIC(3, 2)) -- output is 2.00.
+```
+
+When converting a string with datetime to a `DATETIME` you get rounding:
+
+```sql
+DECLARE @dt DATETIME = '2019-05-18 12:55:00.999'
+
+SELECT @dt  -- output is 2019-05-18 12:55:01.000
+```
+
+When converting a datetime type of a higher precision to one with less precision, you get rounding:
+
+```sql
+DECLARE @dt2 DATETIME2 = '2019-05-18 12:55:00.9999999'
+
+SELECT
+    @dt2                    -- output is 2019-05-18 12:55:00.9999999
+  , CAST(@dt2 AS DATETIME)  -- output is 2019-05-18 12:55:01.000
+```
+
+#### Locations of implicit data type conversions in queries
 
 When an expression involves different types, SQL Server will implicitly convert the various types
 when that's possible. Explicit conversions; using `CAST`, `CONVERT`, etc.; can be beneficial.
@@ -2650,11 +3304,38 @@ Outputs 4, because `INT` has higher precedence than `VARCHAR`.
 
 <a name="locations_of_implicit_data_type_conversions_in_queries"></a>
 
-#### Locations of implicit data type conversions in queries
+If all operands in an expression are of the same type, the result will be of that type.
+
+Example:
+
+```sql
+SELECT 11 / 2     -- output is 5
+```
+
+Because 11 and 2 are INTs, the output will be an INT as well. Because FLOAT and REAL have higher precedence than
+INT, the following will output 5.5:
+
+```sql
+SELECT 11.0 / 2   -- output is 5.500000
+```
+
+Because 2 will be implicitly converted to 2.0.
+
+`CAST(col AS NUMERIC(10, 3))` can be used if the operands are columns or variables:
+
+```sql
+DECLARE @dividend INT = 11
+DECLARE @divisor  INT = 2
+
+SELECT CAST(@dividend AS NUMERIC(10, 3)) /
+       CAST(@divisor  AS NUMERIC(10, 3))   -- output is 5.50000000000000
+```
 
 <a name="correct_results_when_joins_and_null_values"></a>
 
 #### Correct results when joins and NULL values
+
+See section *[Query multiple tables by using joins](#query_with_joins)*.
 
 <a name="isnull"></a>
 
@@ -2671,7 +3352,7 @@ DECLARE @b INT = 1
 SELECT ISNULL(@a, @b)   -- outputs 1
 ```
 
-- `ISNULL()` is T-SQL and not part of the SQL standard.
+`ISNULL()` is T-SQL and not part of the SQL standard.
 
 <a name="coalesce"></a>
 
@@ -2689,7 +3370,7 @@ DECLARE @c INT = 2
 SELECT COALESCE(@a, @b, @c)   -- outputs 2
 ```
 
-- `COALESCE()` is part of the SQL standard.
+`COALESCE()` is part of the SQL standard.
 
 <a name="isnull_vs_coalesce"></a>
 
@@ -2818,26 +3499,42 @@ DEALLOCATE cursor_test
 
 [microsoft-mcsa-sql-2016-database-development]: https://www.microsoft.com/en-us/learning/mcsa-sql2016-database-development-certification.aspx
 [microsoft-70-761-curriculum]: https://www.microsoft.com/en-us/learning/exam-70-761.aspx
+[microsoft-select]: https://docs.microsoft.com/en-us/sql/t-sql/queries/select-transact-sql
+[microsoft-top]: https://docs.microsoft.com/en-us/sql/t-sql/queries/top-transact-sql
+[microsoft-offset-fetch]: https://docs.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql#using-offset-and-fetch-to-limit-the-rows-returned
+[microsoft-union]: https://docs.microsoft.com/en-us/sql/t-sql/language-elements/set-operators-union-transact-sql
+[microsoft-except-intersect]: https://docs.microsoft.com/en-us/sql/t-sql/language-elements/set-operators-except-and-intersect-transact-sql
 [microsoft-deterministic-and-non-deterministic-functions]: https://docs.microsoft.com/en-us/sql/relational-databases/user-defined-functions/deterministic-and-nondeterministic-functions
 [microsoft-conversion-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/conversion-functions-transact-sql
 [microsoft-aggregate-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/aggregate-functions-transact-sql
 [microsoft-date-and-time-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/date-and-time-data-types-and-functions-transact-sql
 [microsoft-at-time-zone]: https://docs.microsoft.com/en-us/sql/t-sql/queries/at-time-zone-transact-sql
+[microsoft-case]: https://docs.microsoft.com/en-us/sql/t-sql/language-elements/case-transact-sql
 [microsoft-system-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/system-functions-transact-sql
+[microsoft-insert]: https://docs.microsoft.com/en-us/sql/t-sql/statements/insert-transact-sql
+[microsoft-update]: https://docs.microsoft.com/en-us/sql/t-sql/queries/update-transact-sql
+[microsoft-delete]: https://docs.microsoft.com/en-us/sql/t-sql/statements/delete-transact-sql
 [microsoft-merge]: https://docs.microsoft.com/en-us/sql/t-sql/statements/merge-transact-sql
 [microsoft-output]: https://docs.microsoft.com/en-us/sql/t-sql/queries/output-clause-transact-sql
+[microsoft-cross-apply]: https://docs.microsoft.com/en-us/sql/t-sql/queries/from-transact-sql#using-apply
 [microsoft-cte]: https://docs.microsoft.com/en-us/sql/t-sql/queries/with-common-table-expression-transact-sql
-[microsoft-lag]: https://docs.microsoft.com/en-us/sql/t-sql/functions/lag-transact-sql
-[microsoft-lead]: https://docs.microsoft.com/en-us/sql/t-sql/functions/lead-transact-sql
-[microsoft-first-value]: https://docs.microsoft.com/en-us/sql/t-sql/functions/first-value-transact-sql
-[microsoft-last-value]: https://docs.microsoft.com/en-us/sql/t-sql/functions/last-value-transact-sql
+[microsoft-group-by]: https://docs.microsoft.com/en-us/sql/t-sql/queries/select-group-by-transact-sql
+[microsoft-having]: https://docs.microsoft.com/en-us/sql/t-sql/queries/select-having-transact-sql
+[microsoft-pivot-unpivot]: https://docs.microsoft.com/en-us/sql/t-sql/queries/from-using-pivot-and-unpivot
+[microsoft-ranking-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/ranking-functions-transact-sql
+[microsoft-analytical-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/analytic-functions-transact-sql
 [microsoft-temporal-tables]: https://docs.microsoft.com/en-us/sql/relational-databases/tables/temporal-tables
+[microsoft-xml]: https://docs.microsoft.com/en-us/sql/relational-databases/xml/xml-data-sql-server
 [microsoft-for-xml]: https://docs.microsoft.com/en-us/sql/relational-databases/xml/for-xml-sql-server
 [microsoft-openxml]: https://docs.microsoft.com/en-us/sql/relational-databases/xml/openxml-sql-server
 [microsoft-xml-data-type-methods]: https://docs.microsoft.com/en-us/sql/t-sql/xml/xml-data-type-methods
 [microsoft-json]: https://docs.microsoft.com/en-us/sql/relational-databases/json/json-data-sql-server
 [microsoft-openjson]: https://docs.microsoft.com/en-us/sql/t-sql/functions/openjson-transact-sql
+[microsoft-stored-procedure]: https://docs.microsoft.com/en-us/sql/relational-databases/stored-procedures/stored-procedures-database-engine
+[microsoft-user-defined-functions]: https://docs.microsoft.com/en-us/sql/relational-databases/user-defined-functions/user-defined-functions
+[microsoft-triggers]: https://docs.microsoft.com/en-us/sql/relational-databases/triggers/logon-triggers
 [microsoft-create-view]: https://docs.microsoft.com/en-us/sql/t-sql/statements/create-view-transact-sql
+[microsoft-indexed-views]: https://docs.microsoft.com/en-us/sql/relational-databases/views/create-indexed-views
 [microsoft-data-type-precedence]: https://docs.microsoft.com/en-us/sql/t-sql/data-types/data-type-precedence-transact-sql
 [microsoft-try-catch]: https://docs.microsoft.com/en-us/sql/t-sql/language-elements/try-catch-transact-sql
 [microsoft-error-number]: https://docs.microsoft.com/en-us/sql/t-sql/functions/error-number-transact-sql
@@ -2850,6 +3547,7 @@ DEALLOCATE cursor_test
 [microsoft-geometry]: https://docs.microsoft.com/en-us/sql/t-sql/spatial-geometry/spatial-types-geometry-transact-sql
 [essentialsql-intro-to-ctes]: https://www.essentialsql.com/introduction-common-table-expressions-ctes/
 [essentialsql-recursive-ctes]: https://www.essentialsql.com/recursive-ctes-explained/
+[red-gate-grouping-sets]: https://www.red-gate.com/simple-talk/sql/t-sql-programming/summarizing-data-using-grouping-sets-operator/
 [red-gate-spatial-data]: https://www.red-gate.com/simple-talk/sql/t-sql-programming/introduction-to-sql-server-spatial-data/
 [stackoverflow-union-and-union-all]: https://stackoverflow.com/questions/49925/what-is-the-difference-between-union-and-union-all
 [stackoverflow-where-clause-sargability]: https://stackoverflow.com/questions/799584/what-makes-a-sql-statement-sargable
