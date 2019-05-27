@@ -67,13 +67,13 @@ You can access the [debug library][lua-5.2-debug-library] by requiring it at the
 local d = require('debug')
 ```
 
-and then start using it by calling it's functions. For example:
+and then start using it by calling its functions. For example:
 
 ```lua
 print(d.traceback())
 ```
 
-And that's pretty much what we have available for debugging. Don't expect any fancy IDE with a built in debugger when
+And that's pretty much what we have available for debugging. Don't expect any fancy IDE with a built-in debugger when
 dealing with Lua dissectors. If you want to you could try to get [ZeroBrane Studio][github-ZeroBraneStudio] working,
 but I haven't figured out how to do that easily, so I'm going with printf debugging myself.
 
@@ -83,7 +83,7 @@ In the previous post we made a dissector that ended up looking like this in the 
 
 ![Opcode without name]({{ "/assets/creating-wireshark-dissectors-2/opcode-without-name.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
-The opcode here is only a number. It would be nicer if we actually showed the opcode name too. According to the
+The opcode here is only a number. It would be nicer if we showed the opcode name too. According to the
 [MongoDB wire protocol][mongodb-wire-protocol], the opcodes have the following names:
 
 ![Opcode descriptions]({{ "/assets/creating-wireshark-dissectors-2/opcode-descriptions.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
@@ -116,7 +116,7 @@ function get_opcode_name(opcode)
 end
 ```
 
-Finally we have to replace the old addition to the sub tree with the following code:
+Finally, we have to replace the old addition to the sub tree with the following code:
 
 ```lua
 local opcode_name = get_opcode_name(opcode)

@@ -28,12 +28,12 @@ permalink: /topics/
 * [Trajectory generation with a minimum jerk trajectory]({% post_url 2017-12-06-trajectory-generation-with-a-minimum-jerk-trajectory %})
 * [Angle transformation to [-π, π]]({% post_url 2017-12-18-transformation-to-pipi %})
 
-{% comment %}
-
 ## Certifications
 
-* [Notes on 70-761 - Querying Data with Transact SQL]({% post_url 2019-01-31-notes-on-70-761-Querying-Data-with-Transact-SQL %})
+* [Notes on 70-761 - Querying Data with Transact-SQL]({% post_url 2019-05-27-notes-on-70-761-Querying-Data-with-Transact-SQL %})
 
+{% comment %}
+* [Notes on 70-762 - Developing SQL Databases]({% post_url 2019-06-01-notes-on-70-762-Developing-SQL-Databases %})
 {% endcomment %}
 
 ## Miscellaneous
@@ -41,3 +41,4 @@ permalink: /topics/
 * [Quality, min and max with jpeg-recompress]({% post_url 2018-01-10-quality-min-and-max-with-jpeg-recompress %})
 * [Generating random HSL colors in Javascript]({% post_url 2017-12-05-generating-random-colors-in-javascript %})
 * [Generating normally distributed random numbers in Javascript]({% post_url 2019-05-15-generating-normally-distributed-random-numbers-in-javascript %})
+* [SoapUI snippets]({% post_url 2019-04-08-SoapUI-snippets %})

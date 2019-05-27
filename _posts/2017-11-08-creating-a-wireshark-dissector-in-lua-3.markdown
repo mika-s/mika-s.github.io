@@ -7,18 +7,20 @@ categories: wireshark lua dissector
 
 This post continues where [the second post]({% post_url 2017-11-06-creating-a-wireshark-dissector-in-lua-2 %}) left off.
 
-In part 1 and 2 we looked at the header of the [MongoDB wire protocol][mongodb-wire-protocol] messages. This time it's
-time to actually parse the content of the messages. However, we will not actually decode the documents returned by
-MongoDB, as that falls outside the scope of this tutorial.
+In part 1 and 2 we looked at the header of the [MongoDB wire protocol][mongodb-wire-protocol]
+messages. This time it's time to parse the content of the messages. However, we will not actually
+decode the documents returned by MongoDB, as that falls outside the scope of this tutorial.
 
 ### Decoding the *OP_QUERY* message
 
-The *OP_QUERY* message is used to query the database for documents in a collection. The format of this message is:
+The *OP_QUERY* message is used to query the database for documents in a collection. The format of
+this message is:
 
 ![OP_QUERY message format]({{ "/assets/creating-wireshark-dissectors-3/OP_QUERY-message.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
-What the various fields mean can be seen in the [specification][mongodb-wire-protocol]. In the header we only had to deal
-with int32s, but now we have a string as well. We can start by parsing the *flags* field:
+What the various fields mean can be seen in the [specification][mongodb-wire-protocol]. In the
+header we only had to deal with int32s, but now we have a string as well. We can start by parsing
+the *flags* field:
 
 ```lua
 mongodb_protocol = Proto("MongoDB",  "MongoDB Protocol")
@@ -69,18 +71,18 @@ local tcp_port = DissectorTable.get("tcp.port")
 tcp_port:add(59274, mongodb_protocol)
 ```
 
-To make the distinction clearer between the header and the actual payload of the message we will use comments
-to show where the different sections start. Because the different opcodes have different structure we have
-to check what type of message we are dissecting with an `if` statement. We are only dissecting the `OP_QUERY`
-message in the code above.
+To make the distinction clearer between the header and the actual payload of the message we will
+use comments to show where the different sections start. Because the different opcodes have
+different structure we have to check what type of message we are dissecting with an `if` statement.
+We are only dissecting the `OP_QUERY` message in the code above.
 
-The script is starting to get pretty big for a blog post now, so I will start shortening the content that
+The script is starting to get big for a blog post now, so I will start shortening the content that
 we have already looked at before with ...
 
-So the `flags` field is now shown in the sub tree for `OP_QUERY` messages. Similar to the `opcode`, it would
-be nice we if could have a description of the flag value in parentheses beside the value. The description
-of the values are found in the spec. As with the opcode description we make a lookup function to get the
-flag description:
+So the `flags` field is now shown in the sub tree for `OP_QUERY` messages. Similar to the `opcode`,
+it would be nice we if could have a description of the flag value in parentheses beside the value.
+The description of the values are found in the spec. As with the opcode description we make a lookup
+function to get the flag description:
 
 ```lua
 function get_flag_description(flags)
@@ -116,11 +118,12 @@ The MongoDB sub tree will then look like this for messages with the `OP_QUERY` o
 
 The flag field will not be there for other messages, as they never enter the `OP_QUERY` *if* block.
 
-The next field is a bit different than the previous ones: we now have to dissect something else than an int32.
-In this particular case it's a string. A string is different from the other types in that it doesn't have a
-fixed length. So we have to loop over the bytes in the buffer until we hit the end of the string. How we determine
-the end of the string is depends on what type of string it is. In this case, it's a *[cstring][wikipedia-null-terminated-string]*,
-which means the string is terminated by *[NUL][wikipedia-nul]* (the byte 00).
+The next field is a bit different than the previous ones: we must now dissect something else
+than an int32. In this case it's a string. A string is different from the other types in that it
+doesn't have a fixed length. So we have to loop over the bytes in the buffer until we hit the end
+of the string. How we determine the end of the string is depends on what type of string it is. In
+this case, it's a *[cstring][wikipedia-null-terminated-string]*, which means the string is
+terminated by *[NUL][wikipedia-nul]* (the byte 00).
 
 ```lua
 -- Loop over string
@@ -136,20 +139,21 @@ end
 subtree:add_le(full_coll_name, buffer(20,string_length))
 ```
 
-We loop over the bytes from the start of the string (byte 20) to the end of the entire message. We then read one
-byte at a time with `buffer(i,1):le_uint()` and check whether it's the *NUL* byte, which indicates the end of
-the string. If it is we store the length of the string in `string_length` and break the loop.
+We loop over the bytes from the start of the string (byte 20) to the end of the entire message. We
+then read one byte at a time with `buffer(i,1):le_uint()` and check whether it's the *NUL* byte,
+which indicates the end of the string. If it is, we store the length of the string in `string_length`
+and break the loop.
 
-We can then add the field to the sub tree. We also have to make the field by adding this line to the top of the
-script:
+We can then add the field to the sub tree. We must also make the field by adding this line to
+the top of the script:
 
 ```lua
 full_coll_name = ProtoField.string("mongodb.full_coll_name", "fullCollectionName", base.ASCII)
 ```
 
-We can see that we use the `string` function of `ProtoField` rather than `int32` this time. We also want to
-represent the string in ASCII rather than decimal, so we have to use `base.ASCII`. The field also has to be
-added to the `fields` table:
+We can see that we use the `string` function of `ProtoField` rather than `int32` this time. We also
+want to represent the string in ASCII rather than decimal, so we have to use `base.ASCII`. The field
+also has to be added to the `fields` table:
 
 ```lua
 mongodb_protocol.fields = {
@@ -162,10 +166,10 @@ We now have the collection name in the packet details pane:
 
 ![Packet details with Collection name]({{ "/assets/creating-wireshark-dissectors-3/collectionname.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
-The rest of the fields are fairly simple. I will not explain them in detail, but show the final code instead.
-The field called `query` contains BSON documents, but as mentioned before, decoding them are outside the
-scope of this post. I'll use `ProtoField.none` for that field, which is a type that can be used for unstructured
-data. The script with `OP_QUERY` added is then:
+The rest of the fields are simple. I will not explain them in detail but show the final code
+instead. The field called `query` contains BSON documents, but as mentioned before, decoding them
+are outside the scope of this post. I'll use `ProtoField.none` for that field, which is a type that
+can be used for unstructured data. The script with `OP_QUERY` added is then:
 
 ```lua
 mongodb_protocol = Proto("MongoDB",  "MongoDB Protocol")
@@ -273,7 +277,8 @@ I am not going to decode all the messages, but we can look at one more. It has t
 
 ![OP_REPLY message]({{ "/assets/creating-wireshark-dissectors-3/OP_REPLY-message.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
-We have one new type here: int64. We won't touch the *documents* field, as that gets to complicated. We make the following fields:
+We have one new type here: int64. We won't touch the *documents* field, as that gets to
+complicated. We make the following fields:
 
 ```lua
 response_flags =ProtoField.int32 ("mongodb.response_flags" ,"responseFlags" ,base.DEC)
@@ -283,7 +288,7 @@ number_returned=ProtoField.int32 ("mongodb.number_returned","numberReturned",bas
 documents      =ProtoField.none  ("mongodb.documents"      ,"documents"     ,base.HEX)
 ```
 
-We also have to add the fields to the `fields` table:
+We must also add the fields to the `fields` table:
 
 ```lua
 mongodb_protocol.fields = {
@@ -310,8 +315,8 @@ elseif opcode_name == "OP_REPLY" then
 end
 ```
 
-It's quite similar to how the other fields are parsed. `cursor_id` is an int64, which means it's 8 bytes
-long (8*8 = 64). That means we have to read 8 bytes. The lookup function for the response flags looks
+It's like how the other fields are parsed. `cursor_id` is an int64, which means it's 8 bytes long
+(8*8 = 64). That means we must read 8 bytes. The lookup function for the response flags looks
 like this:
 
 ```lua
@@ -332,7 +337,8 @@ An *OP_REPLY* message will finally look like this in the packet details pane:
 
 ![OP_REPLY message finished]({{ "/assets/creating-wireshark-dissectors-3/OP_REPLY-finished.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
-The documents field is pretty much unparsed. It's simply read as a string. The final code looks like this:
+The documents field is pretty much unparsed. It's simply read as a string. The final code looks
+like this:
 
 ```lua
 mongodb_protocol = Proto("MongoDB",  "MongoDB Protocol")
@@ -467,8 +473,9 @@ You can find the final code [here][mikas-github-mongodb].
 Two other blogs that describe Wireshark dissectors in Lua can be found [here][delog-wireshark-dissector-in-lua] and
 [here][emmanueladenola-wireshark-dissector-with-lua].
 
-If you want to find out how you can separate the fields into separate sub trees, you can take a look of
-[part four]({% post_url 2018-12-16-creating-a-wireshark-dissector-in-lua-4 %}) of this series.
+If you want to find out how you can separate the fields into separate sub trees, you can take a
+look at [part four]({% post_url 2018-12-16-creating-a-wireshark-dissector-in-lua-4 %}) of this
+series.
 
 [wikipedia-nul]: https://en.wikipedia.org/wiki/Null_character
 [wikipedia-null-terminated-string]: https://en.wikipedia.org/wiki/Null-terminated_string

@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Notes on 70-761: Querying Data with Transact-SQL"
-date:   2019-05-05 15:00:00 +0100
+date:   2019-05-27 15:00:00 +0100
 categories: sql certification 70-761
 ---
 
@@ -630,7 +630,7 @@ Exceptions:
   function.
 * A clustered index cannot be created on a view that uses a non-deterministic function.
 * Certain non-deterministic functions can be used in indexed views if they are used in a
-  deterministic matter. E.g. `RAND` when a seed is specified.
+  deterministic matter. E.g. `RAND()` when a seed is specified.
 
 <a name="type_conversion_functions"></a>
 
@@ -646,7 +646,7 @@ Example:
 `CAST` syntax:
 
 ```sql
-SELECT CAST('123' AS INT)   -- outputs 123
+SELECT CAST('123' AS INT)    -- outputs 123
 ```
 
 `CONVERT` syntax without style:
@@ -676,13 +676,14 @@ SELECT PARSE('01/05/2019' AS DATE USING 'no-NO')  -- outputs 2019-05-01
 SELECT FORMAT(GETDATE(), 'yyyy-MM-dd')  -- outputs 2019-05-05
 ```
 
-`PARSE` and `FORMAT` are slow.
+`PARSE` and `FORMAT` are slow. Try to use `CAST` and `CONVERT` instead.
 
 `TRY_CAST`, `TRY_CONVERT` and `TRY_PARSE` will return `NULL` if they fail to convert:
 
 ```sql
 SELECT PARSE('40/05/2019' AS DATE USING 'en-US')
--- exception: Error converting string value '40/05/2019' into data type date using culture 'en-US'.
+-- exception: Error converting string value '40/05/2019'
+-- into data type date using culture 'en-US'.
 ```
 
 ```sql
@@ -719,13 +720,13 @@ SELECT AVG(age)    FROM people -- outputs 45
 SELECT MIN(age)    FROM people -- outputs 26
 SELECT MAX(age)    FROM people -- outputs 77
 SELECT SUM(age)    FROM people -- outputs 182
-SELECT VAR(age)    FROM people -- outputs 585.666666666667 - variance for subset
-SELECT VARP(age)   FROM people -- outputs 439.25           - variance for population
-SELECT STDEV(age)  FROM people -- outputs 24.2005509579155 - std dev for subset
-SELECT STDEVP(age) FROM people -- outputs 20.9582919151347 - std dev for population
+SELECT VAR(age)    FROM people -- outputs 585.666... - variance for subset
+SELECT VARP(age)   FROM people -- outputs 439.25     - variance for population
+SELECT STDEV(age)  FROM people -- outputs 24.200...  - std dev for subset
+SELECT STDEVP(age) FROM people -- outputs 20.958...  - std dev for population
 ```
 
-- All functions ignore `NULL`, except `COUNT`.
+All functions ignore `NULL`, except `COUNT`.
 
 <a name="arithmetic_functions"></a>
 
@@ -1421,50 +1422,31 @@ WHERE EXISTS(
 
 #### Subqueries vs joins
 
-Subqueries are more efficient than joins in some cases, and less efficient in other cases.
+Joins are more efficient than subqueries in some cases. However, there are certain circumstances
+where subqueries are faster.
 
-Example (`dbo.customers` and `dbo.accounts` taken from above):
+Example (two almost identical and large tables):
 
 ```sql
-INSERT INTO dbo.customers (firstName, lastName, age) VALUES
-    ('Samuel', 'Williams'  , 32)
-  , ('Daniel', 'Davis'     , 25)
-  , ('Sophia', 'Miller'    , 85)
-
-INSERT INTO dbo.accounts (customerId, balance) VALUES
-    (1, 100)
-  , (2, 50)
-
--- Find customers that don't have an account, with two different solutions.
-
--- Subquery
 SELECT *
-FROM customers c
-WHERE NOT EXISTS(
-  SELECT *
-  FROM accounts a
-  WHERE c.Id = a.customerId
-)
--- outputs: 3   Sophia    Miller    85			
+FROM Large l1
+  LEFT JOIN Large2 l2 ON l1.Id = l2.Id
+WHERE l2.Id IS NULL
 
--- vs
-
--- LEFT JOIN with check for NULL
 SELECT *
-FROM customers c
-LEFT JOIN accounts a ON a.customerId = c.Id
-WHERE a.Id IS NULL
--- outputs: 3   Sophia    Miller    85		
+FROM Large l1
+WHERE NOT EXISTS(SELECT * FROM Large2 l2 WHERE l1.Id = l2.Id) 
 ```
 
-In this case, the subquery method will be faster. The inner query will return immediately when it
-finds a match in `accounts`. The join solution, however, will go through all the rows in `accounts`,
-and then later filter out unwanted rows with the `WHERE` clause.
+These queries tries to find rows in `Large` that are not in `Large2`. In this case, the subquery
+method will be faster. The inner query will return immediately when it finds a match in `Large2`.
+The join solution, however, will go through all the rows in `Large2`, and then later filter out
+unwanted rows with the `WHERE` clause.
 
 The short-circuiting done in the subquery solution is called *anti semi join optimization*. This makes
-the subquery solution cost less than half of what the join solution costs.
+the subquery solution cost less than the join solution
 
-![Anti semi join query plan]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/anti-semi-join-query-plan.png" | absolute_url }})
+![Anti semi join query plan]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/left-anti-join-query-plan.png" | absolute_url }})
 
 <a name="cross_apply"></a>
 
@@ -1604,7 +1586,7 @@ order_order_line_cte (OrderId, Date, OrderLineId, ItemId, Amount) AS
 SELECT
     o.Id        AS OrderId
   , o.Date      AS Date
-  , ol.Id      AS OrderLineId
+  , ol.Id       AS OrderLineId
   , ol.ItemId   AS ItemId
   , ol.Amount   AS Amount
 FROM ca_order o
@@ -1630,6 +1612,8 @@ expression.
 #### Recursive CTEs
 
 [Recursive CTEs on Essential SQL][essentialsql-recursive-ctes]
+
+Recursive CTEs are useful for hierarchical data.
 
 Example:
 
@@ -1658,7 +1642,7 @@ INSERT INTO hierarchy
 WITH hierarchy_cte (Id, Name, Level, ParentId, Sort) AS
 (
   SELECT
-        Id
+      Id
     , Name
     , 1
     , ParentId
@@ -2207,7 +2191,7 @@ FOR XML RAW
 ```
 
 A root node is not added. The result is an XML fragment. `FOR XML RAW, ROOT('Customers')`
-should be used to create a root element. The result above uses attributes. To use elements,
+can be used to create a root element. The result above uses attributes. To use elements,
 `FOR XML RAW, ELEMENTS` should be used instead.
 
 **XML AUTO:**
@@ -2507,7 +2491,7 @@ SELECT @xml.query('/People/Person[@Age>50]')
 
 SQL Server does not support a native JSON data type. `VARCHAR` is usually used instead.
 
-This variable with JSON in it is used in all examples:
+This variable with JSON in it is used in many of the examples:
 
 ```sql
 DECLARE @json VARCHAR(MAX) =
@@ -2662,10 +2646,6 @@ functions; create indexed views*
 Example:
 
 ```sql
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE GetMinAndMaxAgeForLastName
   @lastName VARCHAR(200)
 AS
@@ -2680,8 +2660,11 @@ BEGIN
   WHERE lastName = @lastName
   GROUP BY lastName
 END
-GO
+```
 
+Usage:
+
+```sql
 EXEC GetMinAndMaxAgeForLastName 'Anderson'
 ```
 
@@ -2996,42 +2979,6 @@ Because the transaction was committed it will have the Trevor Tate customer.
 `SET XACT_ABORT ON` can be used to get more consistent behavior when an error occurs in the
 transaction. When it's on and an error occurs, the execution of code is aborted and the transaction
 is rolled back automatically.
-
-Example:
-
-```sql
-SET XACT_ABORT OFF
-
-BEGIN TRAN
-
-SELECT * FROM customers
-
-INSERT INTO customers VALUES ('Trevor', 'Tate')
-
-;THROW 50000, 'Error', 1        -- not rolled back here
-
-COMMIT TRAN
-
-GO  -- end of batch, auto commit
-SELECT * FROM customers
-```
-
-```sql
-SET XACT_ABORT ON
-
-BEGIN TRAN
-
-SELECT * FROM customers
-
-INSERT INTO customers VALUES ('Trevor', 'Tate')
-
-;THROW 50000, 'Error', 1    -- error, rolled back
-
-COMMIT TRAN
-
-GO
-SELECT * FROM customers
-```
 
 <a name="try_catch"></a>
 

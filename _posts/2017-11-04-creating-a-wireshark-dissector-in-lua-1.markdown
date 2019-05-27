@@ -12,7 +12,7 @@ this for example
 
 ![Wireshark without dissector]({{ "/assets/creating-wireshark-dissectors-1/before.png" | absolute_url }})
 
-it's pretty hard to tell what the various bytes in the data part represents.
+it's hard to tell what the various bytes in the data part represents.
 
 Wireshark is written in C, and dissectors for Wireshark are generally also written in C. However,
 Wireshark has a Lua implementation that makes it easy for people who are unfamiliar with C to write
@@ -23,7 +23,7 @@ functionality.
 The downside of using Lua is that the dissector will be slower than a dissector written in C.
 
 Before we start writing the dissector, let's go through a crash course on Lua. It's not important
-to know the language in detail, but we have to know the basics.
+to know the language in detail, but we must know the basics.
 
 ### Lua crash course
 
@@ -126,7 +126,7 @@ versions.
 
 The most interesting protocol to investigate in this post would probably be a custom one that
 Wireshark doesn't know of already, but all the custom protocols I've worked with have been work
-related and I can't post information about them here. So instead we'll take a look at the
+related and I can't post information about them here. So instead we'll look at the
 [MongoDB wire protocol][mongodb-wire-protocol].
 
 *(There is already a [Mongo dissector][mongo-dissector] in Wireshark, but I will not use that one.)*
@@ -135,10 +135,10 @@ According to the specification linked to above, the MongoDB wire protocol is a T
 using port number 27017. The byte ordering is little endian, meaning the least significant byte
 comes first. Most protocols are big endian. The only difference is the ordering of the bytes. If
 we had an int32 for example, with these bytes: `00 4F 23 11` in big endian, then the little endian
-version would be `11 23 4F 00`. This is something we have to take into account when writing the
+version would be `11 23 4F 00`. This is something must to take into account when writing the
 dissector.
 
-In this particular post, I'll only take a look at the header of the protocol. It looks like this
+In this post, I'll only take a look at the header of the protocol. It looks like this
 
 ![MongoDB protocol header]({{ "/assets/creating-wireshark-dissectors-1/mongodb-wire-protocol-header.png" | absolute_url }})
 
@@ -146,7 +146,7 @@ We can see that it has four int32s, each containing 4 bytes, because 4*8 = 32.
 
 ### Setting up the boilerplate code
 
-Lets start by setting up some of the boilerplate code that's needed in all dissectors:
+Let's start by setting up some of the boilerplate code that's needed in all dissectors:
 
 ```lua
 mongodb_protocol = Proto("MongoDB",  "MongoDB Protocol")
@@ -196,8 +196,8 @@ and the protocol column name changes from TCP to MONGODB:
 
 ![Packet list protocol column]({{ "/assets/creating-wireshark-dissectors-1/protocol-column.png" | absolute_url }})
 
-We then have to create a sub tree in the tree structure found in the Packet Details pane. It done
-by adding an additional tree item to the tree object that was passed as an argument to the dissector
+We must then create a sub tree in the tree structure found in the Packet Details pane. It done by
+adding an additional tree item to the tree object that was passed as an argument to the dissector
 function.
 
 ```lua
@@ -208,8 +208,8 @@ The string is the name of the sub tree. Without having added any fields it will 
 
 ![Packet pane with MongoDB but without fields]({{ "/assets/creating-wireshark-dissectors-1/packet-pane-1.png" | absolute_url }})
 
-Finally, we have to assign the protocol to a port. In my case, I'll use port 59274, because that's
-the port I use to connect to the Mongo database.
+Finally, we must assign the protocol to a port. In my case, I'll use port 59274, because that's the
+port I use to connect to the Mongo database.
 
 ```lua
 local tcp_port = DissectorTable.get("tcp.port")
@@ -274,7 +274,7 @@ and finally add the field to the sub tree:
 subtree:add_le(message_length, buffer(0,4))
 ```
 
-I use `add_le` rather than `add`, because we are working with a little endian protocol. If the
+I use `add_le` rather than `add`, because we are working with a little-endian protocol. If the
 protocol was big endian we would have to use `add`. The function takes two arguments: the field we
 made further up, and a [buffer range][tvbrange-object]. We can get a range of the buffer by using
 the range function that is a part of the buffer object. `buffer(offset,length)` is the short form
@@ -330,8 +330,8 @@ The packet details pane finally looks like this:
 ![Final result for packet details pane]({{ "/assets/creating-wireshark-dissectors-1/final.png" | absolute_url }})
 
 and we are happy for now. In the [next part]({% post_url 2017-11-06-creating-a-wireshark-dissector-in-lua-2 %})
-I'll take a look at debugging and more advanced parsing methods. Right now we only see the number
-value for the opcodes, but the opcode name would be more interesting.
+I'll look at debugging and more advanced parsing methods. Right now, we only see the numeric values
+of the opcodes, but the opcode name would be more interesting.
 
 [lua-5.3-reference-manual]: https://www.lua.org/manual/5.3/
 [mongodb-wire-protocol]: https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/
