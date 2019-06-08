@@ -14,6 +14,11 @@ I recommend getting the book to make sure you know everything that has to be kno
 also recommend reading some of the articles on Erland Sommerskog's web page, especially the articles
 on [error handling][erland-sommerskog-error-handling].
 
+Microsoft likes to ask questions on features that are new in the latest version of SQL Server. This
+is done to make sure people with an older version of the certification can't just pass without
+reading for the exam. SQL Server 2016 introduced JSON and temporal tables, so make sure you know
+those topics very well.
+
 ---
 
 ## Table of Contents
@@ -44,6 +49,7 @@ on [error handling][erland-sommerskog-error-handling].
     - [Type conversion functions](#type_conversion_functions)
     - [Built-in aggregate functions](#builtin_aggregate_functions)
     - [Arithmetic functions](#arithmetic_functions)
+    - [Character functions](#character_functions)
     - [Date-related functions](#date_related_functions)
     - [Case expressions](#case_expressions)
     - [System functions](#system_functions)
@@ -70,6 +76,7 @@ on [error handling][erland-sommerskog-error-handling].
     - [GROUPING SETS](#grouping_sets)
     - [CUBE](#cube)
     - [ROLLUP](#rollup)
+    - [GROUPING and GROUPING_ID](#grouping_and_grouping_id)
     - [PIVOT and UNPIVOT statements](#pivot_and_unpivot_statements)
     - [NULL values in PIVOT and UNPIVOT](#null_values_in_pivot_and_unpivot)
     - [Window functions](#window_functions)
@@ -215,8 +222,8 @@ ORDER BY customerId
 
 Amount of rows returned with `PERCENT` is rounded up.
 
-`ORDER BY` should be used with `TOP`, otherwise the order is non-deterministic and pretty much like
-the data is stored on disk.
+`ORDER BY` should also be used when using `TOP`, otherwise the order is non-deterministic and pretty
+much like the data is stored on disk.
 
 <a name="select_with_offset_and_fetch"></a>
 
@@ -262,7 +269,7 @@ SELECT firstName, lastName FROM peopleB
 ![Example of UNION ALL]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/union-all.png" | absolute_url }})
 
 - Number of columns must be the same in the two sets.
-- Column data type must be the same or compatible (implicitly convertable).
+- Column data type must be the same or compatible (implicitly convertible).
 
 <a name="difference_between_union_and_union_all"></a>
 
@@ -364,7 +371,7 @@ multi-table SELECT statements and source data; write queries with NULLs on joins
 
 ### Joins
 
-This table structure is used in this chapter:
+These tables are used in this chapter:
 
 ```sql
 CREATE TABLE men (
@@ -490,8 +497,8 @@ FROM men m
 
 #### Query with NULL on joins
 
-Rows that have null on one or more of the joined on keys will be filtered out when using inner
-joins. To preserve the row, an outer join has to be used.
+Rows that have null on one or more of the joined-on keys will be filtered out when using inner
+joins. To preserve the row, an outer join must be used.
 
 When joining on multiple keys, where one or more of the keys can be null, we have to handle the
 nulls in the join. A naive way of handling the null could be like this:
@@ -750,6 +757,73 @@ SELECT 25 / 2		-- output is 12
 
 It truncates.
 
+<a name="character_functions"></a>
+
+#### Character functions
+
+String concatenation can be done with either `+` or with the `CONCAT()` function.
+
+Example:
+
+```sql
+SELECT 
+  firstName + ' ' + lastName AS Name
+FROM customers
+
+SELECT 
+  CONCAT(firstName, ' ', lastName) AS Name
+FROM customers
+```
+
+When either operand to `+` is `NULL`, the entire value becomes `NULL`. 
+`CONCAT()` will use an empty string when it encounters `NULL`.
+
+`SUBSTRING()` is used to extract a string from another string.
+
+Example:
+
+```sql
+SELECT SUBSTRING('Lauren Best', 2, 5)  -- outputs 'auren'
+```
+
+`LEFT()` and `RIGHT()` extracts string from left and right side of the string.
+
+Example:
+
+```sql
+SELECT LEFT ('Lauren Best', 6)  -- outputs 'Lauren'
+SELECT RIGHT('Lauren Best', 4)  -- outputs 'Best'
+```
+
+`CHARINDEX()` looks for the first occurence of a given substring in a string.
+
+Example:
+
+```sql
+SELECT CHARINDEX('test', 'this is a test')  -- outputs 11
+```
+
+`PATINDEX()` looks for the first occurence of a given substring in a string,
+but uses pattern expressions.
+
+Example:
+
+```sql
+
+```
+
+`LEN()` returns the character length of a string.
+
+Example:
+
+```sql
+DECLARE @str VARCHAR(20) = 'test'
+
+SELECT LEN(@str)  -- outputs 4
+```
+
+Trailing spaces are not counted.
+
 <a name="date_related_functions"></a>
 
 #### Date-related functions
@@ -844,7 +918,7 @@ SELECT DATEDIFF(day, '2019-05-01', '2019-05-18')
 
 `DATEDIFF()` only looks at the part in the first argument. The rest are ignored.
 
-`SWITCHOFFSET()` is used to adjust the timezone of a value that has type `DATETIMEOFFSET`.
+`SWITCHOFFSET()` is used to adjust the time zone of a value that has type `DATETIMEOFFSET`.
 
 Example:
 
@@ -855,7 +929,7 @@ SET @dt = SWITCHOFFSET(@dt, '-01:00')
 PRINT @dt   -- output is 2019-05-18 12:00:00.0000000 -01:00
 ```
 
-To convert a datetime that doesn't have timezone to one that does, we can use the function
+To convert a datetime that doesn't have time zone to one that does, we can use the function
 `TODATETIMEOFFSET()`.
 
 Example:
@@ -873,7 +947,7 @@ PRINT @dto  -- output is 2019-05-18 06:00:00.0000000 +02:00
 
 [Official documentation for `AT TIME ZONE`][microsoft-at-time-zone]
 
-When `AT TIME ZONE` is used on a value without timezone, it does not adjust the date and time.
+When `AT TIME ZONE` is used on a value without time zone, it does not adjust the date and time.
 
 Example:
 
@@ -883,7 +957,7 @@ SELECT @dt AT TIME ZONE 'Central European Standard Time'
 -- output is 2019-05-18 06:00:00 +02:00
 ```
 
-When `AT TIME ZONE` is used on a value with timezone, it will also adjust the time and date.
+When `AT TIME ZONE` is used on a value with time zone, it will also adjust the time and date.
 
 Example:
 
@@ -1050,7 +1124,7 @@ INSERT INTO customers (firstName, lastName) VALUES
 	('Mary', 'Lietchstad')
 ```
 
-- If a column does not get a value set, it has to have a `DEFAULT` constraint, have an `IDENTITY`
+- If a column does not get a value set, it must have a `DEFAULT` constraint, have an `IDENTITY`
   property or be able to store `NULL`.
 - Use `SET IDENTITY_INSERT dbo.customers ON` to manually specify values for columns with the
   `IDENTITY` property. Use `SET IDENTITY_INSERT dbo.customers OFF` afterwards.
@@ -1422,10 +1496,10 @@ WHERE EXISTS(
 
 #### Subqueries vs joins
 
-Joins are more efficient than subqueries in some cases. However, there are certain circumstances
+Joins are more efficient than subqueries in most cases. However, there are certain circumstances
 where subqueries are faster.
 
-Example (two almost identical and large tables):
+Example (two large and almost identical tables):
 
 ```sql
 SELECT *
@@ -1438,7 +1512,7 @@ FROM Large l1
 WHERE NOT EXISTS(SELECT * FROM Large2 l2 WHERE l1.Id = l2.Id) 
 ```
 
-These queries tries to find rows in `Large` that are not in `Large2`. In this case, the subquery
+These queries try to find rows in `Large` that are not in `Large2`. In this case, the subquery
 method will be faster. The inner query will return immediately when it finds a match in `Large2`.
 The join solution, however, will go through all the rows in `Large2`, and then later filter out
 unwanted rows with the `WHERE` clause.
@@ -1549,7 +1623,7 @@ Derived tables are subqueries.
 [Official documentation][microsoft-cte] <br/>
 [Introduction to CTEs on Essential SQL][essentialsql-intro-to-ctes]
 
-Example of simple CTE:
+Example of a simple CTE:
 
 ```sql
 WITH customer_order_cte (CustomerId, FirstName, LastName, OrderId, Date) AS
@@ -1762,7 +1836,7 @@ HAVING AVG(age) > 40
 Group functions group together rows and then apply the grouping functions to each group. The result
 is one row per group.
 
-With window functions, a set of underlying rows is defined and the window function operates on each
+With window functions, a set of underlying rows is defined, and the window function operates on each
 row.
 
 <a name="grouping_sets"></a>
@@ -1859,6 +1933,68 @@ GROUP BY ROLLUP(year, month)
 
 ![ROLLUP results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/ROLLUP.png" | absolute_url }})
 
+<a name="grouping_and_grouping_id"></a>
+
+#### GROUPING and GROUPING_ID
+
+[Official documentation on `GROUPING`][microsoft-grouping]<br/>
+[Official documentation on `GROUPING_ID`][microsoft-grouping-id]<br/>
+[Codingsight on `GROUPING` and `GROUPING_ID`][codingsight-grouping-and-grouping-id]
+
+`GROUPING()` and `GROUPING_ID()` are used together with `GROUP BY`.
+
+`GROUPING()` is used to determine whether a column is aggregated or not.
+
+Example:
+
+```sql
+SELECT
+    year
+  , month
+  , AVG(profit)       AS 'Average profit'
+  , GROUPING(month)   AS 'Grouping (month)'
+  , GROUPING(year)    AS 'Grouping (year)'
+FROM sales
+GROUP BY CUBE (month, year)
+ORDER BY GROUPING_ID(month, year)
+```
+
+![GROUPING results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/GROUPING-results.png" | absolute_url }})
+
+`GROUPING()` will return 1 if the given column was aggregated and 0 otherwise. From the results
+above, we can see that the rows were year was aggregated will have `NULL` in the year cell. This
+means `GROUPING(year)` will return 0. The same is true for month were months are aggregated.
+
+`GROUPING_ID()` calculates the level of grouping. When `GROUPING_ID()` is used with the same
+arguments as `GROUP BY`, it will do the following:
+
+* Go through every argument to `GROUPING_ID(arg1, arg2, ...)` and:
+  * Calculate `GROUPING(arg1)`. E.g. 1.
+  * Calculate `GROUPING(arg2)`. E.g. 0.
+  * etc.
+* Concatenate the `GROUPING()` results together. E.g. 10 (binary).
+* The final value is represented in decimal format. E.g. 3.
+
+Example:
+
+```sql
+SELECT
+    year
+  , month
+  , AVG(profit)              AS 'Average profit'
+  , CAST(GROUPING(month) AS VARCHAR(1)) +
+    CAST(GROUPING(year)  AS VARCHAR(1))
+                             AS 'GROUPING_ID (binary)'
+  , GROUPING_ID(month, year) AS 'GROUPING_ID (decimal)'
+FROM sales
+GROUP BY CUBE (month, year)
+ORDER BY GROUPING_ID(month, year)
+```
+
+![GROUPING results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/GROUPING_ID-results.png" | absolute_url }})
+
+* The argument to `GROUPING_ID` has to be the same as the argument to `GROUP BY`.
+
 <a name="pivot_and_unpivot_statements"></a>
 
 #### PIVOT and UNPIVOT statements
@@ -1904,6 +2040,28 @@ FROM insurancesPivotedCTE
 <a name="null_values_in_pivot_and_unpivot"></a>
 
 #### NULL values in PIVOT and UNPIVOT
+
+`ISNULL()` can be used to change the NULLs into something else.
+
+```sql
+...
+WITH insurancesPivotedCTE AS
+(
+  SELECT
+      customerId        -- grouping column
+    , insuranceType     -- spreading column
+    , policyNo          -- aggregation column
+  FROM insurances
+)
+SELECT customerId,
+      ISNULL([Life]     , 0) AS Life
+    , ISNULL([Car]      , 0) AS Car
+    , ISNULL([Fire]     , 0) AS Fire
+    , ISNULL([Liability], 0) AS Liability
+FROM insurancesPivotedCTE
+  PIVOT (MAX(policyNo) FOR insuranceType  -- aggregate and spreading column
+      IN ([Life], [Car], [Fire], [Liability])) AS P
+```
 
 <a name="window_functions"></a>
 
@@ -2049,7 +2207,7 @@ SQL Server 2016 or later is needed to use temporal tables.
 Temporal tables are tables that keep a full history of data changes, rather than just the data at the
 current time. This makes it possible to retrieve data from any point in the past.
 
-Temporal tables basically consists of a pair of tables: a current table and a history table. Both tables
+Temporal tables basically consist of a pair of tables: a current table and a history table. Both tables
 have two columns, in addition to the ordinary data columns, that contain period start and period end.
 The two period columns are both of `DATETIME2` type.
 
@@ -2140,7 +2298,7 @@ FOR SYSTEM_TIME
 
 ![Query results with AS OF]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/system-versioned-table-query-history-AS-OF.png" | absolute_url }})
 
-To drop a system-versioned table, you have to turn off system versioning and drop both the system
+To drop a system-versioned table, you must turn off system versioning and drop both the system
 versioned table and history table.
 
 Example:
@@ -2300,7 +2458,7 @@ FOR XML PATH ('Person')
 [Official documentation][microsoft-openxml]
 
 `OPENXML` can be used to parse XML and return the values as rows and columns. `sp_xml_preparedocument`
-is used to prepare the XML for parsing. `sp_xml_removedocument` has to be used after parsing the XML.
+is used to prepare the XML for parsing. `sp_xml_removedocument` must be used after parsing the XML.
 Preparing is not needed when the XML is typed.
 
 Example with single element containing sub elements:
@@ -2739,7 +2897,7 @@ Usage:
 SELECT * FROM GetMostProfitableSales(3)
 ```
 
-- The return statements has to contain a definition of the output table.
+- The return statements must contain a definition of the output table.
 - `BEGIN` and `END` are needed, because there are multiple statements in the function body.
 
 <a name="scalar_valued_function"></a>
@@ -2776,7 +2934,7 @@ PRINT @BirthMonth   -- prints 11
 #### Functions in general
 
 - User-defined functions can be used in queries.
-- Have to return a value.
+- Must return a value.
 - Cannot use `PRINT` or `SELECT` inside them.
 - Can have schema bindings.
 
@@ -2929,7 +3087,7 @@ procedures*
 
 A transaction is a unit of work. Transactions are used to get the following properties:
 
-- Atomicity: everything happens or nothing happens.
+- Atomicity: everything happens, or nothing happens.
 - Consistency: the database should transition to one consistent state to another.
 - Isolation: intermediate states are only visible to the transaction.
 - Durability: a committed transaction will survive permanently.
@@ -2977,8 +3135,17 @@ SELECT * FROM customers
 Because the transaction was committed it will have the Trevor Tate customer.
 
 `SET XACT_ABORT ON` can be used to get more consistent behavior when an error occurs in the
-transaction. When it's on and an error occurs, the execution of code is aborted and the transaction
+transaction. When it's on and an error occurs, the execution of code is aborted, and the transaction
 is rolled back automatically.
+
+`@@TRANCOUNT` returns a number. It will increment when `BEGIN TRANSACTION` runs and decrement when
+`COMMIT` is run. `ROLLBACK TRANSACTION` (except with a savepoint) will set `@@TRANCOUNT` to 0.
+`@@TRANCOUNT` can therefore be used to check if we are in an open transaction.
+
+`XACT_STATE()` can also be used to check the status of a transaction. It returns:
+  * 0 when no transaction is open.
+  * 1 when the transaction is open and committable.
+  * -1 when the transaction is doomed.
 
 <a name="try_catch"></a>
 
@@ -3043,7 +3210,7 @@ SQL Server has the following functions that provide information about an error t
 
 Note:
 
-- They all have to be used within a `CATCH` block.
+- They must all be used within a `CATCH` block.
 - Error functions return NULL outside a CATCH block.
 - Error functions return info about the innermost CATCH block, if there are several nested CATCH
   blocks.
@@ -3107,7 +3274,7 @@ RAISERROR('Error message: %s, %s', 16, 1, 'test1', 'test2')
 There two extra options that can be added to `RAISERROR()`:
 
 - `WITH NOWAIT`: used to raise the error immediately, rather than wait until the buffer is full.
-- `WITH LOG`: have to be used for severity 19 and up.
+- `WITH LOG`: logs the error in the error and application log, and required for severity 19 and up.
 
 Example:
 
@@ -3117,7 +3284,7 @@ RAISERROR('Error message', 22, 1) WITH LOG
 ```
 
 - `RAISERROR` is usually used with severity level 16.
-- `PRINT` is a stripped down version of `RAISERROR`. `PRINT` always uses severity level 0.
+- `PRINT` is a stripped-down version of `RAISERROR`. `PRINT` always uses severity level 0.
 
 <a name="throw_vs_raiserror"></a>
 
@@ -3171,13 +3338,13 @@ Important things to take into account when choosing a data type:
 
 - The data type should represent the model.
 - Data types acts as constraints. A proper date type should be chosen to enforce integrity in the
-  database. E.g. an integer can not be stored in a `VARCHAR`, and a character string can not be
+  database. E.g. an integer cannot be stored in a `VARCHAR`, and a character string can not be
   stored in an `INT`.
 - The size of the data type is important. If an attribute can vary between 0 and 100, a `TINYINT`
   should be used over `INT`, as `TINYINT` only needs 1 byte whereas `INT` requires 4 bytes. The
   smallest data type that suits our needs, in the long run, should be used.
-- `FLOAT` and `REAL` are only approximate. If a value has to be represented with preciseness then
-  a exact numeric type should be used.
+- `FLOAT` and `REAL` are only approximate. If a value has to be represented with preciseness then,
+  an exact numeric type should be used.
 - When `CHAR(X)` is used, it will always use a storage of X characters, even if less characters
   are specified. While this may take more space than a `VARCHAR(20)`, it makes updates faster.
 - When `VARCHAR(Y)` is used, it will use less storage than `CHAR(Y)`, because `VARCHAR` only stores
@@ -3192,7 +3359,7 @@ Important things to take into account when choosing a data type:
 
 [Official documentation on data type precedence][microsoft-data-type-precedence]
 
-Literals have to be on the correct form.
+Literals must be on the correct form.
 
 | Type       | Literal                  |
 |------------|--------------------------|
@@ -3343,7 +3510,8 @@ the differences between `ISNULL()` and `COALESCE()`:
 
 ## Not part of the official syllabus
 
-The things in this chapter is not part of the official syllabus, but should be known about anyway.
+The things in this chapter is not part of the official syllabus but should be known about anyway.
+I don't know if spatial data types will show up on the exam, but cursors will for sure.
 
 <a name="spatial_data"></a>
 
@@ -3418,8 +3586,14 @@ FROM employees
 #### Cursors
 
 - A control structure that enables traversal over the records in a database.
-- Similar to an iterator in programming languages.
+- Like an iterator in programming languages.
 - A pointer to one row in a set of rows.
+- Remember **DOFCD**:
+  * Declare
+  * Open
+  * Fetch next row
+  * Close
+  * Deallocate
 
 Example:
 
@@ -3467,6 +3641,8 @@ DEALLOCATE cursor_test
 [microsoft-cte]: https://docs.microsoft.com/en-us/sql/t-sql/queries/with-common-table-expression-transact-sql
 [microsoft-group-by]: https://docs.microsoft.com/en-us/sql/t-sql/queries/select-group-by-transact-sql
 [microsoft-having]: https://docs.microsoft.com/en-us/sql/t-sql/queries/select-having-transact-sql
+[microsoft-grouping]: https://docs.microsoft.com/en-us/sql/t-sql/functions/grouping-transact-sql
+[microsoft-grouping-id]: https://docs.microsoft.com/en-us/sql/t-sql/functions/grouping-id-transact-sql
 [microsoft-pivot-unpivot]: https://docs.microsoft.com/en-us/sql/t-sql/queries/from-using-pivot-and-unpivot
 [microsoft-ranking-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/ranking-functions-transact-sql
 [microsoft-analytical-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/analytic-functions-transact-sql
@@ -3496,6 +3672,7 @@ DEALLOCATE cursor_test
 [essentialsql-recursive-ctes]: https://www.essentialsql.com/recursive-ctes-explained/
 [red-gate-grouping-sets]: https://www.red-gate.com/simple-talk/sql/t-sql-programming/summarizing-data-using-grouping-sets-operator/
 [red-gate-spatial-data]: https://www.red-gate.com/simple-talk/sql/t-sql-programming/introduction-to-sql-server-spatial-data/
+[codingsight-grouping-and-grouping-id]: https://codingsight.com/understanding-grouping-and-grouping_id-functions-in-sql-server/
 [stackoverflow-union-and-union-all]: https://stackoverflow.com/questions/49925/what-is-the-difference-between-union-and-union-all
 [stackoverflow-where-clause-sargability]: https://stackoverflow.com/questions/799584/what-makes-a-sql-statement-sargable
 [lobsterpot-sargable-functions]: http://blogs.lobsterpot.com.au/2010/01/22/sargable-functions-in-sql-server/

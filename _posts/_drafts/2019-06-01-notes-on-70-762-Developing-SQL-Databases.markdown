@@ -10,8 +10,7 @@ which is a part of [MCSA: SQL 2016 Database Development][microsoft-mcsa-sql-2016
 
 This is for the syllabus as it was in June 2019. The syllabus might change in the future. I've mainly
 taken notes from the official documentation and the [official exam book][amazon-developing-sql-databases].
-I recommend getting the book to make sure you know everything that has to be known at the exam. I
-also recommend reading some of the articles on Erland Sommerskog's web page, especially the articles
+I recommend reading some of the articles on Erland Sommerskog's web page, especially the articles
 on [error handling][erland-sommerskog-error-handling].
 
 ---

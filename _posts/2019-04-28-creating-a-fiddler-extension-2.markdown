@@ -16,7 +16,7 @@ we see this:
 
 ![XML pretty-printed in Fiddler]({{ "/assets/creating-a-fiddler-extension-2/xml-pretty.png" | absolute_url }})
 
-## Creating a custom inspector
+## Creating a custom response inspector
 
 I assume the project has been set up properly already (see the first post). As a recap, setting
 up a new project consists of creating a new class library project, adding a reference to
@@ -164,7 +164,7 @@ taskkill /im fiddler.exe /t /f 2>&1 | exit /B 0
 Post-build event:
 
 ```
-XCOPY "$(TargetPath)" "%25userprofile%25\Documents\Fiddler2\Inspectors\" /S /Y
+XCOPY "$(TargetPath)" "%userprofile%\Documents\Fiddler2\Inspectors\" /S /Y
 ```
 
 The pre-build event will close Fiddler when building and the post-build event will copy the compiled
