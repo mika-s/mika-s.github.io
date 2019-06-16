@@ -15,9 +15,9 @@ also recommend reading some of the articles on Erland Sommerskog's web page, esp
 on [error handling][erland-sommerskog-error-handling].
 
 Microsoft likes to ask questions on features that are new in the latest version of SQL Server. This
-is done to make sure people with an older version of the certification can't just pass without
-reading for the exam. SQL Server 2016 introduced JSON and temporal tables, so make sure you know
-those topics very well.
+is done to make sure people with an older version of the certification can't pass without studying
+when going for the newest version of the certification. SQL Server 2016 introduced JSON and temporal
+tables, so make sure you know those topics very well.
 
 ---
 
@@ -370,6 +370,8 @@ multiple JOIN operators using AND and OR; determine the correct results when pre
 multi-table SELECT statements and source data; write queries with NULLs on joins*
 
 ### Joins
+
+[Official documentation][microsoft-joins]
 
 These tables are used in this chapter:
 
@@ -809,7 +811,8 @@ but uses pattern expressions.
 Example:
 
 ```sql
-
+SELECT PATINDEX('%test%', 'this is a test') -- outputs 11
+SELECT PATINDEX('%t__s%', 'This is a test') -- outputs 1
 ```
 
 `LEN()` returns the character length of a string.
@@ -823,6 +826,56 @@ SELECT LEN(@str)  -- outputs 4
 ```
 
 Trailing spaces are not counted.
+
+`REPLACE()` replaces a substring in a string with a new substring.
+
+Example:
+
+```sql
+SELECT REPLACE('2019-05-18', '-', '/')  -- outputs '2019/05/18'
+```
+
+`REPLICATE()` replicates a string a given number of times.
+
+Example:
+
+```sql
+SELECT REPLICATE('test ', 2)  -- outputs 'test test '
+```
+
+`STUFF()` removes a given number of characters in a string and then inserts a new substring in
+the same place.
+
+Example:
+
+```sql
+SELECT STUFF('test', 1, 2, 'a')  -- outputs 'ast'
+```
+
+`UPPER()`, `LOWER()`, `LTRIM()` and `RTRIM()` can be used to format strings.
+
+Example:
+
+```sql
+SELECT LOWER('Test')      -- outputs 'test'
+SELECT UPPER('Test')      -- outputs 'TEST'
+SELECT LTRIM('  Test  ')  -- outputs 'Test  '
+SELECT RTRIM('  Test  ')  -- outputs '  Test'
+```
+
+`STRING_SPLIT()` can be used to split a string given a delimiter.
+
+Example:
+
+```sql
+SELECT value FROM STRING_SPLIT('123;456;789', ';')
+
+/* Output is
+1   123
+2   456
+3   789
+*/
+```
 
 <a name="date_related_functions"></a>
 
@@ -1087,6 +1140,15 @@ SELECT NEWID()  -- outputs A182DF6A-80AD-4F23-870F-B0BC6973D1C2
 
 `NEWSEQUENTIALID()` can be used to generate always-increasing GUIDs. Can only be used in default
 constraints.
+
+`SCOPE_IDENTITY()` returns the last id inserted into a table with an identity column. It has one of
+these scopes:
+* stored procedure
+* trigger
+* function
+* batch
+
+This is unlike `@@IDENTITY`, which is not limited to a scope.
 
 ---
 
@@ -2037,6 +2099,8 @@ FROM insurancesPivotedCTE
       IN ([Life], [Car], [Fire], [Liability])) AS P
 ```
 
+![PIVOT results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/PIVOT.png" | absolute_url }})
+
 <a name="null_values_in_pivot_and_unpivot"></a>
 
 #### NULL values in PIVOT and UNPIVOT
@@ -2044,7 +2108,6 @@ FROM insurancesPivotedCTE
 `ISNULL()` can be used to change the NULLs into something else.
 
 ```sql
-...
 WITH insurancesPivotedCTE AS
 (
   SELECT
@@ -2062,6 +2125,8 @@ FROM insurancesPivotedCTE
   PIVOT (MAX(policyNo) FOR insuranceType  -- aggregate and spreading column
       IN ([Life], [Car], [Fire], [Liability])) AS P
 ```
+
+![PIVOT with ISNULL results]({{ "/assets/notes-on-70-761-Querying-Data-with-Transact-SQL/PIVOT-with-ISNULL.png" | absolute_url }})
 
 <a name="window_functions"></a>
 
@@ -2955,6 +3020,16 @@ check whether the rows should be inserted/deleted or not.
 Triggers should not be used for ordinary integrity checks. Native constraints (check constraint,
 uniqueness, etc.) should be used instead. This is because triggers have a performance overhead.
 
+Types of triggers:
+
+- AFTER: starts after the execution that fired the trigger. After constraints. Will not be fired if
+  the execution failed.
+- INSTEAD OF: starts before the execution that fired the trigger.
+- CLR triggers: written in .NET languages. Not part of the syllabus.
+- Logon triggers: run when a user session is established. Not part of the syllabus.
+
+Example:
+
 ```sql
 CREATE TRIGGER dbo.accounts_trgi ON dbo.accounts AFTER INSERT
 AS
@@ -3618,6 +3693,59 @@ CLOSE cursor_test
 DEALLOCATE cursor_test
 ```
 
+`UPDATE <table> WHERE CURRENT OF <cursor>` can be used to update the row the cursor is at.
+
+Example:
+
+```sql
+DECLARE @lastName  VARCHAR(200)
+
+DECLARE MyCursor CURSOR FOR
+  SELECT lastName FROM customers
+
+OPEN MyCursor
+
+FETCH NEXT FROM MyCursor INTO @lastName
+
+WHILE @@FETCH_STATUS = 0  
+BEGIN
+  IF @lastName IS NULL
+    UPDATE customers SET lastName = 'To delete'
+    WHERE CURRENT OF MyCursor
+
+  FETCH NEXT FROM MyCursor INTO @lastName
+END
+
+CLOSE MyCursor
+DEALLOCATE MyCursor
+```
+
+`DELETE <table> WHERE CURRENT OF <cursor>` can be used to delete the row the cursor is at.
+
+Example:
+
+```sql
+DECLARE @lastName  VARCHAR(200)
+
+DECLARE MyCursor CURSOR FOR
+  SELECT lastName FROM customers
+
+OPEN MyCursor
+
+FETCH NEXT FROM MyCursor INTO @lastName
+
+WHILE @@FETCH_STATUS = 0  
+BEGIN
+  IF @lastName IS NULL
+    DELETE customers WHERE CURRENT OF MyCursor
+
+  FETCH NEXT FROM MyCursor INTO @lastName
+END
+
+CLOSE MyCursor
+DEALLOCATE MyCursor
+```
+
 [microsoft-mcsa-sql-2016-database-development]: https://www.microsoft.com/en-us/learning/mcsa-sql2016-database-development-certification.aspx
 [microsoft-70-761-curriculum]: https://www.microsoft.com/en-us/learning/exam-70-761.aspx
 [microsoft-select]: https://docs.microsoft.com/en-us/sql/t-sql/queries/select-transact-sql
@@ -3625,6 +3753,7 @@ DEALLOCATE cursor_test
 [microsoft-offset-fetch]: https://docs.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql#using-offset-and-fetch-to-limit-the-rows-returned
 [microsoft-union]: https://docs.microsoft.com/en-us/sql/t-sql/language-elements/set-operators-union-transact-sql
 [microsoft-except-intersect]: https://docs.microsoft.com/en-us/sql/t-sql/language-elements/set-operators-except-and-intersect-transact-sql
+[microsoft-joins]: https://docs.microsoft.com/en-us/sql/relational-databases/performance/joins
 [microsoft-deterministic-and-non-deterministic-functions]: https://docs.microsoft.com/en-us/sql/relational-databases/user-defined-functions/deterministic-and-nondeterministic-functions
 [microsoft-conversion-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/conversion-functions-transact-sql
 [microsoft-aggregate-functions]: https://docs.microsoft.com/en-us/sql/t-sql/functions/aggregate-functions-transact-sql

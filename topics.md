@@ -18,6 +18,10 @@ permalink: /topics/
 * [Creating a Fiddler extension - part 1 (initial setup)]({% post_url 2019-04-09-creating-a-fiddler-extension-1 %})
 * [Creating a Fiddler extension - part 2 (custom response inspector)]({% post_url 2019-04-28-creating-a-fiddler-extension-2 %})
 
+{% comment %}
+* [Creating a Fiddler extension - part 3 (custom request inspector)]({% post_url 2019-06-08-creating-a-fiddler-extension-3 %})
+{% endcomment %}
+
 ## Various debugging
 
 * [Printing all arguments to a SQL stored procedure (for SQL Server)]({% post_url 2019-01-13-printing-all-arguments-to-an-sql-stored-procedure %})

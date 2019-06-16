@@ -5,9 +5,9 @@ date:   2017-12-05 12:00:00 +0100
 categories: javascript colors hsl
 ---
 
-Sometimes we need to generate a range of random colors. This can, for example, be when creating graphs where
-every curve should have a different color in order to distinguish the curves from each other. A decent first
-attempt at creating a random-color generator could be a function like this:
+Sometimes we need to generate a range of random colors. This can, for example, be when creating
+graphs where every curve should have a different color to distinguish the curves from each other.
+A decent first attempt at creating a random-color generator could be a function like this:
 
 ```javascript
 function randomRgbaString (alpha) {
@@ -26,9 +26,9 @@ let colors = [];
 for (let i = 0; i < 10; i++) colors.push(randomRgbaString(1));
 ```
 
-This generates [rgba strings][mdn-color] that represents colors in CSS. `alpha` is the alpha-channel, which
-represents transparency. It's not important here and is simply set to 1 (no transparency). The color
-values in the string are random values between 0 and 255, e.g.
+This generates [rgba strings][mdn-color] that represents colors in CSS. `alpha` is the alpha-channel,
+which represents transparency. It's not important here and is simply set to 1 (no transparency).
+The color values in the string are random values between 0 and 255, e.g.
 
 ```javascript
 rgba(127,2,241,1)
@@ -54,14 +54,15 @@ A problem quickly arises when we, for example, generate 10 random colors:
   </tr>
 </table>
 
-Several of the colors look similar, making it hard to distinguish them from each other. So we don't really
-want the colors completely random, we want them spread apart from each other. This is easily done with HSL
-colors.
+Several of the colors look similar, making it hard to distinguish them from each other. So we don't
+really want the colors completely random, we want them spread apart from each other. This is easily
+done with HSL colors.
 
 ### HSL
 
-Hue-Saturation-Lightness (HSL) is an alternative to the RGB color model. Rather than having three values
-that represents red, green and blue, we now have three values representing hue, saturation and lightness.
+Hue-Saturation-Lightness (HSL) is an alternative to the RGB color model. Rather than having three
+values that represents red, green and blue, we now have three values representing hue, saturation
+and lightness.
 
 HSL has a cylindrical geometry, as seen in the image below.
 
@@ -72,9 +73,9 @@ HSL has a cylindrical geometry, as seen in the image below.
 
 **Hue:**
 
-Hue is the perceived color, for example red, green, blue or yellow. The unit of hue is degrees, because the
-HSL model is represented as a cylinder with hue being the circular coordinate. Red is 0°, green is 120° and
-blue is 240°.
+Hue is the perceived color, for example red, green, blue or yellow. The unit of hue is degrees,
+because the HSL model is represented as a cylinder with hue being the circular coordinate. Red is
+0°, green is 120° and blue is 240°.
 
 <table style="text-align: center">
   <tr>
@@ -105,8 +106,8 @@ The colors above all have constant saturation and lightness.
 
 **Saturation:**
 
-Saturation represents how "colorful" the color is. It has a value between 0 and 100%. 0% is unsaturated
-(gray), while 100% is full saturation.
+Saturation represents how "colorful" the color is. It has a value between 0 and 100%. 0% is
+unsaturated (gray), while 100% is full saturation.
 
 The table below shows various hues with different values of saturation. The saturation
 increases the further right you go in the table. The lightness is 50% for all the colors.
@@ -323,13 +324,13 @@ further right you go in the table. The saturation is 100% for all the colors.
 
 ### Code
 
-Using this information we can create a function that generates colors as `hsla()` strings, which are also
-supported by CSS. The strings should be returned in an array and the colors should not be similar to each
-other.
+Using this information we can create a function that generates colors as `hsla()` strings, which
+are also supported by CSS. The strings should be returned in an array and the colors should not be
+similar to each other.
 
-The perceived color is basically the hue, which means we can keep the saturation and lightness constant. The
-number of colors we want to generate is `amount`. By dividing 360° by `amount` we get the difference between
-the hues of the returned colors.
+The perceived color is basically the hue, which means we can keep the saturation and lightness
+constant. The number of colors we want to generate is `amount`. By dividing 360° by `amount` we get
+the difference between the hues of the returned colors.
 
 E.g. `amount = 2` gives the hues 0° and 180°. `amount = 3` gives the hues 0°, 120° and 240°.
 

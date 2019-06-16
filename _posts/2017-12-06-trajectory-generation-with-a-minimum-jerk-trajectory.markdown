@@ -5,48 +5,47 @@ date:   2017-12-06 12:00:00 +0100
 categories: python control-theory trajectory-generation
 ---
 
-[Trajectory generators][stanford-handout-trajectory] are necessary in control systems when we
-want to move something smoothly from some initial position to another position. They are often
-very advanced and derived from first principles for a particular system. So I was searching
-the Internet for something that was fast and easy to implement and luckily enough I found the
+[Trajectory generators][stanford-handout-trajectory] are necessary in control systems when we want
+to move something smoothly from some initial position to another position. They are often very
+advanced and derived from first principles for a particular system. So I was searching the Internet
+for something that was fast and easy to implement and luckily enough I found the
 [minimum jerk trajectory][shadmehrlab-mjt].
 
-The minimum jerk trajectory is based on minimizing the sum of the squared jerk (time derivative
-of acceleration) along its trajectory. I won't go into details on how it's derived, but just
-show the final equation in the paper:
+The minimum jerk trajectory is based on minimizing the sum of the squared jerk (time derivative of
+acceleration) along its trajectory. I won't go into details on how it's derived, but just show the
+final equation in the paper:
 
 ![Position equation]({{ "/assets/trajectory-generation-with-a-minimum-jerk-trajectory/pos-equation.png" | absolute_url }}){: style="display: block; margin: auto;" }
 
-`x_i` is the current position, `x_f` is the setpoint, `t` is travel time, `d` is how long it
-should take to get from  the current position to the setpoint. The units of `x_i` and `x_f`
-are, for example, meters, degrees or radians. The dimension is distance. The unit of `t` and
-`d` is typically seconds. The dimension is time.
+`x_i` is the current position, `x_f` is the setpoint, `t` is travel time, `d` is how long it should
+take to get from  the current position to the setpoint. The units of `x_i` and `x_f` are, for
+example, meters, degrees or radians. The dimension is distance. The unit of `t` and `d` is typically
+seconds. The dimension is time.
 
-The velocity trajectory is also nice to have. You can't find it in the paper, but it's easy to
-find on our own by finding the time derivative of the position equation:
+The velocity trajectory is also nice to have. You can't find it in the paper, but it's easy to find
+on our own by finding the time derivative of the position equation:
 
 ![Velocity equation]({{ "/assets/trajectory-generation-with-a-minimum-jerk-trajectory/vel-equation.png" | absolute_url }}){: style="display: block; margin: auto;" }
 
-As you can see there is very few tuning parameters for the trajectory. The only thing that
-can be changed is `d`: the time it should take to get to the final position. The upside is that
-we have two explicit equations that are very easy to implement that will give a decent result.
+As you can see there is very few tuning parameters for the trajectory. The only thing that can be
+changed is `d`: the time it should take to get to the final position. The upside is that we have two
+explicit equations that are very easy to implement that will give a decent result.
 
 ### Code
 
 The equations can be translated into the code shown below. I chose to use Python here because it's
-borderline pseudo code and also allows me to use *matplotlib* for plotting.
+borderline pseudo code and allows me to use *matplotlib* for plotting.
 
 `mjtg` accepts the current position (start position), the setpoint (desired position), the
-frequency of the control system and a time parameter that indicates how long it should
-take to get from the current position to the setpoint.
+frequency of the control system and a time parameter that indicates how long it should take to get
+from the current position to the setpoint.
 
-We can also use average velocity rather than movement time, considering that we know the
-position delta and time (v = p/t after all). Average velocity is used in the example below.
+We can also use average velocity rather than movement time, considering that we know the position
+delta and time (v = p/t after all). Average velocity is used in the example below.
 
-We have to take frequency into account, otherwise the trajectory will run too fast (higher
-than 1 Hz) or too slow (lower than 1 Hz). It's not important in the sample below, but it has
-to be taken into account for real systems. `d` in the equations is replaced with timefreq =
-d * f.
+We must take frequency into account, otherwise the trajectory will run too fast (higher than 1 Hz)
+or too slow (lower than 1 Hz). It's not important in the sample below, but it has to be taken into
+account for real systems. `d` in the equations is replaced with timefreq = d * f.
 
 
 ```python
@@ -99,13 +98,13 @@ This is the result:
 
 ![Minimum jerk trajectory 1]({{ "/assets/trajectory-generation-with-a-minimum-jerk-trajectory/graph-0-180.png" | absolute_url }}){: style="display: block; margin: auto;" }
 
-The trajectory moves from 0 to 180° in a smooth manner. It takes 180° / 20°/sec = 9 sec as it's supposed to,
-because the average velocity is 20°/sec. The maximum velocity seems to be 1.87 times larger than the average
-velocity, quite consistently. It peaked at about 37.5°/sec for this example.
+The trajectory moves from 0 to 180° in a smooth manner. It takes 180° / 20°/sec = 9 sec as it's
+supposed to, because the average velocity is 20°/sec. The maximum velocity seems to be 1.87 times
+larger than the average velocity, quite consistently. It peaked at about 37.5°/sec for this example.
 
-If the maximum velocity of the process is known, and we want to go as fast as possible, we can choose the
-average velocity to be the maximum velocity divided by 1.87. E.g. a servo motor can move at maximum 50°/sec.
-That means the velocity in the code above would be set to 50/1.87 = 26.7°/sec.
+If the maximum velocity of the process is known, and we want to go as fast as possible, we can
+choose the average velocity to be the maximum velocity divided by 1.87. E.g. a servo motor can move
+at maximum 50°/sec. That means the velocity in the code above would be set to 50/1.87 = 26.7°/sec.
 
 ```python
 average_velocity = 26.7
