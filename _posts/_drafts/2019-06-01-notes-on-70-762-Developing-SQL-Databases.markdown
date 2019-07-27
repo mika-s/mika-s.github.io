@@ -283,9 +283,34 @@ stored procedures*
 
 #### Design stored procedure components and structure based on business requirements
 
+- Stored procedures can be used to create an abstraction layer between the user and the database.
+- Stored procedures can also be used to encapsulate complex code.
+
+Options when creating stored procedures:
+
+- `WITH ENCRYPTION`: The stored procedure source code is encrypted.
+- `WITH RECOMPILE`: The execution plan is not cached for the procedure, but calculated every time.
+- `WITH EXECUTE AS`: Change the security context for the procedure.
+- `WITH REPLICATION`: The procedure is specifically created for replication.
+
 <a name="implement_input_and_output_parameters"></a>
 
 #### Implement input and output parameters
+
+```sql
+CREATE PROCEDURE [dbo].[GetData]
+(
+	  @param1    VARCHAR(50)
+	, @param2    VARCHAR(50) = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON
+
+    SELECT FirstName, LastName
+    WHERE Param1 = @param1 AND Param2 <> @param2
+END
+```
 
 <a name="implement_table_valued_parameters"></a>
 
@@ -294,6 +319,26 @@ stored procedures*
 <a name="implement_return_codes"></a>
 
 #### Implement return codes
+
+```sql
+CREATE PROCEDURE [dbo].[GetData]
+(
+	  @param1    VARCHAR(50)
+	, @param2    VARCHAR(50) = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON
+
+    SELECT FirstName, LastName
+    WHERE Param1 = @param1 AND Param2 <> @param2
+    
+    IF @@ROWCOUNT = 0
+        RETURN -1
+    
+    RETURN 0
+END
+```
 
 <a name="streamline_existing_stored_procedure_logic"></a>
 
@@ -391,6 +436,62 @@ the resource and performance impact of given isolation levels*
 
 #### Identify differences between Read Uncommitted, Read Committed, Repeatable Read, Serializable, and Snapshot isolation levels
 
+`SET ISOLATION LEVEL` can be used to change isolation level on session level. The isolation level
+can also be changed on transaction level with hints.
+
+**Read Uncommitted:**
+
+- This is the least restricting isolation level.
+- Transaction can read other transaction's uncommited data.
+
+`NOLOCK` can be used as hint to use this isolation level.
+
+**Read Committed:**
+
+- This is the default level in SQL Server.
+- It is the second least restricting isolation level.
+- Uses pessimistic locking.
+- A transaction cannot read uncommitted data that is being changed by another transaction, until
+  the other transaction releases the lock.
+
+**Repeatable Read:**
+
+- Stricter level than read committed.
+- Values that are read by one transaction are not changed by another transaction.
+- Only protects existing data, not rows that are inserted later. Phantom reads are possible.
+
+**Serializable:**
+
+- The most pessimistic isolation level.
+- Prevent changes and insertions. Phantom reads are not possible.
+
+**Snapshot isolation levels:**
+
+**Snapshot:**
+
+- Optimistic lock.
+- Read and write operations in different transactions can run concurrently without blocking each
+  other.
+- The database has to be configured to allow it.
+- Cannot be used with distributed transactions.
+- Uses the tempdb database.
+
+**Read Committed Snapshot:**
+
+- Optimistic lock.
+- The database has to be configured to allow it.
+- Can be used with distributed transactions.
+
+
+| Isolation level          | Dirty reads | Non-repeatable reads | Phantom reads |
+|--------------------------|-------------|----------------------|---------------|
+| Read Uncommitted         | Yes         | Yes                  | Yes           |
+| Read Committed           | No          | Yes                  | Yes           |
+| Repeatable Read          | No          | No                   | Yes           |
+| Serializable             | No          | No                   | No            |
+| Snapshot                 | No          | No                   | No            |
+| Read Committed Snapshot  | No          | No                   | No            |
+
 <a name="define_results_of_concurrent_queries_based_on_isolation_level"></a>
 
 #### Define results of concurrent queries based on isolation level
@@ -398,6 +499,45 @@ the resource and performance impact of given isolation levels*
 <a name="identify_the_resource_and_performance_impact_of_given_isolation_levels"></a>
 
 #### Identify the resource and performance impact of given isolation levels
+
+**Read Uncommitted:**
+
+- Bad for integrity, but gives the best performance.
+- Does not aquire shared locks for read operations.
+- Ignores existing locks.
+
+**Read Committed:**
+
+- A shared lock is aquired for read operations for a single operation.
+- Exclusive lock is aquired for write operations.
+
+**Repeatable Read:**
+
+- A shared lock is aquired for the data for the entire transaction.
+- Concurrency is reduced because of a high level of locking.
+- Dead locks can become more frequent.
+
+**Serializable:**
+
+- Locks data for read operations.
+- Uses key-range locks for write operations.
+- Concurrency is reduced because of a high level of locking.
+
+Snapshot isolation levels:**
+
+**Snapshot:**
+
+- Locks are not used.
+- Deadlocks and lock escalations happens less frequently than for serializeable,
+  repeatable read, etc.
+- Read operations are not blocked by write operations, and vice versa.
+- Overhead: More space (in tempdb) and CPU power and memory is needed by SQL Server.
+- Update operations might be slower than other isolation levels. Long-running read operations also.
+
+**Read Committed Snapshot:**
+
+- Shared page and row locks are not used.
+- Write operations aquire exclusive locks.
 
 ---
 

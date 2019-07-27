@@ -114,10 +114,11 @@ if you care about the details.
 
 ### Setup
 
-The Lua scripts are placed in a sub folder of the plugins folder, which is found in the Wireshark
-root folder. The sub folder is named after the Wireshark version. E.g. *C:\Program Files\Wireshark\plugins\2.4.2*
-on Windows. The script will be active when Wireshark is started. You have to restart Wireshark
-after you do changes to the script, or reload all the Lua scripts with **Ctrl+Shift+L**.
+If you go to Help --> About Wireshark --> Folders, you'll find all the folders Wireshark reads Lua
+scripts from. Choose either the Personal Lua Plugins, Global Lua Plugins or Personal configuration
+folder. E.g. *C:\Program Files\Wireshark\plugins\2.4.2* on Windows. The script will be active when
+Wireshark is started. You have to restart Wireshark after you do changes to the script, or reload
+all the Lua scripts with **Ctrl+Shift+L**.
 
 I'm using the latest version at the current date. What I'm doing here might not work on earlier
 versions.

@@ -13,6 +13,8 @@ permalink: /topics/
 * [Creating a Wireshark dissector in Lua - part 5 (modularization)]({% post_url 2018-12-18-creating-a-wireshark-dissector-in-lua-5 %})
 * [Creating port-independent (heuristic) Wireshark dissectors in Lua]({% post_url 2018-12-30-creating-port-independent-wireshark-dissectors-in-lua %})
 
+* [Creating a Wireshark USB dissector in Lua - part 1]({% post_url 2019-07-20-creating-a-wireshark-usb-dissector-in-lua-1 %})
+
 ## Fiddler
 
 * [Creating a Fiddler extension - part 1 (initial setup)]({% post_url 2019-04-09-creating-a-fiddler-extension-1 %})
