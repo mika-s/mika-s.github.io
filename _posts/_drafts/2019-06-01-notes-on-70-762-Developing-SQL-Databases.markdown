@@ -159,6 +159,9 @@ indexes based on query plans*
 
 #### Design new indexes based on provided tables, queries, or plans
 
+- There can be only one columnstore index per table.
+- Hash indexes are only used on memory-optimized tables.
+
 <a name="distinguish_between_indexed_columns_and_included_columns"></a>
 
 #### Distinguish between indexed columns and included columns
@@ -188,17 +191,98 @@ necessary to design an updateable view, implement partitioned views, implement i
 
 #### Design a view structure to select data based on user or business requirements
 
+I have already written about views here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#views
+
+Views are usually made to encapsulate a query. This is done for the following reasons, according
+to the exam book:
+
+* To hide data. Either to create a new abstraction layer on top of a complex query, or to hide data
+  for security purposes.
+* To format data. The raw data in the tables can be formatted to be more suitable for customer
+  requirements. For example converting 0 to 'Female' and 1 to 'Male', if gender is stored in a
+  column with BIT data type.
+* Reporting. 
+* Provide a table-like interface for applications that only support tables. Not all applications
+  or tools can use stored procedures or user-defined functions, but almost all can use views.
+
 <a name="identify_steps_to_design_updatable_view"></a>
 
 #### Identify the steps necessary to design an updateable view
+
+The following proerties are needed to be able to use `INSERT`, `UPDATE` and `DELETE` on a view:
+
+* Only one underlying table can be modified at a time. A view that references only one table will
+  almost always be editable. If the view contains joins it will be editable if none of the columns
+  from the joined tables are used.
+* A row that cannot be seen from the view (i.e. filtered away with `WHERE`), but is in one of the
+  underlying tables, cannot be updated or deleted.
+* If `WITH CHECK` is used, rows cannot be edited such that they are no longer visible to the view
+  after the update.
+* `INSTEAD OF` triggers can be used to make all views editable.
 
 <a name="implement_partioned_views"></a>
 
 #### Implement partitioned views
 
+A partitioned view is a view that uses `UNION ALL` to merge multiple tables into one result set.
+This can be useful when tables are physically split into partitions and stored on different servers,
+but should be treated as one table.
+
+Example:
+
+```sql
+CREATE TABLE People1
+(
+      Id        INT          NOT NULL
+        CONSTRAINT Pk_People1_Id PRIMARY KEY
+        CONSTRAINT Ck_People1_Id CHECK (1 <= Id AND Id < 20)
+    , FirstName VARCHAR(200) NOT NULL
+    , LastName  VARCHAR(200) NOT NULL
+)
+
+CREATE TABLE People2
+(
+      Id        INT          NOT NULL
+        CONSTRAINT Pk_People2_Id PRIMARY KEY
+        CONSTRAINT Ck_People2_Id CHECK (21 <= Id AND Id < 30)
+    , FirstName VARCHAR(200) NOT NULL
+    , LastName  VARCHAR(200) NOT NULL
+)
+
+GO
+
+CREATE VIEW PeoplePartitioned AS
+    SELECT * FROM People1
+    UNION ALL
+    SELECT * FROM People2
+
+GO
+
+INSERT INTO People1 (Id, FirstName, LastName) VALUES ( 1, 'Aaron', 'Smithson'), ( 2, 'Denise', 'Shanique')
+INSERT INTO People2 (Id, FirstName, LastName) VALUES (21, 'Sam',   'Crosette'), (22, 'Jaqlin', 'Bonaqua')
+
+SELECT *
+FROM PeoplePartitioned
+WHERE Id = 1
+```
+
+The query plan for the last query will look like this:
+
+![Query plan on partitioned view]({{ "/assets/notes-on-70-762-Developing-SQL-Databases/query-plan-partitioned-view.png" | absolute_url }})
+
+SQL Server will only use one index, instead of using both the index for People1 and People2.
+
+Requirements for partitioned views:
+
+- `PRIMARY KEY` constraints are needed on the Id columns.
+- The identity column cannot use `IDENTITY(X,Y)` or a `DEFAULT` constraint.
+- `CHECK` constraints are needed to make sure the Ids are in the correct range. The ranges cannot overlap.
+
 <a name="implement_indexed_views"></a>
 
 #### Implement indexed views
+
+I have already written about indexed views here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#indexed_views
 
 ---
 
@@ -217,6 +301,9 @@ clustered columnstore indexes, implement columnstore index maintenance*
 <a name="determine_use_cases_for_columnstore_indexes"></a>
 
 #### Determine use cases that support the use of columnstore indexes
+
+- Only one columnstore index per table is supported.
+- Columnstore indexes are often used on fact tables in data warehouses.
 
 <a name="identify_proper_usage_of_columnstore_indexes"></a>
 
@@ -1036,6 +1123,58 @@ Database query plans*
 <a name="select_and_appropriate_service_tier_or_edition"></a>
 
 #### Select an appropriate service tier or edition
+
+The following editions of SQL Server 2016 are available:
+
+* Express
+* Web
+* Standard
+* Enterprise
+* Developer
+* Evaluation
+
+**Express** is free, but has limited features. It's best suited for small websites and applications.
+The maximum database size is 10 GB, maximum memory is 1 GB and supports 1 CPU or 4 cores. Express
+has the following editions:
+
+* LocalDB: a local embedded database
+* Express: a simple version of SQL Server
+* Express with Advanced Series: like Express, but with Full Text Search and Reporting Services
+  capabilities
+
+**Web** can use up to 64 GB of memory and supports 4 CPUs or 16 cores. Maximum database size is 524 PB.
+It is intended for use in web hosting and lacks many features.
+
+**Standard** can use up to 128 GB of memory and supports 4 CPUs or 24 cores. Maximum database size is
+524 PB. This edition has most features, such as BI, high-availability features, dynamic data masking
+etc.
+
+**Enterprise** is the full-fledged version of SQL Server. It has no limits on memory or number of CPUs
+or cores, other than the limits set by the operating system. Maximum database size is 524 PB. The
+Enterprise edition has all available features.
+
+**Developer** has the same features as the Enterprise edition, but cannot be used in a production
+environment. It's intended to be used by developers, for testing, etc.
+
+**Evaluation** is the free trial version. It is the Enterprise version, but only works for 180 days.
+
+The following service tiers are available in Azure:
+
+* Basic
+* Standard
+* Premium
+
+The data below are taken from the exam book, which is from 2017. The 2019 numbers are in parentheses
+if the values have changed.
+
+**Basic** has a maximum database size of 2 GB and a performance level of 5 DTUs. This tier is suitable
+for small applications with less demanding workloads.
+
+**Standard** has a maximum database size of 250 GB (1 TB) and performance levels between 10 and 100 (3000)
+DTUs. This is suitable when the database supports multiple applications or ordinary and large applications.
+
+**Premium** has a maximum database size of 1 TB (4 TB) and performance levels between 125 and 4000 DTUs.
+This is suitable for enterprise-level database requirements.
 
 <a name="optimize_database_file_and_tempdp_configuration"></a>
 
