@@ -252,17 +252,209 @@ given existing tables and constraints, identify proper usage of PRIMARY KEY cons
 
 #### Define table and foreign key constraints to enforce business rules
 
+Types of constraints:
+
+| Name        | Description                                                                  |
+|-------------|------------------------------------------------------------------------------|
+| PRIMARY KEY | Enforce primary key.                                                         |
+| FOREIGN KEY | Enforce relationships between two tables.                                    |
+| DEFAULT     | Provide a default value for a column if no value is provided during inserts. |
+| UNIQUE      | Enforce uniqueness for values in a column.                                   |
+| CHECK       | Do simple predicate checks for values during inserts or updates.             |
+
+Unique:
+
+- NULL is always unique. Special check has to be implemented if only one NULL is allowed.
+
+Check constraint:
+
+- Validate that an integer is within a range.
+- Enforce data format, e.g. SSN.
+- Enforce logic.
+- NULL is special.
+- Use `INSTEAD OF` triggers for more advanced cases.
+
 <a name="write_tsql_statements_to_add_constraints"></a>
 
 #### Write Transact-SQL statements to add constraints to tables
+
+When creating the table:
+
+Inline version:
+
+```sql
+CREATE TABLE Customers
+(
+      Id            INT             NOT NULL IDENTITY(1,1)  CONSTRAINT Pk_Id            PRIMARY KEY 
+    , FirstName     VARCHAR(200)    NOT NULL
+    , LastName      VARCHAR(200)    NOT NULL
+    , Age           INT             NOT NULL                CONSTRAINT Ch_Age           CHECK (18 <= Age AND Age < 100)
+    , Email         VARCHAR(150)    NOT NULL                CONSTRAINT Un_Email         UNIQUE
+    , IsDisabled    BIT             NOT NULL                CONSTRAINT Df_IsDisabled    DEFAULT (0)
+)
+
+CREATE TABLE Accounts
+(
+      Id            INT             NOT NULL IDENTITY(1,1)  CONSTRAINT Pk_AccId         PRIMARY KEY
+    , CustomerId    INT             NOT NULL                CONSTRAINT Fk_CustomerId    FOREIGN KEY REFERENCES dbo.Customers (Id)
+    , Balance       DECIMAL(10, 2)  NOT NULL                CONSTRAINT Df_Balance       DEFAULT (0.0)   
+)
+```
+
+Standalone version:
+
+```sql
+CREATE TABLE Customers
+(
+      Id            INT             NOT NULL IDENTITY(1,1)
+    , FirstName     VARCHAR(200)    NOT NULL
+    , LastName      VARCHAR(200)    NOT NULL
+    , Age           INT             NOT NULL
+    , Email         VARCHAR(150)    NOT NULL
+    , IsDisabled    BIT             NOT NULL                CONSTRAINT Df_IsDisabled    DEFAULT (0)
+
+    , CONSTRAINT Pk_CustId      PRIMARY KEY (Id)
+    , CONSTRAINT Ch_Age         CHECK (18 <= Age AND Age < 100)
+    , CONSTRAINT Un_Email       UNIQUE (Email)
+)
+```
+
+- `DEFAULT` constraints have to be inline.
+- If the check constraint is checking multiple columns, it has to be standalone.
+
+Adding constraints when table exists already:
+
+Foreign key:
+
+```sql
+ALTER TABLE Accounts
+    ADD CONSTRAINT Fk_CustomerId FOREIGN KEY (CustomerId) REFERENCES dbo.Customers (Id)
+```
+
+Default:
+
+```sql
+ALTER TABLE Customers
+    ADD CONSTRAINT Df_IsDisabled DEFAULT(0) FOR IsDisabled
+```
+	
+Unique:
+
+```sql
+ALTER TABLE Customers
+    ADD CONSTRAINT Un_Email UNIQUE (Email)
+```
+
+Check:
+
+```sql
+ALTER TABLE Customers
+    ADD CONSTRAINT Ch_Age CHECK (18 <= Age AND Age < 100)
+```
+
+
+- Different options: ON CASCADE, WITH CHECK, etc.
 
 <a name="identify_results_of_dml_statements_given_tables_and_constraints"></a>
 
 #### Identify results of Data Manipulation Language (DML) statements given existing tables and constraints
 
+Primary key constraints:
+
+Ok:
+
+Not ok:
+
+Foreign key constraints:
+
+Ok:
+
+Not Ok:
+
+```sql
+INSERT INTO Customers (FirstName, LastName, Age, Email) VALUES
+      ('John', 'Smith', 30, 'john@smith.com')
+    , ('Joey', 'Smith', 44, 'joey@smith.com')
+    , ('Anna', 'Smith', 47, 'anna@smith.com')
+    , ('Nick', 'Smith', 88, 'nick@smith.com')
+
+INSERT INTO Accounts (CustomerId) VALUES (1), (2), (3)
+
+DELETE FROM Customers WHERE Id = 1  -- will not work due to FK
+
+/*
+Msg 547, Level 16, State 0, Line 30
+The DELETE statement conflicted with the REFERENCE constraint "Fk_CustomerId". The conflict occurred in database "test", table "dbo.Accounts", column 'CustomerId'.
+The statement has been terminated.
+*/
+```
+
+Default constraints:
+
+Ok:
+
+Not ok:
+
+
+Unique constraints:
+
+Ok:
+
+This will be ok, as long as the email adresses don't exist in `Customers` already.
+
+```sql
+INSERT INTO Customers (FirstName, LastName, Age, Email) VALUES
+      ('Albert', 'Smith', 30, 'albert@example.com')
+    , ('Alan',   'Smith', 42, 'alan@example.com')
+```
+
+Not ok:
+
+This is not ok because the same email is provided twice, and therefore break the unique constraint.
+
+
+```sql
+INSERT INTO Customers (FirstName, LastName, Age, Email) VALUES
+      ('John', 'Smith', 30, 'john@example.com')
+    , ('John', 'Smith', 30, 'john@example.com')
+	
+/*
+Msg 2627, Level 14, State 1, Line 1
+Violation of UNIQUE KEY constraint 'Un_Email'. Cannot insert duplicate key in object 'dbo.Customers'. The duplicate key value is (john@example.com).
+The statement has been terminated.
+*/
+```
+
+Check contraints:
+
+Ok:
+
+- Use `WITH NOCHECK` when adding a check constraint on an already existing table, to ignore checking the already existing rows
+  in the column that's getting the check constraint.
+
+Not ok:
+
+This will not work due to the check constraint on age, that requires an age over or equal to 18.
+
+```sql
+INSERT INTO Customers (FirstName, LastName, Age, Email) VALUES
+      ('Alonso', 'Smith', 17, 'alonso@example.com')
+	  
+/*
+Msg 547, Level 16, State 0, Line 1
+The INSERT statement conflicted with the CHECK constraint "Ch_Age". The conflict occurred in database "test", table "dbo.Customers", column 'Age'.
+The statement has been terminated.
+*/
+```
+
 <a name="identify_proper_usage_of_primary_key_constraints"></a>
 
 #### Identify proper usage of PRIMARY KEY constraints
+
+- We typically create an Id column as the primary key.
+- `INT` is often used as the type of Id. `IDENTITY(X,Y)` is used to automatically increment the value.
+- GUIDs can be used as type for Id. This is slower than using integers, but makes it possible to create Ids on any computer.
+  GUIDs also take up a lot of space (16 bytes).
 
 ---
 
@@ -297,34 +489,90 @@ Options when creating stored procedures:
 
 #### Implement input and output parameters
 
+Creation:
+
 ```sql
-CREATE PROCEDURE [dbo].[GetData]
+CREATE PROCEDURE dbo.NewCustomer
 (
-	  @param1    VARCHAR(50)
-	, @param2    VARCHAR(50) = NULL
+      @FirstName    VARCHAR(200)
+    , @LastName     VARCHAR(200)
+    , @Id           INT            OUTPUT
 )
 AS
 BEGIN
     SET NOCOUNT ON
 
-    SELECT FirstName, LastName
-    WHERE Param1 = @param1 AND Param2 <> @param2
+    INSERT INTO dbo.Customers (FirstName, LastName) VALUES (@FirstName, @LastName)
+
+    SET @Id = SCOPE_IDENTITY()
 END
+```
+
+Usage:
+
+```sql
+DECLARE @Id VARCHAR(200)
+
+EXEC dbo.NewCustomer 'John', 'Smith', @Id OUTPUT
+
+PRINT @Id  -- outputs 1
 ```
 
 <a name="implement_table_valued_parameters"></a>
 
 #### Implement table-valued parameters
 
+Create a custom type first:
+
+```sql
+CREATE TYPE CustomerType AS TABLE
+(
+      FirstName VARCHAR(200)
+    , LastName  VARCHAR(200)
+)
+```
+
+Create the stored procedure with the custom type as parameter type. The `READONLY` keyword has to be used.
+
+```sql
+CREATE PROCEDURE dbo.NewCustomers
+(
+      @Customers    CustomerType    READONLY
+)
+AS
+BEGIN
+    SET NOCOUNT ON
+
+    INSERT INTO dbo.Customers (FirstName, LastName)
+    SELECT FirstName, LastName FROM @Customers
+END
+```
+
+Usage:
+
+```sql
+DECLARE @NewCustomers CustomerType
+
+INSERT INTO @NewCustomers (FirstName, LastName) VALUES
+    ('Jane', 'Doe'), ('Peter', 'Almone')
+
+EXEC dbo.NewCustomers @NewCustomers
+```
+
 <a name="implement_return_codes"></a>
 
 #### Implement return codes
 
+- Default return code is 0 if none is returned expicitly.
+- Positive value generally mean positive outcome.
+- Negative value generally mean negative outcome.
+- 0 as return value usually mean success, without any other information given.
+
 ```sql
 CREATE PROCEDURE [dbo].[GetData]
 (
-	  @param1    VARCHAR(50)
-	, @param2    VARCHAR(50) = NULL
+      @param1    VARCHAR(50)
+    , @param2    VARCHAR(50) = NULL
 )
 AS
 BEGIN
@@ -343,6 +591,9 @@ END
 <a name="streamline_existing_stored_procedure_logic"></a>
 
 #### Streamline existing stored procedure logic
+
+- Invalid use of search argument.
+- Parameter type mistmatch.
 
 <a name="implement_error_handling_and_transaction_login_in_stored_procedure"></a>
 
@@ -392,6 +643,60 @@ and non-deterministic functions*
 
 ## Manage database concurrency (25–30%)
 
+# Locks in general
+
+[Official documentation on locking][microsoft-locking-in-the-database-engine]
+[SQLTeam on locking in SQL Server][sqlteam-introduction-to-locking-in-sql-server]
+
+Here are some notes on locking, before going deeper into concurrency etc.
+
+- Locks can exist on rows, tables, pages or indexes.
+
+##### Lock modes
+
+[Official documentation][microsoft-lock-modes]
+
+"The lock mode defines the level of dependency the transaction has on the data."
+
+Intent shared lock (IS):
+
+    Intent locks are used to establish lock hierarchies.
+
+Shared lock (S):
+
+    Created when reading data in pessimistic locking model. Other transactions can read but not modify locked data.
+    The lock is released after the data is read, except in Read Repeatable or stricter isolation levels, or if
+    a lock hint is used to keep the shared lock.
+
+Intent exclusive (IX):
+
+    Intent locks are used to establish lock hierarchies.
+
+Exclusive lock (X):
+
+    Lock used for data-manipulation operations, such as `INSERT`, `UPDATE` or `DELETE`.
+    Exclusive locks will prevent other transactions of modifying data that is already being modified by the lock acquirer.
+    Data that are exclusive locked cannot be read either, unless the isolation level is Read Uncommited or the `NOLOCK`
+    hint is used.
+
+Update lock (U):
+
+    A combination of shared and exclusive lock. During an update the system has to find and then update a row.
+    This two-step process could create deadlocks, which is why Update locks are used.
+
+##### Lock granularity
+
+[Official documentation][microsoft-lock-granularity]
+
+"Locking at a smaller granularity, such as rows, increases concurrency but has a higher overhead because
+more locks must be held if many rows are locked. Locking at a larger granularity, such as tables, are
+expensive in terms of concurrency because locking an entire table restricts access to any part of the
+table by other transactions. However, it has a lower overhead because fewer locks are being maintained."
+
+- ROWLOCK
+- PAGLOCK
+- TABLOCKX
+
 <a name="implement_transactions"></a>
 
 # Implement transactions
@@ -439,6 +744,15 @@ the resource and performance impact of given isolation levels*
 `SET ISOLATION LEVEL` can be used to change isolation level on session level. The isolation level
 can also be changed on transaction level with hints.
 
+| Isolation level          | Dirty reads | Non-repeatable reads | Phantom reads |
+|--------------------------|-------------|----------------------|---------------|
+| Read Uncommitted         | Yes         | Yes                  | Yes           |
+| Read Committed           | No          | Yes                  | Yes           |
+| Repeatable Read          | No          | No                   | Yes           |
+| Serializable             | No          | No                   | No            |
+| Snapshot                 | No          | No                   | No            |
+| Read Committed Snapshot  | No          | No                   | No            |
+
 **Read Uncommitted:**
 
 - This is the least restricting isolation level.
@@ -481,16 +795,6 @@ can also be changed on transaction level with hints.
 - Optimistic lock.
 - The database has to be configured to allow it.
 - Can be used with distributed transactions.
-
-
-| Isolation level          | Dirty reads | Non-repeatable reads | Phantom reads |
-|--------------------------|-------------|----------------------|---------------|
-| Read Uncommitted         | Yes         | Yes                  | Yes           |
-| Read Committed           | No          | Yes                  | Yes           |
-| Repeatable Read          | No          | No                   | Yes           |
-| Serializable             | No          | No                   | No            |
-| Snapshot                 | No          | No                   | No            |
-| Read Committed Snapshot  | No          | No                   | No            |
 
 <a name="define_results_of_concurrent_queries_based_on_isolation_level"></a>
 
@@ -560,6 +864,14 @@ graphs, identify ways to remediate deadlocks*
 
 #### Identify lock escalation behaviors
 
+[Official documentation on lock escalation]: [microsoft-lock-escalation]
+[DBA Stack Exchange on lock escalation][stackexchange-dba-what-is-lock-escalation]
+
+Lock escalation is when SQL Server consolidates multiple locks into a higher-level lock. E.g.
+multiple row locks into table lock or multiple page locks into table lock. Lock escalation is done
+by the system in order to free up the memory that the finer-grained locks used, and thus increase
+performance. There is also a maximum number of allowed locks that the system cannot go over.
+
 <a name="capture_and_analyze_deadlock_graphs"></a>
 
 #### Capture and analyze deadlock graphs
@@ -620,6 +932,36 @@ and identify missing indexes, consolidate overlapping indexes*
 <a name="determine_the_accuracy_of_statistics_and_the_associated_impact_to_query_plans_and_performance"></a>
 
 #### Determine the accuracy of statistics and the associated impact to query plans and performance
+
+- When you create an index, SQL Server will create a statistics (database object).
+- A column has a certain cardinality. If a column has only unique values (e.g. primary key column),
+  it will have cardinality 1. Highly unique values in a column means high cardinality. When many of
+  the values are the same in the column, the cardinality is lower.
+- Use `DBCC SHOW_STATISTICS` to show statistics.
+- Statistics will by default be updated and created automatically. The following commands can be
+  used to change this behavior:
+  
+```sql
+ALTER DATABASE test
+    SET AUTO_UPDATE_STATISTICS OFF
+    
+ALTER DATABASE test
+    SET AUTO_UPDATE_STATISTICS_ASYNC OFF
+    
+ALTER DATABASE test
+    SET AUTO_CREATE_STATISTICS OFF
+```
+
+- SQL Server has a counter for each column with an index. When rows are inserted or modified this counter
+  will be incremented. When statistics is updated the counter is reset to 0. When the server reaches a
+  certain threshold it will update the statistics, if auto update is enabled.
+  
+- The thresholds are:
+    * One or more rows are added to an empty table.
+    * More than 500 rows are added to a table having fewer than 500 rows.
+    * More than 500 rows are added to a table having more than 500 rows, and the number of rows added are
+      more than a dynamic percentage of total rows. The dynamic percentage starts at ~20% and then reduces
+      with table size.
 
 <a name="design_statistics_mainentance_tasks"></a>
 
@@ -767,5 +1109,12 @@ between Extended Events Packages, Targets, Actions, and Sessions*
 
 [microsoft-mcsa-sql-2016-database-development]: https://www.microsoft.com/en-us/learning/mcsa-sql2016-database-development-certification.aspx
 [microsoft-70-762-curriculum]: https://www.microsoft.com/en-us/learning/exam-70-762.aspx
+[microsoft-locking-in-the-database-engine]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms190615(v=sql.105)
+[microsoft-lock-granularity]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms189849%28v%3dsql.105%29
+[microsoft-lock-modes]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms175519%28v%3dsql.105%29
+[microsoft-lock-escalation]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms184286(v=sql.105)
 [amazon-developing-sql-databases]: https://www.amazon.com/Exam-Ref-70-762-Developing-Databases/dp/1509304916
 [erland-sommerskog-error-handling]: http://www.sommarskog.se/error_handling/Part1.html
+[stackoverflow-what-are-row-page-and-table-locks]: https://stackoverflow.com/questions/9784172/what-are-row-page-and-table-locks-and-when-they-are-acquired
+[stackexchange-dba-what-is-lock-escalation]: https://dba.stackexchange.com/questions/12864/what-is-lock-escalation
+[sqlteam-introduction-to-locking-in-sql-server]: https://www.sqlteam.com/articles/introduction-to-locking-in-sql-server
