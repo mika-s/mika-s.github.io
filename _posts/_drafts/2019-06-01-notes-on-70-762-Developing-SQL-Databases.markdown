@@ -133,13 +133,183 @@ normalization, write table create statements, determine the most efficient data 
 
 #### Improve the design of tables by using normalization
 
+- **Natural key:** A unique key based on real-life values, such as email. Based on the other values in
+  the same row.
+- **Surrogate key:** A unique key that has no meaning outside a database environment. Not based on the
+  values in the same row.
+- **Candidate key:** A potential primary key. A candidate key is based on a combination of attributes
+  in a row that can be used to identify that row, without referring to any other data.
+
+##### Forms
+
+Listed below are requirements for the various normalization forms.
+
+**First normal form:**
+
+- The columns must be atomic.
+
+  *Example:*
+  
+  Instead of
+  
+  | Name            | Age |
+  |-----------------|-----|
+  | John, Smith     | 30  |
+  | Laura, Peterson | 77  |
+  
+  we do
+  
+  | FirstName | LastName | Age |
+  |-----------|----------|-----|
+  | John      | Smith    | 30  |
+  | Laura     | Peterson | 77  |
+  
+- All rows must contain the same number of values. The columns should not contain arrays.
+
+  Example:
+  
+  Instead of
+  
+  | CustomerId | Insurances              |
+  |------------|-------------------------|
+  | 1          | contents,house,accident |
+  | 2          | contents,car            |
+  
+  we do
+  
+  | CustomerId | Insurance |
+  |------------|-----------|
+  | 1          | contents  |
+  | 1          | house     |
+  | 1          | accident  |
+  | 2          | contents  |
+  | 2          | car       |
+
+**Second normal form:**
+
+- Is in first normal form.
+- All columns must be a fact about the entire primary key and not a subset of the primary key.
+
+The second requirement is only a concern if the primary key is composed of multiple columns.
+
+Example:
+
+Instead of
+
+| Manufacturer | ManufacturerCountry | Model      | Color  |
+|--------------|---------------------|------------|--------|
+| Specialized  | USA                 | Turbo Creo | Black  |
+| Specialized  | USA                 | Turbo Vado | Black  |
+| Bianchi      | Italy               | Infinito   | Green  |
+| Bianchi      | Italy               | Oltre      | Yellow |
+
+we do
+
+| Manufacturer | Model      | Color  |
+|--------------|------------|--------|
+| Specialized  | Turbo Creo | Black  |
+| Specialized  | Turbo Vado | Black  |
+| Bianchi      | Infinito   | Green  |
+| Bianchi      | Oltre      | Yellow |
+
+| Manufacturer | ManufacturerCountry |
+|--------------|---------------------|
+| Specialized  | USA                 |
+| Bianchi      | Italy               |
+
+**Third normal form:**
+
+- Is in second normal form.
+- All columns must be a fact about the entire primary key, and not any non-primary key columns.
+
+Example:
+
+Instead of
+
+we do
+
+**Boyce-Codd normal form:**
+
+Example:
+
+Instead of
+
+we do
+
 <a name="write_table_create_statements"></a>
 
 #### Write table create statements
 
+Tables have been created multiple places in this document, so I will not write anything about that
+here.
+
 <a name="determine_the_most_efficient_data_types_to_use"></a>
 
 #### Determine the most efficient data types to use
+
+Choosing the best type is important for the following reasons:
+
+- It serves as a first-level validation against faulty input. E.g. a SSN column with `VARCHAR(20)` type
+  can only store 20 characters.
+- It limits and models the domain data. E.g. the `DATE` type can only store dates.
+- It is important for performance.
+
+Choosing the correct type has already been written about here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#proper_data_types_for_elements_and_columns.
+
+##### Computed columns
+
+Computed columns are columns that are based on expressions.
+
+If the computed column is deterministic, it is persisted. If it's non-deterministic it will be
+computed at query-time.
+
+Example:
+
+```sql
+CREATE TABLE PeopleComputed
+(
+      Id        INT             NOT NULL    IDENTITY(1,1)
+    , FirstName VARCHAR(200)    NOT NULL
+    , LastName  VARCHAR(200)    NOT NULL
+    , Name AS CONCAT(FirstName, ' ', LastName)
+)
+
+INSERT INTO PeopleComputed (FirstName, LastName) VALUES ('Anna', 'Kessi')
+
+SELECT * FROM PeopleComputed
+```
+
+![Computed column results]({{ "/assets/notes-on-70-762-Developing-SQL-Databases/computed-column-results.png" | absolute_url }})
+
+The `PERSIST` keyword can be used to make SQL Server persist the computed column:
+
+```sql
+CREATE TABLE PeopleComputedPersisted
+(
+      Id        INT             NOT NULL    IDENTITY(1,1)
+    , FirstName VARCHAR(200)    NOT NULL
+    , LastName  VARCHAR(200)    NOT NULL
+    , Name AS CONCAT(FirstName, ' ', LastName) PERSISTED
+)
+```
+
+##### Dynamic data masking
+
+Dynamic data masking enables the possibility to mask data in columns from users, either fully or
+partially.
+
+Data mask functions:
+
+**Default:** Uses the default data mask of the used data type.
+
+**Email:** Masks an email to only show a couple of characters.
+
+**Random:** Mask a number data type by taking a random value in a range.
+
+**Partial:** Replace the center of a string with a fixed string. The beginning and ending
+are kept as they are.
+  
+- `NULL` will still be `NULL` after data masking. 
 
 ---
 
@@ -159,8 +329,10 @@ indexes based on query plans*
 
 #### Design new indexes based on provided tables, queries, or plans
 
+- There can be only one clustered index per table.
 - There can be only one columnstore index per table.
 - Hash indexes are only used on memory-optimized tables.
+
 
 <a name="distinguish_between_indexed_columns_and_included_columns"></a>
 
@@ -302,6 +474,11 @@ clustered columnstore indexes, implement columnstore index maintenance*
 
 #### Determine use cases that support the use of columnstore indexes
 
+- Columnstore indexes are specifically built for analytical purposes.
+- Columnstore indexes are typically paired with rowstore indexes to allow searching for a single row.
+- Clustered columnstore indexes change a table's storage and will compress data. This reduces the IO
+  needed to perform queries on very large data sets.
+- Nonclustered columnstore indexes can be added to rowstore tables to enable real-time analytics.
 - Only one columnstore index per table is supported.
 - Columnstore indexes are often used on fact tables in data warehouses.
 
@@ -1119,6 +1296,28 @@ Database query plans*
 <a name="design_and_implement_elastic_scale_for_azure_sql_database"></a>
 
 #### Design and implement Elastic Scale for Azure SQL Database
+
+Elastic Scale is a feature that makes it possible to scale database capacity to match the scalability
+requirements of the applications that uses it. The database can be grown and shrinked with a technique
+called sharding. Elastic Scale provides two thing: the *Elastic database client library* and the
+*Split-Merge service*.
+
+**Elastic database client library:**
+
+To use standard sharding patterns we have to use the Elastic database client library. It has the 
+following features:
+
+* Shard map management: directs connection requests to the correct shard.
+* Data-dependent routing: automatically assign a connection to the correct shard.
+* Multishard quering: process queries in parallel across separate shards and then combine the results.
+* Shard elasticity: allocate more resources as necessary and shrink database to normal size when the
+  extra resources are no longer required.
+
+**Split-Merge service:**
+
+The Split-Merge service can be used to add or remove databases from the shard set, depending on the
+resources required. When a shard is added, the service will redistribute data to the new shard. When
+the resource demand lowers the shards can be merged into fewer shards.
 
 <a name="select_and_appropriate_service_tier_or_edition"></a>
 
