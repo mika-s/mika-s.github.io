@@ -325,14 +325,84 @@ are kept as they are.
 and included columns; implement clustered index columns by using best practices; recommend new
 indexes based on query plans*
 
-<a name="design_new_indexes"></a>
+#### Indexes in general
 
-#### Design new indexes based on provided tables, queries, or plans
+[Official documentation][microsoft-indexes]
 
+*An index is an on-disk structure associated with a table or view that speeds retrieval of rows
+from the table or view.*
+
+There are two types of indexes in SQL Server: clustered and non-clustered.
+
+**Clustered:**
+
+- The data in a table are physically stored and sorted after the clustered index.
+- A table without a clustered index is called a *heap*.
+- Teh maximum key size is 900 bytes.
+
+**Non-clustered:**
+
+- Instead of physically sorting the table after the index, the non-clustered index will have pointers
+  that point to the correct row.
+- If the table has a clustered index, the non-clustered indexes will point to the clustered index.
+- If the table is a heap, the non-clusteded indexes will point directly to the rows.
+- The maximum key size is 1700 bytes.
+
+##### Misc.
+
+- When the index key is a single column, it's called a *simple index*. When it uses multiple columns,
+  it's called a *composite index*.
 - There can be only one clustered index per table.
 - There can be only one columnstore index per table.
 - Hash indexes are only used on memory-optimized tables.
 
+<a name="design_new_indexes"></a>
+
+#### Design new indexes based on provided tables, queries, or plans
+
+[Official documentation][microsoft-index-design-guide]
+
+- Indexes will automatically be created when `PRIMARY KEY` and `UNIQUE` constraints are made. SQL Server
+  will automatically create a unique clustered index when `PRIMARY KEY` is used (unless a clustered index
+  exists already) and a non-clustered index when `UNIQUE` is used.
+  
+- It is generally a good idea to implement indexes on columns with `FOREIGN KEY` constraints.
+
+- *"Narrow indexes, or indexes with few columns in the index key, require less disk space and maintenance
+  overhead."*
+  
+- *"Large numbers of indexes on a table affect the performance of INSERT, UPDATE, DELETE, and MERGE
+  statements because all indexes must be adjusted appropriately as data in the table changes."*
+  
+- Indexing small tables might not be worth it, due to the overhead that the index lookup has.
+
+- Create non-clustered index on columns that are frequently used in predicates and join conditions in queries.
+
+- On columns without many distinct values, it can be a good idea to use filtered indexes, meaning
+  indexes that uses a `WHERE` clause. E.g. columns with mostly `NULL` values, columns with categories
+  of values, sparse columns, etc.
+  
+  **Filtered index:**
+  
+- The order matters when using composite keys. E.g. if you have a table with FirstName and LastName
+  columns, and the index uses (LastName, FirstName), the index will help in the following queries:
+  
+  ```sql
+  SELECT * FROM People WHERE LastName = 'Smith'
+  SELECT * FROM People WHERE LastName = 'Smith' AND FirstName = 'Joe'
+  ```
+  
+  but not in this query:
+  
+  ```sql
+  SELECT * FROM People WHERE FirstName = 'Joe'
+  ```
+  
+  The order should also be based on level of distinctness.
+
+Be aware: 
+
+- `PRIMARY KEY` constraints do not allow `NULL`, but `UNIQUE` constraints and unique indexes do.
 
 <a name="distinguish_between_indexed_columns_and_included_columns"></a>
 
@@ -341,6 +411,15 @@ indexes based on query plans*
 <a name="implement_clustered_index_columns"></a>
 
 #### Implement clustered index columns by using best practices
+
+- The clustered index is usually based on the primary key of the table.
+- The clustered index should use a surrogate key with the `IDENTITY` property or `SEQUENCE`
+  object as default value.
+- Clustered indexes should not be based on wide keys (many or large keys). Wide keys will not only
+  affect the clustered index, but also non-clustered indexes that also have to store the wide keys
+  because they point to them.
+- Columns that change often should not be used as keys in a clustered index, because the clustered
+  index is physically sorted using the key. A change means the entire row has to be moved.
 
 <a name="recommend_new_indexes_based_on_query_plans"></a>
 
@@ -739,6 +818,8 @@ stored procedures*
 
 #### Design stored procedure components and structure based on business requirements
 
+I have previously written a little bit about stored procedures here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#stored_procedures.
+
 - Stored procedures can be used to create an abstraction layer between the user and the database.
 - Stored procedures can also be used to encapsulate complex code.
 
@@ -879,9 +960,32 @@ results based on execution of AFTER or INSTEAD OF triggers; design scalar-valued
 user-defined functions based on business requirements; identify differences between deterministic
 and non-deterministic functions*
 
+I have previously written about triggers here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#triggers.
+
 <a name="design_trigger_logic"></a>
 
 #### Design trigger logic based on business requirements
+
+DML triggers will, when enabled, fire after an `INSERT`, `UPDATE` or `DELETE`. They are used to enforce
+integrity of the database, just like the `CHECK` constraint. However, triggers are much more
+powerful than the `CHECK` constraint.
+
+There are also DDL triggers that can fire when database objects are created, update or deleted.
+
+According to the exam book, business requirements with respect to triggers are usually based on DML
+triggers. In this context, they enable:
+
+* Complex data integrity. As mentioned above, the `CHECK` constraint can only handle simple predicate checks
+  that refrences columns in the same row. Triggers can check multiple rows, for instance.
+* Running code is response to an action
+* Ensuring columnar data is modified. E.g. update an UpdatedAt column with the current datetime.
+* Making views editable. If a view is referencing multiple tables it cannot be edited easily. However,
+  `INSTEAD OF` triggers makes it easy.
+  
+There are two kinds of DML triggers:
+
+* `AFTER`: runs after an operation
+* `INSTEAD OF`: runs instead of an operation
 
 <a name="determine_when_to_use_DML_triggers_ddl_triggers_logon_triggers"></a>
 
@@ -895,9 +999,13 @@ and non-deterministic functions*
 
 #### Design scalar-valued and table-valued user-defined functions based on business requirements
 
+I have previously written about that here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#table_valued_function.
+
 <a name="identify_differences_between_deterministic_and_non_deterministic_functions"></a>
 
 #### Identify differences between deterministic and non-deterministic functions
+
+I have previously written about that here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#differences_deterministic_nondeterministic.
 
 ---
 
@@ -1171,6 +1279,22 @@ compiled stored procedures*
 
 #### Determine best case usage scenarios for natively compiled stored procedures
 
+Natively compiled stored procedures are used with memory-optimized tables. The best case usage
+scenarios are:
+
+* When very high performance is needed.
+* Queries that execute frequently.
+
+Natively compiled stored procedures are also good at:
+
+* Aggregation
+* Nested-loop joins
+* Multi-statement CRUD operations
+* Complex expressions
+* Procedural logic
+
+It is a bad option if only processing a single row.
+
 <a name="enable_collection_of_execution_statistics_for_natively_compiled_stored_procedures"></a>
 
 #### Enable collection of execution statistics for natively compiled stored procedures
@@ -1379,9 +1503,105 @@ This is suitable for enterprise-level database requirements.
 
 #### Optimize database file and tempdb configuration
 
+[Official documentation][microsoft-database-files-and-filegroups]
+
+Optimizing the database file can increase the performance of read and write operations.
+
+##### Optimize database file
+
+The following things can be done to optimize the database file:
+
+**File placement:**
+
+- Data and log files should be on separate physical disks. This is useful both for performance
+  and redundancy reasons.
+- The physical disk for the log file should have high write performance. However, this is less
+  important if most of the operations are read operations.
+
+**File groups and secondary data files:**
+
+- To increase the parallelism of data access, we can spread files within a filegroup onto separate
+  physical disks.
+- "Put objects that compete heavily for space in different filegroups."
+- Heavily used tables or indexes can be separated from lesser used tables or indexes by assigning
+  them to different filegroups. These file groups are then placed on different physical disks.
+
+**Partitioning:**
+
+- Partitioning can be used to place a table across multiple filegroups. Each partition should be in
+  its own filegroup to increase performance.
+
+##### Optimize tempdb configuration
+
+Configuring tempdb properly is critical for performance.
+
+The following steps can be taken to increase performance:
+
+**SIMPLE recovery model:**
+
+- This is the default recovery model in SQL Server.
+- SQL Server reclaims log space automatically, which means the space required by the database is kept
+  at a minimum.
+
+**Autogrowth:**
+
+- Autogrowth should be enabled by default.
+- tempdb files automatically grow as necessary.
+
+**File placement:**
+
+- The tempdb data and log files should be placed on different physical disks than the main database files.
+- The tempdb log file should be on a different physical drive than the data file.
+- The tempdb data and log files should be on fast drives.
+- Don't put tempdb files on the C drive (or main drive) to prevent the server from starting if the disk
+  has run out of space.
+
+**Files per core:**
+
+- There should be a 1:1 ratio of tempdb data files to CPU cores.
+
+**File size:**
+
+- The default file size settings are too conservative for most implementations. The default settings are:
+    * Initial size: 8 MB
+    * Autogrowth: 64 MB
+    
+  Initial size can be set to 4096 MB and autogrowth of 512 MB.
+
 <a name="optimize_memory_configuration"></a>
 
 #### Optimize memory configuration
+
+The memory configuration can be optimized to increase performance. SQL Server will deallocate memory
+automatically according to the workload on the host computer and in the database engine. The following
+settings can be adjusted to change the behavior of SQL Server:
+
+**min server memory:**
+
+- Is used to control the memory usage of SQL Server. Minimum server memory is the minimum amount of
+  physical memory that SQL Server will try to keep committed. SQL Server will not release memory below
+  this threshold.
+
+**max server memory:**
+
+- Is used to control the memory usage of SQL Server. SQL Server will not allocate more memory than this
+  threshold.
+
+**max worker threads:**
+
+- Number of threads available for user operations.
+- The default value is 0. This means SQL Server will automatically configure the number when the server starts.
+
+**index create memory:**
+
+- The maximum amount of memory that SQL Server initially allocates to index creation.
+- SQL Server will allocate more memory if it's needed and there is enough memory available.
+- This number can be increased if SQL Server experiences performance delays related to indexes.
+
+**min memory per query:**
+
+- The minimum amount of memory that is allocated to a query execution.
+- SQL Server can use more memory than the minimum number, if enough memory is available.
 
 <a name="monitor_and_diagnose_scheduling_and_wait_statistics_using_dynamic_management_objects"></a>
 
@@ -1447,10 +1667,13 @@ between Extended Events Packages, Targets, Actions, and Sessions*
 
 [microsoft-mcsa-sql-2016-database-development]: https://www.microsoft.com/en-us/learning/mcsa-sql2016-database-development-certification.aspx
 [microsoft-70-762-curriculum]: https://www.microsoft.com/en-us/learning/exam-70-762.aspx
+[microsoft-indexes]: https://docs.microsoft.com/en-us/sql/relational-databases/indexes/indexes
+[microsoft-index-design-guide]: https://docs.microsoft.com/en-us/sql/relational-databases/sql-server-index-design-guide
 [microsoft-locking-in-the-database-engine]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms190615(v=sql.105)
 [microsoft-lock-granularity]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms189849%28v%3dsql.105%29
 [microsoft-lock-modes]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms175519%28v%3dsql.105%29
 [microsoft-lock-escalation]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms184286(v=sql.105)
+[microsoft-database-files-and-filegroups]: https://docs.microsoft.com/en-us/sql/relational-databases/databases/database-files-and-filegroups
 [amazon-developing-sql-databases]: https://www.amazon.com/Exam-Ref-70-762-Developing-Databases/dp/1509304916
 [erland-sommerskog-error-handling]: http://www.sommarskog.se/error_handling/Part1.html
 [stackoverflow-what-are-row-page-and-table-locks]: https://stackoverflow.com/questions/9784172/what-are-row-page-and-table-locks-and-when-they-are-acquired
