@@ -140,7 +140,7 @@ normalization, write table create statements, determine the most efficient data 
 - **Candidate key:** A potential primary key. A candidate key is based on a combination of attributes
   in a row that can be used to identify that row, without referring to any other data.
 
-##### Forms
+**Forms:**
 
 Listed below are requirements for the various normalization forms.
 
@@ -254,9 +254,9 @@ Choosing the best type is important for the following reasons:
 - It limits and models the domain data. E.g. the `DATE` type can only store dates.
 - It is important for performance.
 
-Choosing the correct type has already been written about here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#proper_data_types_for_elements_and_columns.
+Choosing the correct type has already been written about [here][github-70-761-proper-data-types-for-elements-and-columns].
 
-##### Computed columns
+**Computed columns:**
 
 Computed columns are columns that are based on expressions.
 
@@ -279,7 +279,7 @@ INSERT INTO PeopleComputed (FirstName, LastName) VALUES ('Anna', 'Kessi')
 SELECT * FROM PeopleComputed
 ```
 
-![Computed column results]({{ "/assets/notes-on-70-762-Developing-SQL-Databases/computed-column-results.png" | absolute_url }})
+![Computed column results]({{ "/assets/notes-on-70-762-Developing-SQL-Databases/people-computed-results.png" | absolute_url }})
 
 The `PERSIST` keyword can be used to make SQL Server persist the computed column:
 
@@ -293,7 +293,7 @@ CREATE TABLE PeopleComputedPersisted
 )
 ```
 
-##### Dynamic data masking
+**Dynamic data masking:**
 
 Dynamic data masking enables the possibility to mask data in columns from users, either fully or
 partially.
@@ -348,7 +348,7 @@ There are two types of indexes in SQL Server: clustered and non-clustered.
 - If the table is a heap, the non-clusteded indexes will point directly to the rows.
 - The maximum key size is 1700 bytes.
 
-##### Misc.
+**Misc.:**
 
 - When the index key is a single column, it's called a *simple index*. When it uses multiple columns,
   it's called a *composite index*.
@@ -400,6 +400,13 @@ There are two types of indexes in SQL Server: clustered and non-clustered.
   
   The order should also be based on level of distinctness.
 
+  **Covering index:**
+
+  [redgate: Using Covering Indexes to Improve Query Performance][red-gate-covering-index]
+
+  A covering index is an index that completely covers the query. It contains all the information
+  necessary to resolve the query.
+
 Be aware: 
 
 - `PRIMARY KEY` constraints do not allow `NULL`, but `UNIQUE` constraints and unique indexes do.
@@ -407,6 +414,19 @@ Be aware:
 <a name="distinguish_between_indexed_columns_and_included_columns"></a>
 
 #### Distinguish between indexed columns and included columns
+
+[Official documentation on indexes with included columns][microsoft-indexes-with-included-columns]
+
+Included columns are columns that are "included" in an index, but not part of the key (nonkey columns).
+The reason we could potentially want included columns is when the index covers the query, but we
+don't want the included columns to be a part of the index due to performance issues (increased
+size, for instance).
+
+Example:
+
+```sql
+CREATE INDEX IX_Customers_Name ON dbo.Customers(LastName) INCLUDE (FirstName, Email)
+```
 
 <a name="implement_clustered_index_columns"></a>
 
@@ -442,7 +462,7 @@ necessary to design an updateable view, implement partitioned views, implement i
 
 #### Design a view structure to select data based on user or business requirements
 
-I have already written about views here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#views
+I have already written about views [here][github-70-761-views].
 
 Views are usually made to encapsulate a query. This is done for the following reasons, according
 to the exam book:
@@ -533,7 +553,7 @@ Requirements for partitioned views:
 
 #### Implement indexed views
 
-I have already written about indexed views here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#indexed_views
+I have already written about indexed views [here][github-70-761-indexed-views].
 
 ---
 
@@ -552,6 +572,14 @@ clustered columnstore indexes, implement columnstore index maintenance*
 <a name="determine_use_cases_for_columnstore_indexes"></a>
 
 #### Determine use cases that support the use of columnstore indexes
+
+[redgate: What are Columnstore Indexes?][red-gate-columnstore-index]
+
+In ordinary b-tree (rowstore) indexes, the data is physically and logically stored and organiized
+as rows and columns. With columnstore indexes, the data is stored as columns and organized as rows
+and columns. The article linked to above will explain the rest of the theoretical stuff.
+
+The following should be known about columnstore indexes:
 
 - Columnstore indexes are specifically built for analytical purposes.
 - Columnstore indexes are typically paired with rowstore indexes to allow searching for a single row.
@@ -818,7 +846,7 @@ stored procedures*
 
 #### Design stored procedure components and structure based on business requirements
 
-I have previously written a little bit about stored procedures here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#stored_procedures.
+I have previously written a little bit about stored procedures [here][github-70-761-stored-procedures].
 
 - Stored procedures can be used to create an abstraction layer between the user and the database.
 - Stored procedures can also be used to encapsulate complex code.
@@ -960,7 +988,7 @@ results based on execution of AFTER or INSTEAD OF triggers; design scalar-valued
 user-defined functions based on business requirements; identify differences between deterministic
 and non-deterministic functions*
 
-I have previously written about triggers here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#triggers.
+I have previously written about triggers [here][github-70-761-triggers].
 
 <a name="design_trigger_logic"></a>
 
@@ -999,13 +1027,13 @@ There are two kinds of DML triggers:
 
 #### Design scalar-valued and table-valued user-defined functions based on business requirements
 
-I have previously written about that here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#table_valued_function.
+I have previously written about that [here][github-70-761-tvf].
 
 <a name="identify_differences_between_deterministic_and_non_deterministic_functions"></a>
 
 #### Identify differences between deterministic and non-deterministic functions
 
-I have previously written about that here: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#differences_deterministic_nondeterministic.
+I have previously written about that [here][github-70-761-deterministic-vs-nondeterministic].
 
 ---
 
@@ -1024,7 +1052,7 @@ Here are some notes on locking, before going deeper into concurrency etc.
 
 - Locks can exist on rows, tables, pages or indexes.
 
-##### Lock modes
+**Lock modes:**
 
 [Official documentation][microsoft-lock-modes]
 
@@ -1056,7 +1084,7 @@ Update lock (U):
     A combination of shared and exclusive lock. During an update the system has to find and then update a row.
     This two-step process could create deadlocks, which is why Update locks are used.
 
-##### Lock granularity
+**Lock granularity:**
 
 [Official documentation][microsoft-lock-granularity]
 
@@ -1340,28 +1368,166 @@ ALTER DATABASE test
     SET AUTO_CREATE_STATISTICS OFF
 ```
 
-- SQL Server has a counter for each column with an index. When rows are inserted or modified this counter
-  will be incremented. When statistics is updated the counter is reset to 0. When the server reaches a
-  certain threshold it will update the statistics, if auto update is enabled.
+- SQL Server has a counter for each column with an index. When rows are inserted or modified this
+  counter will be incremented. When statistics is updated the counter is reset to 0. When the server
+  reaches a certain threshold it will update the statistics, if auto update is enabled.
   
 - The thresholds are:
     * One or more rows are added to an empty table.
     * More than 500 rows are added to a table having fewer than 500 rows.
-    * More than 500 rows are added to a table having more than 500 rows, and the number of rows added are
-      more than a dynamic percentage of total rows. The dynamic percentage starts at ~20% and then reduces
-      with table size.
+    * More than 500 rows are added to a table having more than 500 rows, and the number of rows
+      added are more than a dynamic percentage of total rows. The dynamic percentage starts at ~20%
+      and then reduces with table size.
 
 <a name="design_statistics_mainentance_tasks"></a>
 
 #### Design statistics maintenance tasks
 
+[Official documentation][microsoft-update-statistics]
+
+SQL Server automatically creates and updates statistics for indexes and for all columns used in a
+`WHERE` clause or in a join. This can happen when the server is very busy, which affects
+performance. It may also not happen often enough. Manually updating the statistics can be used in
+cases like these.
+
+SQL Server Agent extended stored procedures has to be enabled before creating maintenance plans:
+
+```sql
+EXEC sp_configure 'show advanced options', 1
+GO
+
+RECONFIGURE
+GO
+
+EXEC sp_configure 'Agent XPs', 1
+GO
+
+RECONFIGURE
+GO
+```
+
+**Examples:**
+
+Update statistics on table:
+
+```sql
+USE TestDb
+GO
+
+UPDATE STATISTICS dbo.People
+WITH FULLSCAN
+GO
+```
+
+Update statistics on an index:
+
+
+```sql
+USE TestDb
+GO
+
+UPDATE STATISTICS dbo.People IX_Email
+GO
+```
+
+Create and update sample statistics:
+
+```sql
+USE TestDb
+GO
+
+CREATE STATISTICS People
+ON dbo.People ([FirstName], [LastName])
+WITH SAMPLE 50 PERCENT
+
+-- Time passes
+
+UPDATE STATISTICS dbo.People(People)
+WITH SAMPLE 50 PERCENT
+GO
+```
+
+Options:
+
+| Option name   | Description              |
+|---------------|--------------------------|
+| `ALL`         | All existing statistics. |
+| `COLUMNS`     | Column statistics only.  |
+| `INDEX`       | Index statistics only.   |
+
+Scan type options:
+
+| Option name | Description                                               |
+|-------------|-----------------------------------------------------------|
+| `FULLSCAN`  | Update statistics by reading all rows in a table or view. |
+| `SAMPLE`    | Update statistics based on percentage or number of rows.  |
+
+To create a new maintenance task:
+
+[SSMS...]
+
 <a name="use_dynamic_management_objects_to_review_current_index_usage_and_identify_missing_indexes"></a>
 
 #### Use dynamic management objects to review current index usage and identify missing indexes
 
+**Reviewing current index usage:**
+
+* `sys.dm_db_index_usage_stats`: a view that shows the use of indexes in queries.
+* `sys.dm_db_index_physical_stats`: a function that checks the overall status of indexes in the
+  database
+
+The data received from `sys.dm_db_index_usage_stats` will be all numerical values. To see more
+user-friendly values we can join on `sys.indexes`:
+
+```sql
+SELECT
+    OBJECT_NAME(ixu.object_id, DB_ID('test')) AS [object_name] ,
+    ix.[name] AS index_name ,
+    ixu.user_seeks + ixu.user_scans + ixu.user_lookups AS user_reads,
+    ixu.user_updates AS user_writes
+FROM sys.dm_db_index_usage_stats ixu
+INNER JOIN test.sys.indexes ix ON
+    ixu.[object_id] = ix.[object_id] AND
+    ixu.index_id = ix.index_id
+WHERE ixu.database_id = DB_ID('test')
+ORDER BY user_reads DESC
+```
+
+This is for a database called *test*. It will only show the indexes being used.
+
+An index gets fragmented when inserts, updates and deletes occur. The function
+`sys.dm_db_index_physical_stats` is used to determine the health of the indexes.
+
+- When the fragmentation of an index is between 15% and 30%, it should be reorganized.
+- When the fragmentation of an index is larger than 30%, it should be rebuilt.
+
+```sql
+SELECT * FROM sys.dm_db_index_physical_stats(
+      DB_ID(N'test')
+    , OBJECT_ID(N'test.dbo.customers')
+    , NULL
+    , NULL
+    , 'Detailed'
+)
+```
+
+This is for a database called *test* and a table called *dbo.customers*.
+
+**Identify missing indexes:**
+
+The following views can be used to identify missing indexes:
+
+* `sys.dm_db_missing_index_details`: find columns used for equality and inequality predicates.
+* `sys.dm_db_missing_index_groups`: an intermediary between `dm_db_missing_index_details` and
+  `dm_db_missing_index_group_stats`.
+* `sys.dm_db_missing_index_group_stats`: find groups of missing indexes.
+
 <a name="consolidate_overlapping_indexes"></a>
 
 #### Consolidate overlapping indexes
+
+When we find overlapping two indexes it might be a good thing to drop one of the indexes, so
+maintenance tasks run faster and less storage is needed.
 
 ---
 
@@ -1507,7 +1673,7 @@ This is suitable for enterprise-level database requirements.
 
 Optimizing the database file can increase the performance of read and write operations.
 
-##### Optimize database file
+**Optimize database file:**
 
 The following things can be done to optimize the database file:
 
@@ -1531,7 +1697,7 @@ The following things can be done to optimize the database file:
 - Partitioning can be used to place a table across multiple filegroups. Each partition should be in
   its own filegroup to increase performance.
 
-##### Optimize tempdb configuration
+**Optimize tempdb configuration:**
 
 Configuring tempdb properly is critical for performance.
 
@@ -1669,13 +1835,24 @@ between Extended Events Packages, Targets, Actions, and Sessions*
 [microsoft-70-762-curriculum]: https://www.microsoft.com/en-us/learning/exam-70-762.aspx
 [microsoft-indexes]: https://docs.microsoft.com/en-us/sql/relational-databases/indexes/indexes
 [microsoft-index-design-guide]: https://docs.microsoft.com/en-us/sql/relational-databases/sql-server-index-design-guide
+[microsoft-indexes-with-included-columns]: https://docs.microsoft.com/en-us/sql/relational-databases/indexes/create-indexes-with-included-columns
 [microsoft-locking-in-the-database-engine]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms190615(v=sql.105)
 [microsoft-lock-granularity]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms189849%28v%3dsql.105%29
 [microsoft-lock-modes]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms175519%28v%3dsql.105%29
 [microsoft-lock-escalation]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms184286(v=sql.105)
+[microsoft-update-statistics]: https://docs.microsoft.com/en-us/sql/t-sql/statements/update-statistics-transact-sql
 [microsoft-database-files-and-filegroups]: https://docs.microsoft.com/en-us/sql/relational-databases/databases/database-files-and-filegroups
 [amazon-developing-sql-databases]: https://www.amazon.com/Exam-Ref-70-762-Developing-Databases/dp/1509304916
 [erland-sommerskog-error-handling]: http://www.sommarskog.se/error_handling/Part1.html
+[red-gate-covering-index]: https://www.red-gate.com/simple-talk/sql/learn-sql-server/using-covering-indexes-to-improve-query-performance/
+[red-gate-columnstore-index]: https://www.red-gate.com/simple-talk/sql/sql-development/what-are-columnstore-indexes/
 [stackoverflow-what-are-row-page-and-table-locks]: https://stackoverflow.com/questions/9784172/what-are-row-page-and-table-locks-and-when-they-are-acquired
 [stackexchange-dba-what-is-lock-escalation]: https://dba.stackexchange.com/questions/12864/what-is-lock-escalation
 [sqlteam-introduction-to-locking-in-sql-server]: https://www.sqlteam.com/articles/introduction-to-locking-in-sql-server
+[github-70-761-proper-data-types-for-elements-and-columns]: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#proper_data_types_for_elements_and_columns
+[github-70-761-views]: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#views
+[github-70-761-indexed-views]: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#indexed_views
+[github-70-761-stored-procedures]: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#stored_procedures
+[github-70-761-triggers]: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#triggers
+[github-70-761-tvf]: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#table_valued_function
+[github-70-761-deterministic-vs-nondeterministic]: https://mika-s.github.io/sql/certification/70-761/2019/05/27/notes-on-70-761-Querying-Data-with-Transact-SQL.html#differences_deterministic_nondeterministic

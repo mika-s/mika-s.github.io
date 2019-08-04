@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Creating a Wireshark USB dissector in Lua - part 1"
+title:  "Creating a Wireshark USB dissector in Lua - part 1 (mouse)"
 date:   2019-07-23 15:00:00 +0100
 categories: wireshark lua dissector usb
 ---

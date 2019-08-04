@@ -66,10 +66,10 @@ def mjtg(current, setpoint, frequency, move_time):
              + 6.0 * (time/timefreq)**5))
 
         trajectory_derivative.append(
-            frequency * (setpoint - current) *
-            (30.0 * (time)**2.0 * (1.0/timefreq)**3
-             - 60.0 * (time)**3.0 * (1.0/timefreq)**4
-             + 30.0 * (time)**4.0 * (1.0/timefreq)**5))
+            frequency * (1.0/timefreq) * (setpoint - current) *
+            (30.0 * (time/timefreq)**2.0
+             - 60.0 * (time/timefreq)**3.0
+             + 30.0 * (time/timefreq)**4.0))
 
     return trajectory, trajectory_derivative
 
