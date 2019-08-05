@@ -295,6 +295,8 @@ CREATE TABLE PeopleComputedPersisted
 
 **Dynamic data masking:**
 
+[Official documentation][microsoft-dynamic-data-masking]
+
 Dynamic data masking enables the possibility to mask data in columns from users, either fully or
 partially.
 
@@ -310,6 +312,30 @@ Data mask functions:
 are kept as they are.
   
 - `NULL` will still be `NULL` after data masking. 
+
+Example:
+
+```sql
+CREATE TABLE People
+(
+      Id        INT             NOT NULL    IDENTITY(1,1)   PRIMARY KEY
+    , FirstName VARCHAR(200)    NOT NULL
+    , LastName  VARCHAR(200)    MASKED WITH (FUNCTION = 'partial(1,"XXXXXXX",0)')
+    , Age       INT             MASKED WITH (FUNCTION = 'random(1,50)')
+    , Email     VARCHAR(150)    MASKED WITH (FUNCTION = 'email()')
+)
+
+INSERT INTO Test.People (FirstName, LastName, Age, Email)
+VALUES ('John', 'Smith', 33, 'john.smith@example.com')
+
+CREATE USER MaskingTest WITHOUT LOGIN;
+GRANT SELECT ON Test.People TO MaskingTest
+
+EXECUTE AS USER = 'MaskingTest'
+SELECT * FROM Test.People
+```
+
+![Result of query with masked data]({{ "/assets/notes-on-70-762-Developing-SQL-Databases/masking-results.png" | absolute_url }})
 
 ---
 
@@ -1015,9 +1041,36 @@ There are two kinds of DML triggers:
 * `AFTER`: runs after an operation
 * `INSTEAD OF`: runs instead of an operation
 
+Misc. about triggers:
+
+* They cannot return values.
+
 <a name="determine_when_to_use_DML_triggers_ddl_triggers_logon_triggers"></a>
 
 #### Determine when to use Data Manipulation Language (DML) triggers, Data Definition Language (DDL) triggers, or logon triggers
+
+**DML triggers:**
+
+Triggers that fire instead of or after DML statements. For example after inserting something in a table,
+when deleting something, etc.
+
+**DDL triggers:**
+
+- Can be created when code should be run after creating a table, dropping an index, etc.
+- There are two types of DDL triggers. The scope is the main difference.
+  * Server: Applies to all databases on the server. Stored in the *master* database.
+  * Database: Applies only to the database they are stored in.
+
+**Logon triggers:**
+
+Logon triggers fire when a user logs on to the database server.
+Can be used to restrict certain users from logging in at certain times of the day.
+
+**Other triggers:**
+
+These are not mentioned in the syllabus, but should be known about anyway:
+
+* CLR triggers: Triggers written in a .NET language.
 
 <a name="recognize_results_based_on_execution_of_after_or_instead_of_triggers"></a>
 
@@ -1472,8 +1525,8 @@ To create a new maintenance task:
 
 **Reviewing current index usage:**
 
-* `sys.dm_db_index_usage_stats`: a view that shows the use of indexes in queries.
-* `sys.dm_db_index_physical_stats`: a function that checks the overall status of indexes in the
+* **sys.dm_db_index_usage_stats**: a view that shows the use of indexes in queries.
+* **sys.dm_db_index_physical_stats**: a function that checks the overall status of indexes in the
   database
 
 The data received from `sys.dm_db_index_usage_stats` will be all numerical values. To see more
@@ -1517,10 +1570,10 @@ This is for a database called *test* and a table called *dbo.customers*.
 
 The following views can be used to identify missing indexes:
 
-* `sys.dm_db_missing_index_details`: find columns used for equality and inequality predicates.
-* `sys.dm_db_missing_index_groups`: an intermediary between `dm_db_missing_index_details` and
-  `dm_db_missing_index_group_stats`.
-* `sys.dm_db_missing_index_group_stats`: find groups of missing indexes.
+* **sys.dm_db_missing_index_details**: find columns used for equality and inequality predicates.
+* **sys.dm_db_missing_index_groups**: an intermediary between dm_db_missing_index_details and
+  dm_db_missing_index_group_stats.
+* **sys.dm_db_missing_index_group_stats**: find groups of missing indexes.
 
 <a name="consolidate_overlapping_indexes"></a>
 
@@ -1547,13 +1600,196 @@ plans and related metadata, configure Azure SQL Database Performance Insight*
 
 #### Capture query plans using extended events and traces
 
+Extended Events, SQL Trace and SQL Server Profiler are three methods to capture and monitor
+execution plans.
+
+Extended Events that can capture query plans:
+
+* **query_pre_execution_showplan:** captures the estimated query plan without executing the query.
+* **query_post_execution_showplan:** captures the actual query plan after execution.
+
+Tracing:
+
+* SQL Trace: deprecated server-side tracing.
+* SQL Server Profiler: client-side tracing.
+
+* **sp_trace_create**: Creates a trace definition. Will return a handle to the new trace. A filename
+  is given to specify where the trace should be stored.
+* **sp_trace_setevent**: Adds or removes an event or event column to a trace.
+* **sp_trace_setfilter**: Applies a filter to a trace.
+* **sp_trace_setstatus**: Modifies the current state of the specified trace.
+
+Flow:
+
+* Create a trace with `sp_trace_create`.
+* Add the events to filter for with `sp_trace_setevent`. Has to be called for each column to trace.
+* Add filters with `sp_trace_setfilter`. E.g. filter out databases that we are not interested in.
+* Start the trace with `sp_trace_setstatus` (1).
+* Read the results with:
+
+  ```sql
+  SELECT *
+  FROM sys.fn_trace_getinfo(0)
+  WHERE value = 'C:\trace_file.trc';
+  ```
+* Stop the trace with `sp_trace_setstatus` (0).
+* Close and delete the trace with `sp_trace_setstatus` (2).
+
+To see all events that can be traced:
+
+```sql
+SELECT
+    e.trace_event_id AS EventID,
+    e.name AS EventName,
+    c.name AS CategoryName
+FROM sys.trace_events e
+    INNER JOIN sys.trace_categories c ON e.category_id = c.category_id
+ORDER BY e.trace_event_id
+```
+
+To see all running traces:
+
+```sql
+SELECT * FROM sys.fn_trace_getinfo(0)
+```
+
 <a name="identify_poorly_performing_query_plan_operators"></a>
 
 #### Identify poorly performing query plan operators
 
+The following conditions can affect query performance:
+
+* **Query plan optimization:** In the query plan, right click on SELECT and choose Properties.
+  *Reason For Early Termination Of Statement Optimization* should be *Good Enough Plan Found*.
+  If it's *Timeout*, the query has to be tuned. Otherwise, continue with the next steps.
+
+* **Operators:** Some operators require a lot of memory, e.g. SORT.
+
+* **Arrow width:** The width of the arrows between the operators shows how many rows that are
+  being used by that operation. Analyzing arrow widths in the execution plan can help in
+  identifying bottle necks etc.
+
+* **Operator cost:** All the operators have a cost that is relative to the total cost (percentage).
+  The operators with high cost should be taken a look at.
+
+* **Warnings:** The optimizer will give warnings when the query performance suffers.
+
+Here is a list of operators that can be found in the execution plan:
+
+* **Table Scan operator:**
+
+  SQL Server reads the heap row by row. This operation can be slow for large tables.
+  Consider adding a clustered index.
+
+* **Clustered Index Scan operator:**
+
+  SQL Server must read all the data in a table. Could be because there are no advantages of using
+  the index. Index scan is not necessarly a bad operation and it's better than table scans. Adding
+  more filters (with `WHERE`) can make this operation a seek, which is faster.
+
+* **Index Seek (NonClustered) and Key Lookup (Clustered) operator:**
+
+  Index Seek (NonClustered) can find rows in the index rather than read all the rows. It's a much better
+  operator to see than table scan and clustered index scan.
+
+  If the index is not a covering index it will also include a Key Lookup (Clustered) operator, which
+  adds a small overhead to performance. When Key Lookup (Clustered) is encountered we can consider
+  creating a covering index by adding the necessary columns to the index key or as included columns.
+
+* **Sort operator:**
+
+  The Sort operator can be introduced when using `ORDER BY` in a query, when the column used in the
+  `ORDER BY` is not used in the clustered index. This can increase the cost of the query.
+
+* **Hash Match (Aggregate) operator:**
+
+  This operator is introduced when using aggregates in a query. The Hash Match (Aggregate) operator
+  can be expensive. Reducing the number of rows that is passed to the operator can increase performance.
+
+  Another thing that can help is to create an indexed view that pre-aggregates the rows.
+
+* **Hash Match (Inner Join) operator:**
+
+  Hash Match (Inner Join) is used by SQL Server when it places data in temporary hash tables, so that it
+  can match rows in different data sets and produce a single result set.
+
+  When both data sets in the join are large this will cause performance issues. Hash Match (Inner Join)
+  is also a blocking operator, which means the data has to be gathered completely from each set before
+  the join is made.
+
+  To improve the query we can add or revise indexes, add `WHERE` filters or make better `WHERE` filters.
+  Hash Match (Inner Join) can be replaced with Nested Loop (Inner Join) by making these improvements.
+  Nested Loop (Inner Join) can in many circumstances be faster than Hash Match (Inner Loop) if it uses
+  indexes.
+
 <a name="create_efficient_query_plans_using_query_store"></a>
 
 #### Create efficient query plans using Query Store
+
+[Official documentation][microsoft-query-store]
+
+The Query Store is used to monitor performance. It automatically captures information about query plans
+and runtime execution statistics.
+
+Query Store is disabled by default in ordinary SQL Server, but enabled by default in Azure SQL Server.
+
+To enable with SSMS: Right click on the database in Object Explorer --> Properties --> Query Store -->
+Operation Mode Requested = Read Write.
+
+To enable with T-SQL:
+
+```sql
+ALTER DATABASE TestDb
+  SET QUERY_STORE = ON
+  (
+      OPERATION_MODE = READ_WRITE
+    , CLEANUP_POLICY = ( STALE_QUERY_THRESHOLD_DAYS = 30 )
+    , DATA_FLUSH_INTERVAL_SECONDS = 3000
+    , MAX_STORAGE_SIZE_MB = 500
+    , INTERVAL_LENGTH_MINUTES = 50
+  )
+```
+
+To purge data from the query store:
+
+```sql
+ALTER DATABASE TestDb
+SET QUERY_STORE CLEAR ALL
+```
+
+The following views can be used to monitor the query store:
+
+* `sys.query_store_plan:` general query plan information.
+* `sys.query_store_query:` aggregated runtime execution statistics for a query.
+* `sys.query_store_query_text:` the text of the executed query.
+* `sys.query_store_runtime_stats:` runtime execution statistics of a query.
+* `sys.query_store_runtime_stats_interval:` start and endtime for when SQL Server collects runtime execution
+  statistics.
+
+Example of finding top 10 query that requires most logical reads:
+
+```sql
+SELECT TOP 10
+    qt.query_sql_text,
+    CAST(query_plan AS XML) AS QueryPlan,
+    rs.avg_logical_io_reads
+FROM sys.query_store_plan qp
+    INNER JOIN sys.query_store_query q          ON qp.query_id = q.query_id
+    INNER JOIN sys.query_store_query_text qt    ON q.query_text_id = qt.query_text_id
+    INNER JOIN sys.query_store_runtime_stats rs ON qp.plan_id = rs.plan_id
+ORDER BY rs.avg_logical_io_reads DESC
+```
+
+The following stored procedures can be used to manage the query store:
+
+* `sp_query_store_flush_db:` flush the query store that is in memory to disk.
+* `sp_query_store_force_plan:` force SQL Server to use a certain query plan for a query. 
+* `sp_query_store_remove_plan:` remove a query plan from the store.
+* `sp_query_store_remove_query:` remove a query from the store, with plan and statistics.
+* `sp_query_store_reset_exec_stats:` reset statistics for a plan.
+* `sp_query_store_unforce_plan:` no longer force a plan on a query.
+
+There are views in SSMS that can be used to find time-consuming queries, etc.
 
 <a name="compare_estimated_and_actual_query_plans_and_related_metadata"></a>
 
@@ -1562,6 +1798,19 @@ plans and related metadata, configure Azure SQL Database Performance Insight*
 <a name="configure_azure_sql_database_performance_insight"></a>
 
 #### Configure Azure SQL Database Performance Insight
+
+[Official documentation][microsoft-azure-sql-database-query-performance]
+
+Query Performance Insight is a feature in Azure SQL databases. It helps with finding long-running
+queries, resource-consuming queries, etc. Query Store has to be enabled on the database.
+
+It looks like this in Azure Portal:
+
+![Resource consuming queries in Azure Portal]({{ "/assets/notes-on-70-762-Developing-SQL-Databases/resource-consuming-queries.png" | absolute_url }})
+
+![Long running queries in Azure Portal]({{ "/assets/notes-on-70-762-Developing-SQL-Databases/long-running-queries.png" | absolute_url }})
+
+We can find the executed SQL by clicking on a query.
 
 ---
 
@@ -1833,6 +2082,7 @@ between Extended Events Packages, Targets, Actions, and Sessions*
 
 [microsoft-mcsa-sql-2016-database-development]: https://www.microsoft.com/en-us/learning/mcsa-sql2016-database-development-certification.aspx
 [microsoft-70-762-curriculum]: https://www.microsoft.com/en-us/learning/exam-70-762.aspx
+[microsoft-dynamic-data-masking]: https://docs.microsoft.com/en-us/sql/relational-databases/security/dynamic-data-masking
 [microsoft-indexes]: https://docs.microsoft.com/en-us/sql/relational-databases/indexes/indexes
 [microsoft-index-design-guide]: https://docs.microsoft.com/en-us/sql/relational-databases/sql-server-index-design-guide
 [microsoft-indexes-with-included-columns]: https://docs.microsoft.com/en-us/sql/relational-databases/indexes/create-indexes-with-included-columns
@@ -1840,6 +2090,8 @@ between Extended Events Packages, Targets, Actions, and Sessions*
 [microsoft-lock-granularity]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms189849%28v%3dsql.105%29
 [microsoft-lock-modes]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms175519%28v%3dsql.105%29
 [microsoft-lock-escalation]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms184286(v=sql.105)
+[microsoft-query-store]: https://docs.microsoft.com/en-us/sql/relational-databases/performance/monitoring-performance-by-using-the-query-store
+[microsoft-azure-sql-database-query-performance]: https://docs.microsoft.com/en-us/azure/sql-database/sql-database-query-performance
 [microsoft-update-statistics]: https://docs.microsoft.com/en-us/sql/t-sql/statements/update-statistics-transact-sql
 [microsoft-database-files-and-filegroups]: https://docs.microsoft.com/en-us/sql/relational-databases/databases/database-files-and-filegroups
 [amazon-developing-sql-databases]: https://www.amazon.com/Exam-Ref-70-762-Developing-Databases/dp/1509304916
