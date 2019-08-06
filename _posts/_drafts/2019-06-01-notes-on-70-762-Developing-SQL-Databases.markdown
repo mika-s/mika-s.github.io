@@ -1051,10 +1051,14 @@ Misc. about triggers:
 
 **DML triggers:**
 
+[Official documentation][microsoft-dml-triggers]
+
 Triggers that fire instead of or after DML statements. For example after inserting something in a table,
 when deleting something, etc.
 
 **DDL triggers:**
+
+[Official documentation][microsoft-ddl-triggers]
 
 - Can be created when code should be run after creating a table, dropping an index, etc.
 - There are two types of DDL triggers. The scope is the main difference.
@@ -1063,14 +1067,14 @@ when deleting something, etc.
 
 **Logon triggers:**
 
+[Official documentation][microsoft-logon-triggers]
+
 Logon triggers fire when a user logs on to the database server.
 Can be used to restrict certain users from logging in at certain times of the day.
 
-**Other triggers:**
+**CLR triggers:**
 
-These are not mentioned in the syllabus, but should be known about anyway:
-
-* CLR triggers: Triggers written in a .NET language.
+Triggers written in a .NET language.
 
 <a name="recognize_results_based_on_execution_of_after_or_instead_of_triggers"></a>
 
@@ -1313,6 +1317,51 @@ graphs, identify ways to remediate deadlocks*
 
 #### Troubleshoot locking issues
 
+The following DMVs can be used to troubleshoot locking issues:
+
+* **sys.dm_tran_locks:** Shows all current locks, etc.
+
+  In *request_status*, *GRANT* means the lock was granted, *WAIT* means the lock is waiting to be
+  granted. *CONVERT* means a lock was granted with a certain lock mode, but had to be upgraded to
+  a new lock mode, and is now blocked.
+
+* **sys.dm_os_waiting_tasks:** shows tasks that are waiting for resources.
+
+  ```sql
+  SELECT
+      t1.resource_type AS res_typ,
+      t1.resource_database_id AS res_dbid,
+      t1.resource_associated_entity_id AS res_entid,
+      t1.request_mode AS mode,
+      t1.request_session_id AS s_id,
+      t2.blocking_session_id AS blocking_s_id
+  FROM sys.dm_tran_locks as t1
+      INNER JOIN sys.dm_os_waiting_tasks as t2
+        ON t1.lock_owner_address = t2.resource_address;
+  ```
+
+* **sys.dm_os_wait_stats:** shows how often tasks are waiting while locks are taken.
+
+  Filter to only see lock waits:
+
+  ```sql
+  SELECT
+      wait_type as wait,
+      waiting_tasks_count as wt_cnt,
+      wait_time_ms as wt_ms,
+      max_wait_time_ms as max_wt_ms,
+      signal_wait_time_ms as signal_ms
+  FROM sys.dm_os_wait_stats
+  WHERE wait_type LIKE 'LCK%'
+  ORDER BY wait_time_ms DESC
+  ```
+  
+  The cumulative values can be reset like this:
+  
+  ```sql
+  DBCC SQLPERF (N'sys.dm_os_wait_stats', CLEAR)
+  ```
+
 <a name="identify_lock_escalation_behaviors"></a>
 
 #### Identify lock escalation behaviors
@@ -1325,13 +1374,58 @@ multiple row locks into table lock or multiple page locks into table lock. Lock 
 by the system in order to free up the memory that the finer-grained locks used, and thus increase
 performance. There is also a maximum number of allowed locks that the system cannot go over.
 
+To identify lock escalation behaviors:
+
+* Monitor the *Lock:Escalation* event.
+* Use the following SQL:
+
+  ```sql
+  SELECT
+      wait_type as wait,
+      wait_time_ms as wt_ms,
+      CONVERT(decimal(9,2), 100.0 * wait_time_ms /
+      SUM(wait_time_ms) OVER ()) as wait_pct
+  FROM sys.dm_os_wait_stats
+  WHERE wait_type LIKE 'LCK%'
+  ORDER BY wait_time_ms DESC
+  ```
+  
+  to look at how often the intent lock waits (LCK_M_I*) occur compared to ordinary locks.
+
 <a name="capture_and_analyze_deadlock_graphs"></a>
 
 #### Capture and analyze deadlock graphs
 
+[Official documentation on deadlock trace flags][microsoft-deadlock-trace-flags]
+
+First of all, deadlocks can be found without using graphs, using trace flags instead. The trace flags
+are 1204 and 1222. The trace flags can be enabled with the following SQL:
+
+```sql
+DBCC TRACEON(1204, 1222, -1)
+```
+
+Deadlocks are captured in the SQL Server error logs if these trace flags are enabled.
+
+SQL Server Profiler or Extended Events can be used to capture deadlock graphs, which are XML
+descriptions of deadlocks.
+
 <a name="identify_ways_to_remediate_deadlocks"></a>
 
 #### Identify ways to remediate deadlocks
+
+* Transactions should be as small as possible to make deadlocks less likely to occur.
+* Locking more resources, e.g. an entire table, can also prevent deadlocks. This might cause
+  blocking, however.
+* We can try to run the code multiple times. The code has to be wrapped in a try-catch and
+  inside a loop. If a deadlock occurs we rollback in the catch and continue the loop one
+  more time.
+* Use SNAPSHOT or READ_COMMITTED_SNAPSHOT isolation levels. This requires a lot of space in tempdb.
+* Use the NOLOCK hint (READ_UNCOMMITTED isolation level). The trade-off is potential dirty reads.
+* Use UPDLOCK or HOLDLOCK hints to proactivly prevent another transaction from locking a resource
+  that our transaction is going to use.
+* Add a new convering nonclustered index to provide SQL Server with another way to read data without
+  accessing the underlying table. The other transaction cannot use any of the covering index columns.
 
 ---
 
@@ -2083,6 +2177,9 @@ between Extended Events Packages, Targets, Actions, and Sessions*
 [microsoft-mcsa-sql-2016-database-development]: https://www.microsoft.com/en-us/learning/mcsa-sql2016-database-development-certification.aspx
 [microsoft-70-762-curriculum]: https://www.microsoft.com/en-us/learning/exam-70-762.aspx
 [microsoft-dynamic-data-masking]: https://docs.microsoft.com/en-us/sql/relational-databases/security/dynamic-data-masking
+[microsoft-ddl-triggers]: https://docs.microsoft.com/en-us/sql/relational-databases/triggers/ddl-triggers
+[microsoft-dml-triggers]: https://docs.microsoft.com/en-us/sql/relational-databases/triggers/dml-triggers
+[microsoft-logon-triggers]: https://docs.microsoft.com/en-us/sql/relational-databases/triggers/logon-triggers
 [microsoft-indexes]: https://docs.microsoft.com/en-us/sql/relational-databases/indexes/indexes
 [microsoft-index-design-guide]: https://docs.microsoft.com/en-us/sql/relational-databases/sql-server-index-design-guide
 [microsoft-indexes-with-included-columns]: https://docs.microsoft.com/en-us/sql/relational-databases/indexes/create-indexes-with-included-columns
@@ -2090,6 +2187,7 @@ between Extended Events Packages, Targets, Actions, and Sessions*
 [microsoft-lock-granularity]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms189849%28v%3dsql.105%29
 [microsoft-lock-modes]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms175519%28v%3dsql.105%29
 [microsoft-lock-escalation]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms184286(v=sql.105)
+[microsoft-deadlock-trace-flags]: https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms178104(v=sql.105)]
 [microsoft-query-store]: https://docs.microsoft.com/en-us/sql/relational-databases/performance/monitoring-performance-by-using-the-query-store
 [microsoft-azure-sql-database-query-performance]: https://docs.microsoft.com/en-us/azure/sql-database/sql-database-query-performance
 [microsoft-update-statistics]: https://docs.microsoft.com/en-us/sql/t-sql/statements/update-statistics-transact-sql
