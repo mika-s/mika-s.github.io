@@ -2116,13 +2116,128 @@ settings can be adjusted to change the behavior of SQL Server:
 
 #### Monitor and diagnose scheduling and wait statistics using dynamic management objects
 
+Wait statistics can be used to find which resource that's being a bottleneck on performance.
+Wait statistics allows us to analyze the time a worker thread spends in various states before
+it completes a request.
+
+Wait statistics are found in the following DMVs:
+
+* **sys.dm_os_wait_stats:**
+
+  Information about completed waits on the instance level. We can use this to find the most
+  frequently occuring waits.
+
+  *Identify CPU issues:*
+  
+  - The signal wait time can be compared to the total wait tiem to determine the relative
+    percentage of tiem that a thread has to wait for its turn to run on the CPU. If the value
+    is high, it can indicate that the CPU is overwhelmed. The server either needs more CPU or
+    CPU-intensive queries have to be tuned to use less CPU.
+  - *SOS_SCHEDULER_YIELD* will occur more often if the CPU is under pressure.
+
+  *Identify IO issues:*
+  
+  - There can be IO issues if there are many waits with "IO" in the name.
+  - Two wait types that often occur when there are IO issues are: *ASYNC_IO_COMPLETION* and
+    *IO_COMPLETION*. Physical disk performance counters should be used to confirm this.
+    Adding indexes might help with reducing IO contention.
+  - *PAGEIOLATCH* waits might be shown when threads are waiting for latches to release after
+    writing data page in memory to disk.
+  - *WRITELOG* waits might be shown when the log management system is waiting to flush to disk.
+  
+  *Identify memory pressure:*
+  
+  - *PAGEIOLATCH* waits might also idicate memory pressure. It appears when SQL Server doesn't
+    have enough free memory for the buffer pool. The *Page Life Expectancy* performance counter
+    should be checked to see if it's dropping compared to a baseline value.
+  - *RESOURCE_SEMAPHORE* waits is an indicator of memory pressure. It occures when a query
+    requests more memory than is currently available. There are DMVs that can be used to find
+    memory-intensive queries. Their query plans should be reviewed.
+
+* **sys.dm_exec_session_wait_stats:**
+
+  Information about waits on the session level. Similar to sys.dm_os_wait_stats, but contains a
+  column for session id. New in SQL Server 2016.
+
+* **sys.dm_os_waiting_tasks:**
+
+  Information about requests on the waiter list. To find performance bottlenecks we can try to
+  find tasks that have waited too long.
+
 <a name="troubleshoot_and_analuze_storage_io_and_cache_issues"></a>
 
 #### Troubleshoot and analyze storage, IO, and cache issues
 
+**Storage and IO issues:**
+
+Storage and IO issues can occur when the harddisk is slow or when the RAID is not configured
+correctly. The following DMVs can be used to analyze storage and IO issues:
+
+* **sys.dm_os_wait_stats:** seethe  section above.
+
+* **sys.dm_io_virtual_file_stats:**
+* **sys.master_files:** these two are used together to get metrics about data and log files. It
+  will help us find the busiest files and provides information about IO stalls.
+
+* **sys.dm_os_performance_counters:** performance-counter information.
+
+    - **SQLServer:Buffer Manager: Page lookups/sec:** Average request per second at which SQL Server
+      finds a page in the buffer pool. This value should be lower than
+      SQLServer:SQL Statistics: Batch Requests/sec multiplied by 100.
+      
+    - **SQLServer:Buffer Manager: Page reads/sec:** Average rate at which SQL Server reads from disk.
+      This value should be lower than the hardware specifications for the IO subsystem's read operations.
+    
+    - **SQLServer:Buffer Manager: Page writes/sec:** Average rate at which SQL Server writes to disk.
+      This value should be lower than the hardware specifications for the IO subsystem's write operations.
+
+   If the counters are too high we can alleviate the issue by adding new indexes, improve
+   existing indexes, normalize tables or partition tables. Replacing hardware with faster hardware
+   can also help
+
+**Cache issues:**
+
+Cache bottlenecks can occur when SQL Server does not have enough memory to manage.
+
+The following DMVs can be used to analyze caching issues:
+
+* **sys.dm_os_memory_cache_counters:** view the current state of the cache.
+* **sys.dm_os_sys_memory:** view resource usage information for the server.
+* **sys.dm_os_memory_clerks:** view usage information by memory clerk processes.
+
+The following performance counters are also interesting:
+
+* **SQLServer:Buffer Manager: Free List Stalls/Sec:** Number of requests per second that SQL Server
+  waits for a free page in the buffer cache. If this value is greater than zero on a frequent basis,
+  the server is experiencing memory pressure.
+  
+* **SQLServer:Buffer Manager: Lazy Writes/Sec:** Number of times per second that SQL Server flushes
+  pages to disk. If this number is rising over time, and Free List Stalls/Sec is also greater than
+  zero, you likely need more memory on the server.
+
+* **SQLServer:Memory Manager: Memory Grants Outstanding:** Number of processes that have acquired a
+  memory grant successfully. A low value might signify memory pressure.
+
+* **SQLServer:Memory Manager: Memory Grants Pending:** Number of processes that are waiting for a
+  memory grant. If this value is greater than zero, consider turning queries or adding memory to the
+  server.
+
 <a name="monitor_azure_sql_database_query_plans"></a>
 
 #### Monitor Azure SQL Database query plans
+
+The following methods can be used to monitor Azure SQL Database query plans:
+
+* **SQL statements:** `SET SHOWPLAN_*` can be used to see query plans. The buttons in the toolbar
+  in SSMS can do the same.
+  
+* **Extended events:** Extended events can be used to capture query plans. The syntax is slightly
+  different from SQL Server. To write to file we have to use an Azure Storage container. 
+  
+* **Query Store:** The Query Store is enabled by default in Azure SQL databases. We can either
+  use the Query Store views or the Query Store DMVs.
+  
+SQL Trace cannot be used in Azure SQL Database.
 
 ---
 
