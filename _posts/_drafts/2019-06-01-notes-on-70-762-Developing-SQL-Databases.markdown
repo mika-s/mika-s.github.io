@@ -364,7 +364,7 @@ There are two types of indexes in SQL Server: clustered and non-clustered.
 
 - The data in a table are physically stored and sorted after the clustered index.
 - A table without a clustered index is called a *heap*.
-- Teh maximum key size is 900 bytes.
+- The maximum key size is 900 bytes.
 
 **Non-clustered:**
 
@@ -618,6 +618,21 @@ The following should be known about columnstore indexes:
 <a name="identify_proper_usage_of_columnstore_indexes"></a>
 
 #### Identify proper usage of clustered and non-clustered columnstore indexes
+
+Columnstore indexes support two different scenarios:
+
+* Dimensional formatted data warehouses:
+
+  - Clustered columnstore indexes
+
+* Analytics on OLTP tables:
+
+  Non-clustered columnstore indexes
+  
+Misc.:
+
+- Columnstore indexes should be used on tables with a large amount of data.
+- The optimum amount of data in a row group is 1,048,576.
 
 <a name="design_standard_non_clustered_index_with_clustered_columnstore_indexes"></a>
 
@@ -2280,9 +2295,29 @@ between Extended Events Packages, Targets, Actions, and Sessions*
 
 #### Distinguish between Extended Events targets
 
+A target receives information about an event. These are some of the targets that are possible
+for Extended Events:
+
+* **etw_classic_sync_target:** Used to monitor system activity. Synchronous ETW target.
+* **event_counter:** Counts the number of times a specific event has occured.
+* **event_file:** Writes the event session to an output file.
+* **histogram:** Count the number of times a specific event has occured, but can count occurences
+  for multiple items, for both event fields or actions.
+* **pair_matching:** Helps you find events that doesn't have a corresponding end event.
+* **ring_buffer:** Holds data in memory in a FIFO structure.
+
 <a name="compare_the_impact_of_extended_events_and_sql_trace"></a>
 
 #### Compare the impact of Extended Events and SQL Trace
+
+Both Extended Events and SQL Trace adds overhead to the server.
+
+- SQL Server Profiler for client-side tracing is the most intrusive option.
+- SQL Trace stored procedures for server-side events is less intrusive.
+- The least intrusive option is Extended Events. It's made as a lightweight replacement for SQL Trace.
+
+Limiting the number of events and columns captured will mnimize the overhead. The
+*query_post_execution_showplan* event is expensive and should not be used in a production environment.
 
 <a name="define_differences_between_extended_events_packages_targets_actions_and_sessions"></a>
 
