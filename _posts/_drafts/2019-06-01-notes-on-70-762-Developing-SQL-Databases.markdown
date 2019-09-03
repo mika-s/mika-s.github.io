@@ -364,7 +364,7 @@ There are two types of indexes in SQL Server: clustered and non-clustered.
 
 - The data in a table are physically stored and sorted after the clustered index.
 - A table without a clustered index is called a *heap*.
-- Teh maximum key size is 900 bytes.
+- The maximum key size is 900 bytes.
 
 **Non-clustered:**
 
@@ -618,6 +618,21 @@ The following should be known about columnstore indexes:
 <a name="identify_proper_usage_of_columnstore_indexes"></a>
 
 #### Identify proper usage of clustered and non-clustered columnstore indexes
+
+Columnstore indexes support two different scenarios:
+
+* Dimensional formatted data warehouses:
+
+  - Clustered columnstore indexes
+
+* Analytics on OLTP tables:
+
+  Non-clustered columnstore indexes
+  
+Misc.:
+
+- Columnstore indexes should be used on tables with a large amount of data.
+- The optimum amount of data in a row group is 1,048,576.
 
 <a name="design_standard_non_clustered_index_with_clustered_columnstore_indexes"></a>
 
@@ -1446,6 +1461,31 @@ compiled stored procedures*
 
 #### Define use cases for memory-optimized tables versus traditional disk-based tables
 
+Memory-optimized tables can be considered when:
+
+* you need to improve performance and scalability of existing tables
+* you have frequent bottlenecks caused by locking and latching or code execution
+
+The following OLTP workloads benefit the most from migrating to memory-optimized tables:
+
+* short transactions with fast response times
+* queries accessing a limited number of tables that contain small data sets
+* high concurrency requirements
+
+According to the [official exam book][amazon-developing-sql-databases], we should know about the
+following use cases:
+
+* High data ingestion rate
+* High volume, high performance data reads
+* Complex business logic in stored procedures
+* Real-time data access
+* Session state management
+* Applications relying heavily on temporary tables, table variables, and table-valued parameters
+* ETL operations
+
+In addition to memory-optimzed tables, we can use natively stored procedures to reduce
+execution time.
+
 <a name="optimize_performance_of_in_memory_tables_by_changing_durability_settings"></a>
 
 #### Optimize performance of in-memory tables by changing durability settings
@@ -2272,17 +2312,70 @@ between Extended Events Packages, Targets, Actions, and Sessions*
 
 #### Monitor Azure SQL Database performance
 
+* **Azure Portal:** The Azure Portal will show graphs of selected metrics. E.g. CPU percentage,
+  number of firewall blocks, DTU percentage, database size, etc. The Azure Portal can be
+  configured to send emails when metrics go above or below a specified threshold.
+
+* **DMVs:**
+
+  - *sys.database_connection_stats:* Count successful and failed connections.
+  - *sys.dm_db_resource_stats:* Get the resource consumption percentages for CPU, data IO, and
+    log IO. It returns one row for every 15 seconds, even when there is no activity in the database.
+  - *sys.dm_exec_query_stats:* Find queries that use a lot of resources.
+  - *sys.dm_tran_locks:* Discover blocked queries.
+  - *sys.event_log:* Find issues such as deadlocking and throttling for the last 30 days.
+
+* **Extended Events:** Using Extended Events in Azure SQL Database is similar to Extended Events
+  for ordinary SQL Server. However, there are fewer events available to capture. There are also
+  minor differences in syntax.
+
 <a name="determine_best_practice_use_cases_for_extended_events"></a>
 
 #### Determine best practice use cases for extended events
+
+Extended Events can be used for any diagnostic task that can be performed with SQL Trace.
+Extended Events supports the following use cases:
+
+* **System health:** A system health session starts automatically with SQL Server. It collects
+  *session_id* and *sql_text* for sessions that experience errors with severity >= 20. It also
+  collects information about deadlocks, memory-related errors, long lock waits, long latches etc.
+
+* **Query performance diagnostics:** Get query plans, find information on deadlocks or queries
+  that did not end, troubleshoot waits for a session or query, count number of occurences of an
+  event, etc.
+
+* **Resource utilization monitoring and troubleshooting:** Capture information about server
+  resources, such as CPU, IO and memory utilization.
+  
+* **Security audits:** Capture login failures.
 
 <a name="distinguish_between_extended_event_targets"></a>
 
 #### Distinguish between Extended Events targets
 
+A target receives information about an event. These are some of the targets that are possible
+for Extended Events:
+
+* **etw_classic_sync_target:** Used to monitor system activity. Synchronous ETW target.
+* **event_counter:** Counts the number of times a specific event has occured.
+* **event_file:** Writes the event session to an output file.
+* **histogram:** Count the number of times a specific event has occured, but can count occurences
+  for multiple items, for both event fields or actions.
+* **pair_matching:** Helps you find events that doesn't have a corresponding end event.
+* **ring_buffer:** Holds data in memory in a FIFO structure.
+
 <a name="compare_the_impact_of_extended_events_and_sql_trace"></a>
 
 #### Compare the impact of Extended Events and SQL Trace
+
+Both Extended Events and SQL Trace adds overhead to the server.
+
+- SQL Server Profiler for client-side tracing is the most intrusive option.
+- SQL Trace stored procedures for server-side events is less intrusive.
+- The least intrusive option is Extended Events. It's made as a lightweight replacement for SQL Trace.
+
+Limiting the number of events and columns captured will mnimize the overhead. The
+*query_post_execution_showplan* event is expensive and should not be used in a production environment.
 
 <a name="define_differences_between_extended_events_packages_targets_actions_and_sessions"></a>
 
