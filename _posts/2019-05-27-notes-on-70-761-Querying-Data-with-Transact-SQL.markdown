@@ -2904,6 +2904,11 @@ EXEC GetMinAndMaxAgeForLastName 'Anderson'
 Table-valued user-defined functions return a table. There are two different types of table-valued
 functions: inline and multi-statement.
 
+Inline table-valued functions have better performance than multi-statement table-valued functions,
+because SQL Server will calculate the execution plans of the inline table-valued functions with the
+latest statistics. This does not happen with multi-statement table-valued functions. More on that
+[here][stackoverflow-mstvf-vs-itvf].
+
 **Inline table-valued functions:**
 
 Are similar to views because it's a single query. Unlike views, it supports parameters.
@@ -3408,6 +3413,7 @@ SQL Server supports several data types in various categories:
 - Approximate numeric: `FLOAT`, `REAL`.
 - Binary strings: `BINARY`, `VARBINARY`.
 - Date and time: `DATE`, `TIME`, `SMALLDATETIME`, `DATETIME`, `DATETIME2`, `DATETIMEOFFSET`.
+- Boolean: `BIT`.
 
 Important things to take into account when choosing a data type:
 
@@ -3804,6 +3810,7 @@ DEALLOCATE MyCursor
 [codingsight-grouping-and-grouping-id]: https://codingsight.com/understanding-grouping-and-grouping_id-functions-in-sql-server/
 [stackoverflow-union-and-union-all]: https://stackoverflow.com/questions/49925/what-is-the-difference-between-union-and-union-all
 [stackoverflow-where-clause-sargability]: https://stackoverflow.com/questions/799584/what-makes-a-sql-statement-sargable
+[stackoverflow-mstvf-vs-itvf]: https://stackoverflow.com/questions/2554333/multi-statement-table-valued-function-vs-inline-table-valued-function
 [lobsterpot-sargable-functions]: http://blogs.lobsterpot.com.au/2010/01/22/sargable-functions-in-sql-server/
 [amazon-querying-data-with-transact-sql]: https://www.amazon.com/Exam-70-761-Querying-Data-Transact-SQL/dp/1509304339
 [erland-sommerskog-error-handling]: http://www.sommarskog.se/error_handling/Part1.html

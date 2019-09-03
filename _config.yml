@@ -9,6 +9,10 @@ twitter_username:
 github_username:  mika-s
 google_analytics: UA-109270090-1
 
+header_pages:
+  - topics.md
+  - about.md
+
 # Build settings
 markdown: kramdown
 theme: minima
