@@ -33,6 +33,12 @@ ${=org.apache.commons.lang.RandomStringUtils.randomAlphabetic(2)}
 ${=def now = new Date();now.format("yyyy-MM-dd")}
 ```
 
+#### 200 days into the future
+
+```java
+${=def now = new Date();def future = now.plus(200);future.format("yyyy-MM-dd")}
+```
+
 #### Own IP address
 
 ```java
