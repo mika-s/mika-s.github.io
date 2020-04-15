@@ -136,7 +136,7 @@ scp_protocol:register_heuristic("udp", heuristic_checker)
 
 `heuristic_checker()` is a function that is passed as an argument to `register_heuristic()`.
 It has three parameters: `buffer` (Tvb object), `pinfo` (Pinfo object) and `tree` (TreeItem object).
-You can find the documentation for it [here][protofield-functions] (search for register_heuristic).
+You can find the documentation for it [here][register_heuristic].
 
 In my case it looks like this:
 
@@ -244,12 +244,11 @@ Note that the port registration is gone. You can use both port registration and 
 but I won't go into that here.
 
 `scp_protocol.dissector()` could also be passed in as an argument to `register_heuristic()`, rather
-than having a separate function for this. There is more written about that in the [official manual][protofield-functions]
-(search for register_heuristic) and in [this][example-heuristic-dissector] dissector. That makes
-it possible to reuse the parsing logic.
+than having a separate function for this. There is more written about that in the [official manual][register_heuristic]
+and in [this][example-heuristic-dissector] dissector. That makes it possible to reuse the parsing logic.
 
 For more information on heuristic dissectors, please also read the official [readme][readme-heuristic].
 
 [readme-heuristic]: https://github.com/wireshark/wireshark/blob/master/doc/README.heuristic
-[protofield-functions]: https://www.wireshark.org/docs/wsdg_html_chunked/lua_module_Proto.html
+[register_heuristic]: https://www.wireshark.org/docs/wsdg_html_chunked/lua_module_Proto.html#lua_fn_proto_register_heuristic_listname__func_
 [example-heuristic-dissector]: https://github.com/zonque/wireshark/blob/master/test/lua/dissector.lua
