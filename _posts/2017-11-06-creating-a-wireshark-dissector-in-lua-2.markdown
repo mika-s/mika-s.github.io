@@ -91,7 +91,7 @@ The opcode here is only a number. It would be nicer if we showed the opcode name
 To grab the opcode as an integer we can use
 
 ```lua
-local opcode = buffer(12,4):le_int()
+local opcode_number = buffer(12,4):le_int()
 ```
 
 `le_int()` gets a little endian int from the buffer range. The variable `opcode` now contains an int representing the
@@ -119,7 +119,7 @@ end
 Finally, we have to replace the old addition to the sub tree with the following code:
 
 ```lua
-local opcode_name = get_opcode_name(opcode)
+local opcode_name = get_opcode_name(opcode_number)
 subtree:add_le(opcode, buffer(12,4)):append_text(" (" .. opcode_name .. ")")
 ```
 
@@ -152,8 +152,8 @@ function mongodb_protocol.dissector(buffer, pinfo, tree)
   subtree:add_le(request_id,     buffer(4,4))
   subtree:add_le(response_to,    buffer(8,4))
 
-  local opcode = buffer(12,4):le_uint()
-  local opcode_name = get_opcode_name(opcode)
+  local opcode_number = buffer(12,4):le_uint()
+  local opcode_name = get_opcode_name(opcode_number)
   subtree:add_le(opcode,         buffer(12,4)):append_text(" (" .. opcode_name .. ")")
 end
 
