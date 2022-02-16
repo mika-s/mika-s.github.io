@@ -94,7 +94,7 @@ To grab the opcode as an integer we can use
 local opcode_number = buffer(12,4):le_int()
 ```
 
-`le_int()` gets a little endian int from the buffer range. The variable `opcode` now contains an int representing the
+`le_int()` gets a little endian int from the buffer range. The variable `opcode_number` now contains an int representing the
 opcode in decimal. We can then make a function that returns the opcode name given the opcode number:
 
 ```lua
