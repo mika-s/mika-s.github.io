@@ -25,6 +25,12 @@ permalink: /topics/
 * [Creating a Fiddler extension - part 3 (custom request inspector)]({% post_url 2019-06-08-creating-a-fiddler-extension-3 %})
 {% endcomment %}
 
+## Emulators
+
+{% comment %}
+* [Verifying emulator correctness - part 1 (diff and cmp)]({% post_url 2022-11-10-verifying-emulator-correctness-1 %})
+{% endcomment %}
+
 ## Various debugging
 
 * [Printing all arguments to a SQL stored procedure (for SQL Server)]({% post_url 2019-01-13-printing-all-arguments-to-an-sql-stored-procedure %})
