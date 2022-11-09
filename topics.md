@@ -27,9 +27,7 @@ permalink: /topics/
 
 ## Emulators
 
-{% comment %}
-* [Verifying emulator correctness - part 1 (diff and cmp)]({% post_url 2022-11-10-verifying-emulator-correctness-1 %})
-{% endcomment %}
+* [Verifying emulator correctness - part 1 (diff)]({% post_url 2022-11-06-verifying-emulator-correctness-1 %})
 
 ## Various debugging
 
