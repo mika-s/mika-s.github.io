@@ -28,6 +28,7 @@ permalink: /topics/
 ## Emulators
 
 * [Verifying emulator correctness - part 1 (diff)]({% post_url 2022-11-06-verifying-emulator-correctness-1 %})
+* [Verifying emulator correctness - part 2 (one instruction at a time)]({% post_url 2022-11-11-verifying-emulator-correctness-2 %})
 
 ## Various debugging
 

@@ -26,8 +26,8 @@ And something like this when it's failing:
 ```
 
 In this post I'll explain how I figure out where the errors are when the tests are failing. This particular post will
-use `diff` for finding errors. The next post will explain how I deal with tests that generate too much data to be
-run to completion before diffing.
+use `diff` for finding errors. [The next post]({% post_url 2022-11-11-verifying-emulator-correctness-2 %}) will explain
+how I deal with tests that generate too much data to be run to completion before diffing.
 
 I use a Z80 emulator in the examples below, but the principles are the same for all CPUs.
 
@@ -437,7 +437,7 @@ And that's how I fix bugs in my emulators. By narrowing down the test suite to a
 emulator to a reference emulator that is known to be correct. This might not always work, however. In some cases the
 diff might occur after millions of executed instructions, which makes the log files gigantic. In cases like that,
 executing one instruction at a time while running the emulators in parallel might be a better solution. I'll explain
-how I do that in the next post.
+how I do that in [the next part]({% post_url 2022-11-11-verifying-emulator-correctness-2 %}).
 
 
 [zmac]: http://48k.ca/zmac.html
