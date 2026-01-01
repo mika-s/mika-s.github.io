@@ -11,13 +11,13 @@ that the protocol uses. This type of dissector is called a *heuristic dissector*
 ### How heuristic dissectors work
 
 A heuristic dissector is a dissector that reads the content of packets in order to determine
-whether it's the right dissector to use or not. This is compared to a "normal" dissector that is
+whether it's the right dissector to use or not. This is in contrast to a "normal" dissector that is
 registered to a port and will try to dissect all packets that are received on that port. For
 example, the early bytes of a packet are usually metadata that are unique to a particular protocol:
 magic number such as flags, message IDs and so on. If enough of the metadata in the incoming packet
 match, we can assume the dissector is correct to use for the packet that is being dissected.
 
-You might want to make a dissector heuristic if you don't know what port a protocol will operate
+You might want to make a dissector heuristic when you don't know what port a protocol will operate
 on, if it uses random ports, if the port it uses is also used by another protocol, and so on.
 However, be aware that many protocols share structure and metadata such as message IDs and flags.
 It's important that a protocol is unique enough before using the heuristic dissector functionality.
@@ -121,7 +121,7 @@ udp_port:add(4000, scp_protocol)
 udp_port:add(4001, scp_protocol)
 ```
 
-It puts the protocol flag and message ID on the sub tree and is registered to UDP ports 4000 and 4001.
+It puts the protocol flag and message ID on the subtree and is registered to UDP ports 4000 and 4001.
 
 Let's convert this into a heuristic dissector.
 
@@ -161,23 +161,23 @@ end
 
 The goal of the heuristic checker function is to return false if the dissector doesn't belong to the
 packet in question, and return true otherwise. So what I'm doing in the function above is to check
-that the length of the packet is long enough to actually be a SCP packet. This is just a guard so we
+that the length of the packet is long enough to actually be an SCP packet. This is just a guard so we
 don't end up trying to read values outside the buffer.
 
 The first real check I do is to look for the protocol flag: `0xD3`. If this doesn't exist as the first
-byte it can't be a SCP packet and we can return false immediately.
+byte it can't be an SCP packet, and we can return false immediately.
 
-The second check I do is for the two next bytes, which represents the message ID. This is checked with
+The second check I do is for the two next bytes, which represent the message ID. This is checked with
 the `get_message_name()` function which looks for valid message IDs in a bunch of if-elseifs. If it doesn't
 find a valid message ID it will return "Unknown" and we can return false in `heuristic_checker()`. If
-it returns a proper message name we consider the dissector to belong to the packet and we can call the
+it returns a proper message name we consider the dissector to belong to the packet, and we can call the
 dissector function and return true.
 
 Note that I only check the protocol flag and message IDs in this heuristic dissector. I do this because
-this is a blog post and I have to keep it simple. In reality you want to test as many things as possible
+this is a blog post and I have to keep things simple. In reality, you want to test as many things as possible
 before you return true. As mentioned before, many protocols have similar structure and the same magic
-numbers, so you might end up registering a dissector to a wrong protocol if you only test for things like
-protocol flag, message IDs and so on. The further you check the more confidence you get in that the
+numbers, so you might end up registering a dissector to the wrong protocol if you only test for things like
+protocol flag, message IDs, and so on. The further you check, the more confidence you get that the
 registration is correct.
 
 The final heuristic dissector looks like this:

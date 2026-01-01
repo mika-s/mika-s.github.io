@@ -28,7 +28,7 @@ interface:
 This shows all USB traffic, including the keyboard and anything else that is using USB. The
 "Leftover Capture Data" is the application layer and what I consider interesting. Wireshark doesn't
 dissect it, so that's what I want to write a dissector for. I use the following filter to show only
-the packets that goes from the mouse to the computer:
+the packets that go from the mouse to the computer:
 
 ![Filter for usb.src]({{ "/assets/creating-wireshark-usb-dissectors-1/wireshark-filter-for-src.png" | absolute_url }})
 
@@ -39,7 +39,7 @@ device, back to the device. The filter I use in the screenshot will filter out t
 they are just noise. USB is usually little endian, by the way.
 
 At this stage I'll try to reverse engineer the mouse data without looking at the specification. I am
-mainly interested in two things: capturing button presses and capturing mouse movements.
+mainly interested in two things: capturing button presses and mouse movements.
 
 Starting off, all the bytes are 0. Pressing only one button, one by one, yields:
 
@@ -87,10 +87,10 @@ Starting off, all the bytes are 0. Pressing only one button, one by one, yields:
 
 
 Nothing is sent when the mouse sensitivity buttons are clicked. I think the mouse changes the
-reporting frequency internally when using these buttons. They don't seem change anything related to
+reporting frequency internally when using these buttons. They don't seem to change anything related to
 software.
 
-Holding in two buttons at the same time yields:
+Holding down two buttons at the same time yields:
 
 - Left + right buttons:
 
@@ -106,7 +106,7 @@ Holding in two buttons at the same time yields:
 
   ![Back+left click bytes]({{ "/assets/creating-wireshark-usb-dissectors-1/back-left-click-bytes.png" | absolute_url }})
 
-So it easy to see what's going on here: a button is represented as one bit. The first byte
+So it's easy to see what's going on here: a button is represented as one bit. The first byte
 therefore contains the state of 8 buttons.
 
 When I scroll the mouse, without doing anything else, I see:
@@ -161,7 +161,7 @@ as it should. And it does:
 ![First dissector bytes]({{ "/assets/creating-wireshark-usb-dissectors-1/first-dissector-bytes.png" | absolute_url }})
 
 A USB dissector works just like a network packet dissector. The only difference is that we don't
-connect our new dissector to the *tcp.port* table. Instead we use the *usb.interrupt* table,
+connect our new dissector to the *tcp.port* table. Instead, we use the *usb.interrupt* table,
 and use the USB interface class as value (*0xffff*). Other tables that can be used are *usb.control*
 and *usb.bulk*. I'm not sure where they are used, but I think *usb.bulk* is used for USB HDD traffic.
 
@@ -233,8 +233,8 @@ DissectorTable.get("usb.interrupt"):add(0xffff, usb_mouse_protocol)
 ```
 
 I've created a new function: `parse_buttons()`. `parse_buttons()` returns a string with
-information on what buttons that are clicked. I have also made a value string called `scrolling_lookup`
-that converts the number found in the scroll byte (in decimal) to either "(up)", "(down)" or
+information on what buttons that are clicked. I have also made a value string called `scrolling_lookup`,
+which converts the number found in the scroll byte (in decimal) to either "(up)", "(down)" or
 "(not scrolling)". The strings are shown next to the button and scroll status numbers.
 
 The code is pretty self-explanatory. To find out whether a button is clicked or not I use bit
@@ -247,7 +247,7 @@ the left and right button at the same time, while scrolling up:
 
 ### HID
 
-It was fairly easy to figure out how the mouse buttons and scroll wheel works without looking at any formal
+It was fairly easy to figure out how the mouse buttons and scroll wheel work without looking at any formal
 specifications. The mouse movement seems to be related to either the second and third byte, or
 the fifth to eight bytes. So in order to figure out how to get the mouse position we have to look
 up how the USB protocol actually works.
@@ -256,7 +256,7 @@ USB devices such as keyboards and mice use something called HID (Human Interface
 a protocol on top of USB that provides a standardized way for keyboards and mice to communicate with
 the host. My mouse uses HID rather than a proprietary Logitech driver when communicating with my PC.
 
-If you are interested in reading more about HID can do that [here][who-t-understanding-hid-report-descriptors]
+If you are interested in reading more about HID, you can do that [here][who-t-understanding-hid-report-descriptors]
 or [here][eleccelerator-tutorial-about-hid-report-descriptors]. In summary, when the mouse gets
 connected to the PC it will send a report descriptor to it that tells the PC how the mouse will
 send data. For instance, what does the first byte represent, what does the second represent, and so

@@ -12,9 +12,9 @@ the names of the opcodes, rather than just the numbers.
 
 ### Debugging
 
-When I'm talking about debugging I am not really thinking of debugging the normal way, where you use a symbolic debugger
-to step through code. You won't do that here. I am rather thinking about the process of finding and fixing errors in the
-code. There are generally three ways to debug dissectors written in Lua.
+When I'm talking about debugging, I am not really thinking of debugging in the normal way, where you use a symbolic
+debugger to step through code. That’s not something you’ll do here. I am rather thinking about the process of finding
+and fixing errors in the code. There are generally three ways to debug Lua dissectors.
 
 The first is to check if you get any error messages during startup of the script. This happens either when you start
 Wireshark or when you reload the script with **Ctrl+Shift+L**. Syntax errors in the script will be caught this way.
@@ -22,8 +22,8 @@ Here is what an error message looks like when an `end` statement is missing:
 
 ![Error during startup]({{ "/assets/creating-wireshark-dissectors-2/error-dialog.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
-Runtime errors are often shown in the sub tree for the dissector. For example, if a function is called with the wrong
-name is wrong then the error message will look like this.
+Runtime errors are often shown in the subtree for the dissector. For example, if a function is called with the wrong
+name, the error message will look like this.
 
 ![Error in the tree]({{ "/assets/creating-wireshark-dissectors-2/error-in-tree.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
@@ -74,8 +74,8 @@ print(d.traceback())
 ```
 
 And that's pretty much what we have available for debugging. Don't expect any fancy IDE with a built-in debugger when
-dealing with Lua dissectors. If you want to you could try to get [ZeroBrane Studio][github-ZeroBraneStudio] working,
-but I haven't figured out how to do that easily, so I'm going with printf debugging myself.
+dealing with Lua dissectors. If you want to, you could try to get [ZeroBrane Studio][github-ZeroBraneStudio] working,
+but I haven't figured out how to do that easily, so I'm going with printf-style debugging myself.
 
 ### Extending the MongoDB protocol dissector
 
@@ -84,7 +84,7 @@ In the previous post we made a dissector that ended up looking like this in the 
 ![Opcode without name]({{ "/assets/creating-wireshark-dissectors-2/opcode-without-name.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
 The opcode here is only a number. It would be nicer if we showed the opcode name too. According to the
-[MongoDB wire protocol][mongodb-wire-protocol], the opcodes have the following names:
+[MongoDB wire protocol][mongodb-wire-protocol], the opcodes have the following names associated with them:
 
 ![Opcode descriptions]({{ "/assets/creating-wireshark-dissectors-2/opcode-descriptions.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
@@ -116,14 +116,14 @@ function get_opcode_name(opcode)
 end
 ```
 
-Finally, we have to replace the old addition to the sub tree with the following code:
+Finally, we have to replace the old addition to the subtree with the following code:
 
 ```lua
 local opcode_name = get_opcode_name(opcode_number)
 subtree:add_le(opcode, buffer(12,4)):append_text(" (" .. opcode_name .. ")")
 ```
 
-We append the name of the name of the opcode in parentheses to the original statement that only showed opcode number.
+We append the name of the opcode in parentheses to the original statement that only showed opcode number.
 The packet details pane in Wireshark will then end up looking like this:
 
 ![Opcode with name]({{ "/assets/creating-wireshark-dissectors-2/opcode-with-name.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }

@@ -9,15 +9,15 @@ This post continues where [the fourth post]({% post_url 2018-12-16-creating-a-wi
 Here I will explain how we can separate the code into several modules. In my case, I will separate the header and payload
 parts into separate files.
 
-### Dividing up the code
+### Dividing the code
 
 I want to have a separate file for the header stuff, a file for the OP_REPLY message, a file for the OP_QUERY message,
-a file for helper functions and the main file. The final file structure looks like this:
+a file for helper functions and the main file. The final directory structure looks like this:
 
 ![File structure]({{ "/assets/creating-wireshark-dissectors-5/file-structure.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
 I've made a separate folder called *mongodb*. This will contain all the modules for the protocol. The main file still lives
-in the plugin director.
+in the plugin directory.
 
 ### Requiring the files
 
@@ -26,8 +26,8 @@ In Lua we generally have two functions that can load files: `dofile` and `requir
 *Lua offers a higher-level function to load and run libraries, called require. Roughly, require does the same job as dofile, but with two important differences. First, require searches for the file in a path; second, require controls whether a file has already been run to avoid duplicating the work. Because of these features, require is the preferred function in Lua for loading libraries.*
 
 In addition to `require` we have to use `package.prepend_path()`. `package.path` is where Wireshark looks for files.
-`prepend_path` will add a new path to `package.path`. In my particular case, the working directory is the Wireshark root
-directory, which means I have to add *"plugins/mongodb"* to `package.path`. You might have another path than mine if you
+`prepend_path` will add a new path to `package.path`. In my case, the working directory is the Wireshark root
+directory, which means I have to add *"plugins/mongodb"* to `package.path`. Your path may differ from mine if you
 use another OS than me, or place the files in another folder (e.g. user plugins directory rather than the global plugins
 directory).
 
@@ -199,12 +199,12 @@ tcp_port:add(59274, mongodb_protocol)
 ```
 
 Notice the call to `header.parse()`. As mentioned, I return `opcode_name` because I need it further down in the code. The
-sub tree `headerSubtree` will also be modified (fields added to it), because it's a reference type and thus mutable inside
+subtree `headerSubtree` will also be modified (fields added to it), because it's a reference type and thus mutable inside
 `parse()`.
 
 ### Creating OP_QUERY.lua and OP_REPLY.lua
 
-As you can see, there are still a lot of header stuff in the main file that can be moved into the header module. I'll
+As you can see, there is still header-related code in the main file that can be moved into the header module. I'll
 move that later, but first I want to do the same to the OP_QUERY and OP_REPLY parsing code as I did with the header code.
 
 I'm making OP_QUERY.lua and moving `get_flag_description()` and the OP_QUERY parsing logic to it:

@@ -7,7 +7,7 @@ categories: wireshark lua dissector
 
 This post continues where [the second post]({% post_url 2017-11-06-creating-a-wireshark-dissector-in-lua-2 %}) left off.
 
-In part 1 and 2 we looked at the header of the [MongoDB wire protocol][mongodb-wire-protocol]
+In part 1 and 2, we looked at the header of the [MongoDB wire protocol][mongodb-wire-protocol]
 messages. This time it's time to parse the content of the messages. However, we will not actually
 decode the documents returned by MongoDB, as that falls outside the scope of this tutorial.
 
@@ -19,7 +19,7 @@ this message is:
 ![OP_QUERY message format]({{ "/assets/creating-wireshark-dissectors-3/OP_QUERY-message.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
 What the various fields mean can be seen in the [specification][mongodb-wire-protocol]. In the
-header we only had to deal with int32s, but now we have a string as well. We can start by parsing
+header we only had to deal with int32 values, but now we have a string as well. We can start by parsing
 the *flags* field:
 
 ```lua
@@ -79,9 +79,9 @@ We are only dissecting the `OP_QUERY` message in the code above.
 The script is starting to get big for a blog post now, so I will start shortening the content that
 we have already looked at before with ...
 
-So the `flags` field is now shown in the sub tree for `OP_QUERY` messages. Similar to the `opcode`,
-it would be nice we if could have a description of the flag value in parentheses beside the value.
-The description of the values are found in the spec. As with the opcode description we make a lookup
+So the `flags` field is now shown in the subtree for `OP_QUERY` messages. Similar to the `opcode`,
+it would be nice if we could have a description of the flag value in parentheses beside the value.
+The descriptions of the values are found in the spec. As with the opcode description we make a lookup
 function to get the flag description:
 
 ```lua
@@ -102,7 +102,7 @@ function get_flag_description(flags)
 end
 ```
 
-and then change how we add the field to the sub tree:
+and then change how we add the field to the subtree:
 
 ```lua
 if opcode_name == "OP_QUERY" then
@@ -112,16 +112,16 @@ if opcode_name == "OP_QUERY" then
 end
 ```
 
-The MongoDB sub tree will then look like this for messages with the `OP_QUERY` opcode:
+The MongoDB subtree will then look like this for messages with the `OP_QUERY` opcode:
 
 ![Flag with description]({{ "/assets/creating-wireshark-dissectors-3/flag-with-description.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
 The flag field will not be there for other messages, as they never enter the `OP_QUERY` *if* block.
 
-The next field is a bit different than the previous ones: we must now dissect something else
+The next field is a bit different from the previous ones: we must now dissect something other
 than an int32. In this case it's a string. A string is different from the other types in that it
 doesn't have a fixed length. So we have to loop over the bytes in the buffer until we hit the end
-of the string. How we determine the end of the string is depends on what type of string it is. In
+of the string. How we determine the end of the string depends on what type of string it is. In
 this case, it's a *[cstring][wikipedia-null-terminated-string]*, which means the string is
 terminated by *[NUL][wikipedia-nul]* (the byte 00).
 
@@ -144,7 +144,7 @@ then read one byte at a time with `buffer(i,1):le_uint()` and check whether it's
 which indicates the end of the string. If it is, we store the length of the string in `string_length`
 and break the loop.
 
-We can then add the field to the sub tree. We must also make the field by adding this line to
+We can then add the field to the subtree. We must also make the field by adding this line to
 the top of the script:
 
 ```lua
@@ -168,7 +168,7 @@ We now have the collection name in the packet details pane:
 
 The rest of the fields are simple. I will not explain them in detail but show the final code
 instead. The field called `query` contains BSON documents, but as mentioned before, decoding them
-are outside the scope of this post. I'll use `ProtoField.none` for that field, which is a type that
+is outside the scope of this post. I'll use `ProtoField.none` for that field, which is a type that
 can be used for unstructured data. The script with `OP_QUERY` added is then:
 
 ```lua
@@ -273,11 +273,11 @@ The packet details for `OP_QUERY` ends up looking like this:
 
 ### Decoding the *OP_REPLY* message
 
-I am not going to decode all the messages, but we can look at one more. It has the following fields:
+I’m not going to decode all message types, but we can look at one more. It has the following fields:
 
 ![OP_REPLY message]({{ "/assets/creating-wireshark-dissectors-3/OP_REPLY-message.png" | absolute_url }}){: style="margin-top: 15px; margin-bottom: 30px;" }
 
-We have one new type here: int64. We won't touch the *documents* field, as that gets to
+We have one new type here: int64. We won't decode the *documents* field, as that gets too
 complicated. We make the following fields:
 
 ```lua
@@ -298,7 +298,7 @@ mongodb_protocol.fields = {
 }
 ```
 
-Parsing the fields are done like this:
+The fields are parsed like this:
 
 ```lua
 if opcode_name == "OP_QUERY" then
@@ -473,7 +473,7 @@ You can find the final code [here][mikas-github-mongodb].
 Two other blogs that describe Wireshark dissectors in Lua can be found [here][delog-wireshark-dissector-in-lua] and
 [here][emmanueladenola-wireshark-dissector-with-lua].
 
-If you want to find out how you can separate the fields into separate sub trees, you can take a
+If you want to find out how you can separate the fields into separate subtrees, you can take a
 look at [part four]({% post_url 2018-12-16-creating-a-wireshark-dissector-in-lua-4 %}) of this
 series.
 

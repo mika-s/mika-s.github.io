@@ -6,17 +6,17 @@ categories: wireshark lua dissector
 ---
 
 This post will explain how you can easily create [protocol dissectors][wireshark-lua-dissectors]
-in Wireshark, using the Lua programming language. This is can be useful when you're working with
+in Wireshark, using the Lua programming language. This can be useful when you're working with
 a custom protocol that Wireshark doesn't already have a dissector for. If Wireshark looks like
-this for example
+this, for example,
 
 ![Wireshark without dissector]({{ "/assets/creating-wireshark-dissectors-1/before.png" | absolute_url }})
 
-it's hard to tell what the various bytes in the data part represents.
+it's hard to tell what the various bytes in the data part represent.
 
 Wireshark is written in C, and dissectors for Wireshark are generally also written in C. However,
 Wireshark has a Lua implementation that makes it easy for people who are unfamiliar with C to write
-dissectors. For those who are unfamiliar with Lua, it's a very light-weight programming language
+dissectors. For those who are unfamiliar with Lua, it's a very lightweight programming language
 that is designed to be implemented as a scripting language in applications to extend their
 functionality.
 
@@ -31,17 +31,17 @@ to know the language in detail, but we must know the basics.
   it also has some object-oriented programming features. It doesn't have classes, prototypes or
   inheritance out of the box, but they can be made by the programmer.
 - It's dynamically typed.
-- Scope is either `local` or `global`. It's global if you don't declare it.
+- Scope is either `local` or `global`. It’s global if you don’t explicitly declare it.
 - Semicolons are not needed. Whitespace is not important like in Python.
 - Lines that start with `--` are comments.
 - Don't use `++` or `+=`. Use `i = i + 1` instead.
 - Not equal in conditionals is `~=` rather than `!=`.
 - Its types are: string, number, boolean, nil, function, userdata, thread and table. Number
-  represents all numbers, both floating points and integers. Booleans are either true or false.
+  represents all numbers, both floating-point numbers and integers. Booleans are either true or false.
   Strings are either single-quote or double-quote. You can forget about thread and userdata.
 - nil is a non-value. A variable will have the value nil before it's assigned a proper value.
-- In conditionals: nil and false are falsy, the rest are thruthy.
-- Lua has a type called `table`, which is also the only data structure it has. Tables implements
+- In conditionals: nil and false are falsy, the rest are truthy.
+- Lua has a type called `table`, which is also the only data structure it has. Tables implement
   associative arrays. Associative arrays can be indexed by both numbers and other types, such as
   strings. They have no fixed size and elements can be added dynamically. Tables are often called
   objects. They are created like this:
@@ -105,7 +105,7 @@ a:func1()
 a.func2()
 ```
 
-then the functions `func1` and `func2` belongs to the table (object) `a`. Using colon is syntactic
+then the functions `func1` and `func2` belong to the table (object) `a`. Using colon is syntactic
 sugar for passing the object itself as an argument to the function. That means `a:func1()` is
 similar to `a.func1(a)`.
 
@@ -120,7 +120,7 @@ folder. E.g. *C:\Program Files\Wireshark\plugins\2.4.2* on Windows. The script w
 Wireshark is started. You have to restart Wireshark after you do changes to the script, or reload
 all the Lua scripts with **Ctrl+Shift+L**.
 
-I'm using the latest version at the current date. What I'm doing here might not work on earlier
+I’m using the latest version available at the time of writing. What I'm doing here might not work on earlier
 versions.
 
 ### The protocol
@@ -136,7 +136,7 @@ According to the specification linked to above, the MongoDB wire protocol is a T
 using port number 27017. The byte ordering is little endian, meaning the least significant byte
 comes first. Most protocols are big endian. The only difference is the ordering of the bytes. If
 we had an int32 for example, with these bytes: `00 4F 23 11` in big endian, then the little endian
-version would be `11 23 4F 00`. This is something must to take into account when writing the
+version would be `11 23 4F 00`. This is something that must be taken into account when writing the
 dissector.
 
 In this post, I'll only take a look at the header of the protocol. It looks like this
@@ -167,7 +167,7 @@ local tcp_port = DissectorTable.get("tcp.port")
 tcp_port:add(59274, mongodb_protocol)
 ```
 
-We start my creating a [Proto][proto-object] (protocol) object and call it `mongodb_protocol`. The
+We start by creating a [Proto][proto-object] (protocol) object and call it `mongodb_protocol`. The
 table constructor takes two arguments: `name` and `description`. The protocol requires a `fields`
 table and a dissector function. We haven't added any fields yet, so the `fields` table is empty. The
 dissector function is called once for every packet of our type.
@@ -197,15 +197,14 @@ and the protocol column name changes from TCP to MONGODB:
 
 ![Packet list protocol column]({{ "/assets/creating-wireshark-dissectors-1/protocol-column.png" | absolute_url }})
 
-We must then create a sub tree in the tree structure found in the Packet Details pane. It done by
-adding an additional tree item to the tree object that was passed as an argument to the dissector
-function.
+We must then create a subtree in the tree structure found in the Packet Details pane. It's done by
+adding a tree item to the tree object that was passed as an argument to the dissector function.
 
 ```lua
 local subtree = tree:add(mongodb_protocol, buffer(), "MongoDB Protocol Data")
 ```
 
-The string is the name of the sub tree. Without having added any fields it will look like this:
+The string is the name of the subtree. Without having added any fields it will look like this:
 
 ![Packet pane with MongoDB but without fields]({{ "/assets/creating-wireshark-dissectors-1/packet-pane-1.png" | absolute_url }})
 
@@ -223,7 +222,7 @@ tcp_port:add(59274, mongodb_protocol)
 
 The script already runs at this stage, but it isn't doing anything useful. For the script to do
 something useful we have to add the fields that we want to parse. Fields are made by creating
-[ProtoField][protofield-object] objects. We can start off simple by adding only the first field.
+[ProtoField][protofield-object] objects. We can start simply by adding only the first field.
 The first field in the MongoDB wire protocol specification is the message length, which is an int32.
 
 ```lua
@@ -254,8 +253,8 @@ We add the following above the dissector function:
 message_length = ProtoField.int32("mongodb.message_length", "messageLength", base.DEC)
 ```
 
-The first argument is used as a label in the filter settings, second is used as a label in the sub
-tree and the last is used to decide how the variable's value should be displayed. In this case I
+The first argument is used as a label in the filter settings, second is used as a label in the subtree
+and the last is used to decide how the variable's value should be displayed. In this case I
 want to show the value in decimal, but I could also use `base.HEX` to show it in hexadecimal format.
 Hexadecimal format doesn't work for int32 though.
 
@@ -269,7 +268,7 @@ We then add the field to the `fields` table of the protocol:
 mongodb_protocol.fields = { message_length }
 ```
 
-and finally add the field to the sub tree:
+and finally add the field to the subtree:
 
 ```lua
 subtree:add_le(message_length, buffer(0,4))
@@ -280,7 +279,7 @@ protocol was big endian we would have to use `add`. The function takes two argum
 made further up, and a [buffer range][tvbrange-object]. We can get a range of the buffer by using
 the range function that is a part of the buffer object. `buffer(offset,length)` is the short form
 for the range function. `buffer(0,4)` means we want to start at the first byte, and then take 4
-bytes. The reason we want to start at 0 is because we're dealing with the first field in the header.
+bytes. The reason we want to start at 0 is that we're dealing with the first field in the header.
 We take 4 bytes because that is the size of an int32.
 
 After reloading the Lua script with **Ctrl+Shift+L** Wireshark should look like this:
@@ -290,7 +289,7 @@ After reloading the Lua script with **Ctrl+Shift+L** Wireshark should look like 
 We can see that it parses the messageLength correctly. We can also see that we don't have to parse
 all the fields for this to work. We can gradually expand the plugin as we go.
 
-The three other fields in the header are also int32s. We can add them just like the we did with the
+The three other fields in the header are also int32s. We can add them just like we did with the
 message length field. The final script for this part will therefore look like this:
 
 ```lua
@@ -323,7 +322,7 @@ tcp_port:add(59274, mongodb_protocol)
 ```
 
 We have to increase the offset by 4 in the call to the range function (`buffer(offset,length)`) in
-order to read 4 new bytes for every field. If we were dealing with something else than int32s we
+order to read 4 new bytes for every field. If we were dealing with something other than int32s we
 would of course have to increase by something else.
 
 The packet details pane finally looks like this:
