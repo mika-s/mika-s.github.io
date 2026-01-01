@@ -10,7 +10,7 @@ source "https://rubygems.org"
 # Happy Jekylling!
 
 # https://pages.github.com/versions/
-gem "jekyll", "3.9.2"
+gem "jekyll", "3.10.0"
 
 # This is the default theme for new Jekyll sites. You may change this to anything you like.
 gem "minima", ">= 2.5"
@@ -22,7 +22,7 @@ gem "jekyll-remote-theme"
 
 # If you have any plugins, put them here!
 group :jekyll_plugins do
-  gem "jekyll-feed", "~> 0.15"
+  gem "jekyll-feed", "~> 0.17"
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
